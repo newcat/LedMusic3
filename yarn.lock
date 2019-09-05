@@ -18,6 +18,42 @@
     esutils "^2.0.2"
     js-tokens "^4.0.0"
 
+"@baklavajs/core@^1.3.1-next.4+b668ade":
+  version "1.3.1-next.4"
+  resolved "https://registry.yarnpkg.com/@baklavajs/core/-/core-1.3.1-next.4.tgz#5870ff056618afebd1e66f2cd30377a6668c2646"
+  integrity sha512-nW0UnrNMy8gYb3szrSXDJj3vb0f9FM1XRXiKTjhDBC5p1yd/amO28OwuwwOo9lG/bTef/6YbGrVSz17CrJ7tLA==
+
+"@baklavajs/full@^1.3.3-next.0":
+  version "1.3.3-next.0"
+  resolved "https://registry.yarnpkg.com/@baklavajs/full/-/full-1.3.3-next.0.tgz#81283b9f189e2fcd4ab2378b6fad1fc2b55bc9e2"
+  integrity sha512-gArg7uKR4au5esUEehwY6BBjdd4rBFualcRYWgMmNMesxAsETA0zumFfOTP6O2PWSKyb1Pi/lsWbzDMam7onmA==
+  dependencies:
+    "@baklavajs/core" "^1.3.1-next.4+b668ade"
+    "@baklavajs/plugin-engine" "^1.3.1-next.4+b668ade"
+    "@baklavajs/plugin-interface-types" "^1.3.0"
+    "@baklavajs/plugin-options-vue" "^1.2.0"
+    "@baklavajs/plugin-renderer-vue" "^1.3.3-next.0+b668ade"
+
+"@baklavajs/plugin-engine@^1.3.1-next.4+b668ade":
+  version "1.3.1-next.4"
+  resolved "https://registry.yarnpkg.com/@baklavajs/plugin-engine/-/plugin-engine-1.3.1-next.4.tgz#b56a5b87d641f637d28c874ee31f38f115733465"
+  integrity sha512-yQUmI9cVQaLhgkXnijZCo5jNvmGzUwR3avaXw3r1uvxIn5awFtlkwvXPzu4C/TyCY9ol2kbdEIV5siyICdTu3Q==
+
+"@baklavajs/plugin-interface-types@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@baklavajs/plugin-interface-types/-/plugin-interface-types-1.3.0.tgz#c6badf219231e0e040b2c23678d8b44657763eac"
+  integrity sha512-h7WUiwmIAjBVXE1HcGfhyIAOlxaDuVn3ZJRkN2BfXL7iFvoEv/yuvsoVtFDxw800sP4fQRuRPOLehh6NCrWrBw==
+
+"@baklavajs/plugin-options-vue@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@baklavajs/plugin-options-vue/-/plugin-options-vue-1.2.0.tgz#80d3b277514bb5b599786efe46e871d849a3da06"
+  integrity sha512-xVCqemX6YOPIqIKyvg1krzl+Bo7+xQ0ekpU98RHUhe+4zYOdI6l8jouSGOjWnP54KdlLBtHdgDqxeCuEID/Npw==
+
+"@baklavajs/plugin-renderer-vue@^1.3.3-next.0+b668ade":
+  version "1.3.3-next.0"
+  resolved "https://registry.yarnpkg.com/@baklavajs/plugin-renderer-vue/-/plugin-renderer-vue-1.3.3-next.0.tgz#ae6fa72ac2282ab5a54469269e7bf7d32d936fa4"
+  integrity sha512-8U6FD0tak0XDywKZFeSHvltSx7cDx8l5NQcl8qsGBJ/vAvqDDtRfS+gw9xmTadZMqkG9vcIfQHOvMjuWSrcDIw==
+
 "@hapi/address@2.x.x":
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/@hapi/address/-/address-2.1.1.tgz#61395b5ed94c4cb19c2dc4c85969cff3d40d583f"

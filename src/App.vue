@@ -1,29 +1,43 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
-  </div>
+    <baklava-editor :plugin="viewPlugin"></baklava-editor>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-import HelloWorld from './components/HelloWorld.vue';
+import { Component, Prop, Vue } from "vue-property-decorator";
+import { Editor } from "@baklavajs/core";
+import { ViewPlugin } from "@baklavajs/plugin-renderer-vue";
+import { InterfaceTypePlugin } from "@baklavajs/plugin-interface-types";
+import { OptionPlugin } from "@baklavajs/plugin-options-vue";
 
-@Component({
-  components: {
-    HelloWorld,
-  },
-})
-export default class App extends Vue {}
-</script>
+import { registerNodes } from "@/nodes/registerNodes";
 
-<style lang="scss">
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+@Component
+export default class App extends Vue {
+
+    public editor = new Editor();
+    public viewPlugin = new ViewPlugin();
+    public intfTypePlugin = new InterfaceTypePlugin();
+
+    public created() {
+
+        this.editor.use(this.viewPlugin);
+        this.editor.use(this.intfTypePlugin);
+        this.editor.use(new OptionPlugin());
+
+        registerNodes(this.editor);
+
+        this.intfTypePlugin.addType("boolean", "darkcyan");
+        this.intfTypePlugin.addType("color_single", "gold");
+        this.intfTypePlugin.addType("color_array", "coral");
+        this.intfTypePlugin.addType("number", "gray");
+
+        this.intfTypePlugin.addConversion("number", "bool");
+        this.intfTypePlugin.addConversion("number", "color_single");
+        this.intfTypePlugin.addConversion("number", "color_array");
+        this.intfTypePlugin.addConversion("bool", "number");
+
+
+    }
+
 }
-</style>
+</script>
