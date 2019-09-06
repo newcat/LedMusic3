@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@baklavajs/full": "^1.3.3-next.0",
+    "@types/chroma-js": "^1.4.2",
+    "chroma-js": "^2.0.6",
     "vue": "^2.6.10",
     "vue-class-component": "^7.0.2",
     "vue-property-decorator": "^8.1.0"
