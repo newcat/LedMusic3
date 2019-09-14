@@ -18,41 +18,41 @@
     esutils "^2.0.2"
     js-tokens "^4.0.0"
 
-"@baklavajs/core@^1.3.1-next.4+b668ade":
-  version "1.3.1-next.4"
-  resolved "https://registry.yarnpkg.com/@baklavajs/core/-/core-1.3.1-next.4.tgz#5870ff056618afebd1e66f2cd30377a6668c2646"
-  integrity sha512-nW0UnrNMy8gYb3szrSXDJj3vb0f9FM1XRXiKTjhDBC5p1yd/amO28OwuwwOo9lG/bTef/6YbGrVSz17CrJ7tLA==
+"@baklavajs/core@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@baklavajs/core/-/core-1.3.0.tgz#ac6634bb60d686410f0159fbda09e7399e22910d"
+  integrity sha512-+sBPVdYXxPvcCVP/xFcUjqGKIkpn6/izhfBUXy1n+hGppg/VWUi1K4Avnuw27i7HzcUhEz1dxJ1CV1KgYEHIkQ==
 
-"@baklavajs/full@^1.3.3-next.0":
-  version "1.3.3-next.0"
-  resolved "https://registry.yarnpkg.com/@baklavajs/full/-/full-1.3.3-next.0.tgz#81283b9f189e2fcd4ab2378b6fad1fc2b55bc9e2"
-  integrity sha512-gArg7uKR4au5esUEehwY6BBjdd4rBFualcRYWgMmNMesxAsETA0zumFfOTP6O2PWSKyb1Pi/lsWbzDMam7onmA==
+"@baklavajs/full@^1.3.3-next.2":
+  version "1.3.3-next.2"
+  resolved "https://registry.yarnpkg.com/@baklavajs/full/-/full-1.3.3-next.2.tgz#d050a3d61d366cc99a3ecb43569ead7b5fed627e"
+  integrity sha512-l5EQE4/Cj+Rs25eZ5okjktCISllt+i2s9ShHY2fd93JeBY7VUFIazBfnnXvUxFPDhgDdSZ15yaAPOG2sEhJRsw==
   dependencies:
-    "@baklavajs/core" "^1.3.1-next.4+b668ade"
-    "@baklavajs/plugin-engine" "^1.3.1-next.4+b668ade"
+    "@baklavajs/core" "^1.3.0"
+    "@baklavajs/plugin-engine" "^1.3.0"
     "@baklavajs/plugin-interface-types" "^1.3.0"
-    "@baklavajs/plugin-options-vue" "^1.2.0"
-    "@baklavajs/plugin-renderer-vue" "^1.3.3-next.0+b668ade"
+    "@baklavajs/plugin-options-vue" "^1.2.1-next.17+80e0f3b"
+    "@baklavajs/plugin-renderer-vue" "^1.3.3-next.2+80e0f3b"
 
-"@baklavajs/plugin-engine@^1.3.1-next.4+b668ade":
-  version "1.3.1-next.4"
-  resolved "https://registry.yarnpkg.com/@baklavajs/plugin-engine/-/plugin-engine-1.3.1-next.4.tgz#b56a5b87d641f637d28c874ee31f38f115733465"
-  integrity sha512-yQUmI9cVQaLhgkXnijZCo5jNvmGzUwR3avaXw3r1uvxIn5awFtlkwvXPzu4C/TyCY9ol2kbdEIV5siyICdTu3Q==
+"@baklavajs/plugin-engine@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@baklavajs/plugin-engine/-/plugin-engine-1.3.0.tgz#2384dc10c7e93fe6b529362d06ff9a0117b360fd"
+  integrity sha512-Ty2HaxS4xadn4dChRUW9vLabGtYsamKoxPxAg4dhnGXetBbU6KPHdSAbGqMwjWUwDE0XnIIqafiiSG4fyh7GsA==
 
 "@baklavajs/plugin-interface-types@^1.3.0":
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/@baklavajs/plugin-interface-types/-/plugin-interface-types-1.3.0.tgz#c6badf219231e0e040b2c23678d8b44657763eac"
   integrity sha512-h7WUiwmIAjBVXE1HcGfhyIAOlxaDuVn3ZJRkN2BfXL7iFvoEv/yuvsoVtFDxw800sP4fQRuRPOLehh6NCrWrBw==
 
-"@baklavajs/plugin-options-vue@^1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@baklavajs/plugin-options-vue/-/plugin-options-vue-1.2.0.tgz#80d3b277514bb5b599786efe46e871d849a3da06"
-  integrity sha512-xVCqemX6YOPIqIKyvg1krzl+Bo7+xQ0ekpU98RHUhe+4zYOdI6l8jouSGOjWnP54KdlLBtHdgDqxeCuEID/Npw==
+"@baklavajs/plugin-options-vue@^1.2.1-next.17+80e0f3b":
+  version "1.2.1-next.17"
+  resolved "https://registry.yarnpkg.com/@baklavajs/plugin-options-vue/-/plugin-options-vue-1.2.1-next.17.tgz#f7dbb2f120fb7208994dbb250cde74d5ba9965be"
+  integrity sha512-+tw56u0dz4Hu/10FChubl2I0Co+qDJIEUcFRqjbQ/l7jjZsmLC1Bf2A4AitePjMk0DpqYEPwdmqWR73bSQorKw==
 
-"@baklavajs/plugin-renderer-vue@^1.3.3-next.0+b668ade":
-  version "1.3.3-next.0"
-  resolved "https://registry.yarnpkg.com/@baklavajs/plugin-renderer-vue/-/plugin-renderer-vue-1.3.3-next.0.tgz#ae6fa72ac2282ab5a54469269e7bf7d32d936fa4"
-  integrity sha512-8U6FD0tak0XDywKZFeSHvltSx7cDx8l5NQcl8qsGBJ/vAvqDDtRfS+gw9xmTadZMqkG9vcIfQHOvMjuWSrcDIw==
+"@baklavajs/plugin-renderer-vue@^1.3.3-next.2+80e0f3b":
+  version "1.3.3-next.2"
+  resolved "https://registry.yarnpkg.com/@baklavajs/plugin-renderer-vue/-/plugin-renderer-vue-1.3.3-next.2.tgz#8a6c8bb8d620ae853c80af366a5ecb963859505c"
+  integrity sha512-wq2YpZs/WTiXSHMg4xdRNa/xr7hE3G1aFnTUzca5n2tXPsdsgQUiQKCiTAd6nrn6/fu5F5PShcliMf5FriMxOg==
 
 "@hapi/address@2.x.x":
   version "2.1.1"

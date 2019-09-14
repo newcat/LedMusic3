@@ -12,6 +12,7 @@ import { Engine } from "@baklavajs/plugin-engine";
 
 import { registerNodes } from "@/nodes/registerNodes";
 import { registerOptions } from "@/options/registerOptions";
+import GlobalProperties from "@/GlobalProperties";
 
 @Component
 export default class App extends Vue {
@@ -19,7 +20,7 @@ export default class App extends Vue {
     public editor = new Editor();
     public viewPlugin = new ViewPlugin();
     public intfTypePlugin = new InterfaceTypePlugin();
-    public enginePlugin = new Engine(true);
+    public enginePlugin = new Engine(false);
 
     public created() {
 
@@ -35,13 +36,16 @@ export default class App extends Vue {
         this.intfTypePlugin.addType("color_single", "gold");
         this.intfTypePlugin.addType("color_array", "coral");
         this.intfTypePlugin.addType("number", "gray");
+        this.intfTypePlugin.addType("positions", "lightblue");
 
         this.intfTypePlugin.addConversion("number", "boolean");
         this.intfTypePlugin.addConversion("number", "color_single");
         this.intfTypePlugin.addConversion("number", "color_array");
         this.intfTypePlugin.addConversion("boolean", "number");
 
-        this.viewPlugin.registerOption("SliderOption", NumberOption);
+        setInterval(() => {
+            this.enginePlugin.calculate();
+        }, 1000 / GlobalProperties.fps);
 
     }
 
