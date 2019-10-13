@@ -14,8 +14,8 @@ export class DotNode extends Node {
         this.addInputInterface("Color", "ColorOption", chroma("lightblue"), { type: "color_single" });
         this.addInputInterface("Glow", "NumberOption", 0, { type: "number" });
         this.addInputInterface("Symmetric", "CheckboxOption", false, { type: "boolean" });
-        this.addOption("Glow Type", "SelectOption",
-            { selected: "Linear", items: ["Linear", "Exponential", "Gaussian"] });
+        this.addOption("Glow Type", "SelectOption", "Linear", undefined,
+            { items: ["Linear", "Exponential", "Gaussian"] });
         this.addOutputInterface("Colors", { type: "color_array" });
     }
 
