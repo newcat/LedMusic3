@@ -44,6 +44,7 @@ impl ColorArray {
 
 }
 
+#[wasm_bindgen]
 pub fn mix(c1: &ColorArray, c2: &ColorArray, result_array: &mut ColorArray) {
     for index in 0..result_array.length {
         let i = index * 3;

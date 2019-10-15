@@ -4,7 +4,8 @@ module.exports = {
     configureWebpack: {
         plugins: [
             new WasmPackPlugin({
-                crateDirectory: __dirname
+                crateDirectory: __dirname,
+                forceMode: "production"
             })
         ]
     }
