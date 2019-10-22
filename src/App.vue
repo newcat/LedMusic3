@@ -4,6 +4,8 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
+import chroma from "chroma-js";
+
 import { Editor } from "@baklavajs/core";
 import { ViewPlugin } from "@baklavajs/plugin-renderer-vue";
 import { InterfaceTypePlugin } from "@baklavajs/plugin-interface-types";
@@ -39,8 +41,8 @@ export default class App extends Vue {
         this.intfTypePlugin.addType("positions", "lightblue");
 
         this.intfTypePlugin.addConversion("number", "boolean");
-        this.intfTypePlugin.addConversion("number", "color_single");
-        this.intfTypePlugin.addConversion("number", "color_array");
+        this.intfTypePlugin.addConversion("number", "color_single", (v) => chroma(v, v, v));
+        this.intfTypePlugin.addConversion("number", "color_array", (v) => [chroma(v, v, v)]);
         this.intfTypePlugin.addConversion("boolean", "number");
 
         setInterval(() => {

@@ -10,8 +10,8 @@ export class BlendColorNode extends Node {
         super();
         this.addInputInterface("Color 1", undefined, () => [chroma("black")], { type: "color_array" });
         this.addInputInterface("Color 2", undefined, () => [chroma("black")], { type: "color_array" });
-        this.addOption("Mode", "SelectOption",
-            { selected: "Multiply", items: ["Multiply", "Darken", "Lighten", "Screen", "Overlay", "Burn", "Dodge"] });
+        this.addOption("Mode", "SelectOption", "Multiply", undefined,
+            { items: ["Multiply", "Darken", "Lighten", "Screen", "Overlay", "Burn", "Dodge"] });
         this.addOutputInterface("Output", { type: "color_array" });
     }
 

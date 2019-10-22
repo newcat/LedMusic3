@@ -12,7 +12,7 @@ export class DotNode extends Node {
         this.addInputInterface("Center Position", "SliderOption", 0, { type: "number", min: 0, max: 1 });
         this.addInputInterface("Alpha", "SliderOption", 1, { type: "number", min: 0, max: 1 });
         this.addInputInterface("Color", "ColorOption", chroma("lightblue"), { type: "color_single" });
-        this.addInputInterface("Glow", "NumberOption", 0, { type: "number" });
+        this.addInputInterface("Glow", "NumberOption", 0.1, { type: "number" });
         this.addInputInterface("Symmetric", "CheckboxOption", false, { type: "boolean" });
         this.addOption("Glow Type", "SelectOption", "Linear", undefined,
             { items: ["Linear", "Exponential", "Gaussian"] });
@@ -32,7 +32,7 @@ export class DotNode extends Node {
         const result: Color[] = new Array(resolution);
 
         let intensity;
-        switch (this.getOptionValue("Glow Type").selected) {
+        switch (this.getOptionValue("Glow Type")) {
             case "Exponential":
                 intensity = this.exponentialIntensity;
                 break;
