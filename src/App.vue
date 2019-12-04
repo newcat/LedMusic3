@@ -1,5 +1,8 @@
 <template>
+<div style="display: flex; flex-direction: column; height: 100vh; width: 100vw;">
     <baklava-editor :plugin="viewPlugin"></baklava-editor>
+    <div style="height: 50vh;" ref="wrapper"></div>
+</div>
 </template>
 
 <script lang="ts">
@@ -12,6 +15,8 @@ import { InterfaceTypePlugin } from "@baklavajs/plugin-interface-types";
 import { OptionPlugin, NumberOption } from "@baklavajs/plugin-options-vue";
 import { Engine } from "@baklavajs/plugin-engine";
 
+import { createTimeline, Editor as LokumEditor, Track } from "lokumjs";
+
 import { registerNodes } from "@/nodes/registerNodes";
 import { registerOptions } from "@/options/registerOptions";
 import GlobalProperties from "@/GlobalProperties";
@@ -23,6 +28,8 @@ export default class App extends Vue {
     public viewPlugin = new ViewPlugin();
     public intfTypePlugin = new InterfaceTypePlugin();
     public enginePlugin = new Engine(false);
+
+    public lokumEditor = new LokumEditor();
 
     public created() {
 
@@ -49,6 +56,11 @@ export default class App extends Vue {
             this.enginePlugin.calculate();
         }, 1000 / GlobalProperties.fps);
 
+    }
+
+    public async mounted() {
+        await createTimeline(this.lokumEditor, this.$refs.wrapper as HTMLElement);
+        this.lokumEditor.addTrack(new Track("Music"));
     }
 
 }
