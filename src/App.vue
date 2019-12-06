@@ -2,6 +2,9 @@
 <div style="display: flex; flex-direction: column; height: 100vh; width: 100vw;">
     <baklava-editor :plugin="viewPlugin"></baklava-editor>
     <div style="height: 50vh;" ref="wrapper"></div>
+    <div>
+        <button @click="loadAudio">Load Audio</button>
+    </div>
 </div>
 </template>
 
@@ -15,11 +18,13 @@ import { InterfaceTypePlugin } from "@baklavajs/plugin-interface-types";
 import { OptionPlugin, NumberOption } from "@baklavajs/plugin-options-vue";
 import { Engine } from "@baklavajs/plugin-engine";
 
-import { createTimeline, Editor as LokumEditor, Track } from "lokumjs";
-
 import { registerNodes } from "@/nodes/registerNodes";
 import { registerOptions } from "@/options/registerOptions";
 import GlobalProperties from "@/GlobalProperties";
+
+import { createTimeline, Editor as LokumEditor, Track } from "lokumjs";
+import { Text, TextStyle } from "pixi.js";
+import { MusicProcessor } from "./processing/musicProcessor";
 
 @Component
 export default class App extends Vue {
@@ -59,8 +64,25 @@ export default class App extends Vue {
     }
 
     public async mounted() {
-        await createTimeline(this.lokumEditor, this.$refs.wrapper as HTMLElement);
+        const { root } = await createTimeline(this.lokumEditor, this.$refs.wrapper as HTMLElement);
         this.lokumEditor.addTrack(new Track("Music"));
+        const style = new TextStyle({ fontSize: 10, fill: 0xffffff });
+        const fpsText = new Text("FPS", style);
+        fpsText.position.set(10, 10);
+        root.app.stage.addChild(fpsText);
+        root.app.ticker.add(() => {
+            fpsText.text = root.app.ticker.elapsedMS.toFixed(2);
+        });
+    }
+
+    public async loadAudio() {
+        const response = await fetch("beat.mp3");
+        const buff = await response.arrayBuffer();
+        const mp = new MusicProcessor();
+        const auBuff = await mp.decodeArrayBuffer(buff);
+        mp.load(auBuff);
+        // mp.play();
+        console.log(mp.getPeaks(100, 0, 100));
     }
 
 }
