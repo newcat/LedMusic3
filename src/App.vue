@@ -3,7 +3,7 @@
     <baklava-editor :plugin="viewPlugin"></baklava-editor>
     <div style="height: 50vh;" ref="wrapper"></div>
     <div>
-        <button @click="loadAudio">Load Audio</button>
+        <input type="file" @change="loadAudio" />
         <button @click="playPause">Play/Pause</button>
     </div>
 </div>
@@ -27,6 +27,12 @@ import { createTimeline, Editor as LokumEditor, Track, Item } from "lokumjs";
 import { Text, TextStyle, Texture, Sprite, Graphics } from "pixi.js";
 import { MusicProcessor } from "./processing/musicProcessor";
 
+interface IWaveformPart {
+    start: number;
+    end: number;
+    sprite: Sprite;
+}
+
 @Component
 export default class App extends Vue {
 
@@ -37,7 +43,7 @@ export default class App extends Vue {
 
     public lokumEditor = new LokumEditor();
     private mp = new MusicProcessor();
-    private waveformTexture: Texture|null = null;
+    private waveformParts: IWaveformPart[]|null = null;
     private musicItem: Item|null = null;
     private playIndicatorGraphics = new Graphics();
     private fpsText = new Text("FPS", new TextStyle({ fontSize: 10, fill: 0xffffff }));
@@ -93,6 +99,18 @@ export default class App extends Vue {
         root.eventManager.events.resize.subscribe(this, ({ height }) => {
             this.createPlayIndicator(height);
         });
+        timeline.header.graphics.interactive = true;
+        root.eventManager.events.pointerdown.subscribe(timeline.header.graphics, (ev) => {
+            const x = ev.data.global.x as number;
+            let unit = root.positionCalculator.getUnit(x - timeline.props.trackHeaderWidth);
+            if (unit < 0) { unit = 0; }
+            this.mp.position = unit;
+        });
+        root.eventManager.events.keydown.subscribe(this, (ev) => {
+            if (ev.key === " ") {
+                this.playPause();
+            }
+        });
         root.app.stage.addChild(this.playIndicatorGraphics);
         root.positionCalculator.unitWidth = 2;
         root.positionCalculator.markerSpace = 24;
@@ -100,13 +118,17 @@ export default class App extends Vue {
         this.createPlayIndicator(root.app.renderer.screen.height);
     }
 
-    public async loadAudio() {
-        const response = await fetch("beat.mp3");
-        const buff = await response.arrayBuffer();
+    public async loadAudio(ev: any) {
+        const f = ev.target.files[0] as File;
+        const reader = new FileReader();
+        const buff = await new Promise<ArrayBuffer>((res) => {
+            reader.onload = (e) => res(e.target!.result as ArrayBuffer);
+            reader.readAsArrayBuffer(f);
+        });
         const auBuff = await this.mp.decodeArrayBuffer(buff);
         this.mp.load(auBuff);
         this.mp.volume = 0.1;
-        this.waveformTexture = this.getWaveformTexture();
+        this.waveformParts = this.getWaveformSprites();
         this.musicItem = new Item(0, this.mp.secondsToUnits(this.mp.duration), { type: "music" });
         this.musicItem.resizable = false;
         this.lokumEditor.tracks[0].items.push(this.musicItem);
@@ -120,23 +142,36 @@ export default class App extends Vue {
         }
     }
 
-    private getWaveformTexture() {
-        const peaks = this.mp.getPeaks(30);
+    private getWaveformSprites() {
+        const peaks = this.mp.getPeaks(70);
+        const sprites: IWaveformPart[] = [];
+        for (let i = 0; i < peaks.length; i += 1024) {
+            const end = Math.min(i + 1024, peaks.length);
+            sprites.push({
+                start: i,
+                end,
+                sprite: new Sprite(this.createPartWaveformTexture(peaks, i, end))
+            });
+        }
+        return sprites;
+    }
+
+    private createPartWaveformTexture(peaks: Uint8Array, start: number, end: number) {
         const canvas = document.createElement("canvas");
-        canvas.width = peaks.length;
+        canvas.width = end - start;
         canvas.height = 300;
         const ctx = canvas.getContext("2d")!;
         const center = 300 / 2;
         ctx.fillStyle = "#FFFFFF";
         ctx.beginPath();
         ctx.moveTo(0, center);
-        peaks.forEach((p, i) => {
-            const pxOffCenter = (300 / 2) * (p / 255);
-            ctx.lineTo(i, center - pxOffCenter);
-        });
-        for (let i = peaks.length - 1; i >= 0; i--) {
+        for (let i = start; i < end; i++) {
             const pxOffCenter = (300 / 2) * (peaks[i] / 255);
-            ctx.lineTo(i, center + pxOffCenter);
+            ctx.lineTo(i - start, center - pxOffCenter);
+        }
+        for (let i = end - 1; i >= start; i--) {
+            const pxOffCenter = (300 / 2) * (peaks[i] / 255);
+            ctx.lineTo(i - start, center + pxOffCenter);
         }
         ctx.closePath();
         ctx.fill();
@@ -158,16 +193,17 @@ export default class App extends Vue {
     }
 
     private renderWaveformItem(item: Item, graphics: Graphics, width: number, height: number) {
-        if (this.waveformTexture && item.data && item.data.type === "music") {
-            let sprite: Sprite;
+        if (this.waveformParts && item.data && item.data.type === "music") {
             if (graphics.children.length === 0) {
-                sprite = new Sprite(this.waveformTexture);
-                graphics.addChild(sprite);
-            } else {
-                sprite = graphics.children[0] as Sprite;
+                this.waveformParts.forEach((p) => graphics.addChild(p.sprite));
             }
-            sprite.width = width;
-            sprite.height = height;
+            const totalLength = this.waveformParts[this.waveformParts.length - 1].end;
+            const factor = width / totalLength;
+            this.waveformParts.forEach((p) => {
+                p.sprite.x = p.start * factor;
+                p.sprite.width = (p.end - p.start) * factor;
+                p.sprite.height = height;
+            });
         }
     }
 

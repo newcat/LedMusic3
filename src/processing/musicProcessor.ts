@@ -2,7 +2,6 @@
 
 export class MusicProcessor {
 
-    static scriptBufferSize = 256;
     static sampleRate = 44100;
 
     // WebAudio stuff

@@ -4667,10 +4667,10 @@ loglevel@^1.6.3:
   resolved "https://registry.yarnpkg.com/loglevel/-/loglevel-1.6.4.tgz#f408f4f006db8354d0577dcf6d33485b3cb90d56"
   integrity sha512-p0b6mOGKcGa+7nnmKbpzR6qloPbrgLcnio++E+14Vo/XffOGwZtRpUhr8dTH/x2oCMmEoIU0Zwm3ZauhvYD17g==
 
-lokumjs@^0.2.4:
-  version "0.2.4"
-  resolved "https://registry.yarnpkg.com/lokumjs/-/lokumjs-0.2.4.tgz#e3385ff5151fd6c0825e98bc19e821e9152dc353"
-  integrity sha512-PknpMNCwm/NOXKnVRrJF+m7RdAm2Y8DtSBbIpmDfIRyMRlwgbevGDoaoQhkGfcf9sKU+aUjnlXcgWj/r6IWC4A==
+lokumjs@^0.2.5:
+  version "0.2.5"
+  resolved "https://registry.yarnpkg.com/lokumjs/-/lokumjs-0.2.5.tgz#181d6da8d33e13f992e6e7e667f7810553a6f8fc"
+  integrity sha512-Ldr7xKHyIchmOZgIo9gol4rWkMXadZj/7bI/9/Uizklx3lBqw2Ovl9Qn98HwxwE2D/Iq8DdNoWNZjrZOSUG3Mw==
   dependencies:
     pixi.js "^5.2.0"
 
