@@ -22,7 +22,7 @@ import { registerNodes } from "@/nodes/registerNodes";
 import { registerOptions } from "@/options/registerOptions";
 import GlobalProperties from "@/GlobalProperties";
 
-import { createTimeline, Editor as LokumEditor, Track } from "lokumjs";
+import { createTimeline, Editor as LokumEditor, Track, Item } from "lokumjs";
 import { Text, TextStyle } from "pixi.js";
 import { MusicProcessor } from "./processing/musicProcessor";
 
@@ -35,6 +35,7 @@ export default class App extends Vue {
     public enginePlugin = new Engine(false);
 
     public lokumEditor = new LokumEditor();
+    private peaks: Uint8Array|null = null;
 
     public created() {
 
@@ -64,14 +65,25 @@ export default class App extends Vue {
     }
 
     public async mounted() {
-        const { root } = await createTimeline(this.lokumEditor, this.$refs.wrapper as HTMLElement);
-        this.lokumEditor.addTrack(new Track("Music"));
+        const { root } = await createTimeline(this.lokumEditor as any, this.$refs.wrapper as HTMLElement);
+        const t = new Track("Music");
+        t.items.push(new Item(1, 15));
+        this.lokumEditor.addTrack(t);
         const style = new TextStyle({ fontSize: 10, fill: 0xffffff });
         const fpsText = new Text("FPS", style);
         fpsText.position.set(10, 10);
         root.app.stage.addChild(fpsText);
         root.app.ticker.add(() => {
             fpsText.text = root.app.ticker.elapsedMS.toFixed(2);
+        });
+        root.eventManager.events.renderItem.subscribe(this, (ev) => {
+            if (this.peaks && ev.item.data && ev.item.data.type === "music") {
+                ev.graphics.lineStyle(1, 0xffffff);
+                this.peaks.forEach((p, i) => {
+                    ev.graphics.moveTo(i, ev.height);
+                    ev.graphics.lineTo(i, (p / 255) * ev.height);
+                });
+            }
         });
     }
 
@@ -82,7 +94,9 @@ export default class App extends Vue {
         const auBuff = await mp.decodeArrayBuffer(buff);
         mp.load(auBuff);
         // mp.play();
-        console.log(mp.getPeaks(100, 0, 100));
+        this.peaks = mp.getPeaks(30);
+        this.lokumEditor.tracks[0].items.push(new Item(20, 100, { type: "music" }));
+        console.log(JSON.parse(JSON.stringify(this.lokumEditor.tracks[0].items[0])));
     }
 
 }

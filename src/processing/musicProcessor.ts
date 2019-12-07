@@ -28,9 +28,6 @@ export class MusicProcessor {
     private startPosition = 0;
     private buffer: AudioBuffer|null = null;
 
-    private mergedPeaks: number[] = [];
-    private splitPeaks: number[][] = [];
-
     public get volume() {
         return this.gainNode.gain.value;
     }
@@ -100,11 +97,8 @@ export class MusicProcessor {
     public constructor() {
         this.state = this.states.paused;
         this.state.init();
-        this.setLength(0);
-
         this.gainNode.connect(this.audioContext.destination);
         this.analyserNode.connect(this.gainNode);
-
     }
 
     public supportsWebAudio() {
@@ -122,82 +116,38 @@ export class MusicProcessor {
         this.source = this.createSource();
     }
 
-    public getPeaks(length: number, first: number, last: number): number[] {
+    /**
+     * Calculates the peaks for the loaded buffer
+     * @param resolution Number of peaks to calculate per second of samples
+     */
+    public getPeaks(resolution: number): Uint8Array {
         if (!this.buffer) {
-            return [];
+            return new Uint8Array(0);
         }
 
-        first = first || 0;
-        last = last || length - 1;
+        // how many samples to analyze for a single peak
+        const peakSpan = Math.round(MusicProcessor.sampleRate / resolution);
+        const peakCount = Math.ceil(this.buffer.length / peakSpan);
+        const peaks = new Uint8Array(peakCount);
 
-        this.setLength(length);
-
-        if (!this.buffer) {
-            return this.mergedPeaks;
-        }
-
-        /**
-         * The following snippet fixes a buffering data issue on the Safari
-         * browser which returned undefined It creates the missing buffer based
-         * on 1 channel, 4096 samples and the sampleRate from the current
-         * webaudio context 4096 samples seemed to be the best fit for rendering
-         * will review this code once a stable version of Safari TP is out
-         */
-        if (!this.buffer.length) {
-            const newBuffer = new AudioBuffer({
-                numberOfChannels: 1,
-                length: 4096,
-                sampleRate: MusicProcessor.sampleRate
-            });
-            this.buffer = newBuffer;
-        }
-
-        const sampleSize = this.buffer.length / length;
-        // tslint:disable-next-line: no-bitwise
-        const sampleStep = ~~(sampleSize / 10) || 1;
-        const channels = this.buffer.numberOfChannels;
-        let c;
-
-        for (c = 0; c < channels; c++) {
-            const peaks = this.splitPeaks[c];
-            const chan = this.buffer.getChannelData(c);
-            let i;
-
-            for (i = first; i <= last; i++) {
-                // tslint:disable-next-line: no-bitwise
-                const start = ~~(i * sampleSize);
-                // tslint:disable-next-line: no-bitwise
-                const end = ~~(start + sampleSize);
-                let min = 0;
+        for (let c = 0; c < this.buffer.numberOfChannels; c++) {
+            const samples = this.buffer.getChannelData(c);
+            for (let i = 0; i < peakCount; i++) {
                 let max = 0;
-                let j;
-
-                for (j = start; j < end; j += sampleStep) {
-                    const value = chan[j];
-
-                    if (value > max) {
-                        max = value;
-                    }
-
-                    if (value < min) {
-                        min = value;
+                for (let j = i * peakSpan; j < (i + 1) * peakSpan; j++) {
+                    if (Math.abs(samples[j]) > max) {
+                        max = Math.abs(samples[j]);
                     }
                 }
-
-                peaks[2 * i] = max;
-                peaks[2 * i + 1] = min;
-
-                if (c === 0 || max > this.mergedPeaks[2 * i]) {
-                    this.mergedPeaks[2 * i] = max;
-                }
-
-                if (c === 0 || min < this.mergedPeaks[2 * i + 1]) {
-                    this.mergedPeaks[2 * i + 1] = min;
+                const peakValue = Math.round(255 * max);
+                if (peakValue > peaks[i]) {
+                    peaks[i] = peakValue;
                 }
             }
         }
 
-        return this.mergedPeaks;
+        return peaks;
+
     }
 
     public play() {
@@ -278,27 +228,6 @@ export class MusicProcessor {
 
     private removeOnAudioProcess() {
         this.scriptNode.onaudioprocess = null;
-    }
-
-    private setLength(length: number) {
-        // No resize, we can preserve the cached peaks.
-        if (this.mergedPeaks && length === 2 * this.mergedPeaks.length - 1 + 2) {
-            return;
-        }
-
-        this.splitPeaks = [];
-        this.mergedPeaks = [];
-        // Set the last element of the sparse array so the peak arrays are
-        // appropriately sized for other calculations.
-        const channels = this.buffer ? this.buffer.numberOfChannels : 1;
-        let c;
-        for (c = 0; c < channels; c++) {
-            this.splitPeaks[c] = [];
-            this.splitPeaks[c][2 * (length - 1)] = 0;
-            this.splitPeaks[c][2 * (length - 1) + 1] = 0;
-        }
-        this.mergedPeaks[2 * (length - 1)] = 0;
-        this.mergedPeaks[2 * (length - 1) + 1] = 0;
     }
 
     private disconnectSource() {
