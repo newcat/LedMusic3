@@ -1,55 +1,29 @@
-// source: https://github.com/katspaugh/wavesurfer.js/blob/master/src/webaudio.js
-
-interface IState {
-    init(): void;
-    getPlayedPercents(): number;
-    getCurrentTime(): number;
-}
-interface IStateDefinition {
-    playing: IState;
-    paused: IState;
-    finished: IState;
-}
+// inspired by: https://github.com/katspaugh/wavesurfer.js/blob/master/src/webaudio.js
 
 export class MusicProcessor {
 
     static scriptBufferSize = 256;
     static sampleRate = 44100;
 
+    // WebAudio stuff
     private audioContext = new AudioContext();
-    private offlineAudioContext = new OfflineAudioContext(1, 2, MusicProcessor.sampleRate);
     private gainNode = this.audioContext.createGain();
     private analyserNode = this.audioContext.createAnalyser();
-    private scriptNode = this.createScriptNode();
-    private source = this.createSource();
+    private source: AudioBufferSourceNode|null = null;
 
-    private state: IState;
-    private lastPlay = this.audioContext.currentTime;
-    private startPosition = 0;
+    // State
     private buffer: AudioBuffer|null = null;
+    private startTime = 0;
+    private startPosition = 0;
 
-    public get volume() {
-        return this.gainNode.gain.value;
-    }
-    public set volume(value: number) {
-        this.gainNode.gain.setValueAtTime(value, this.audioContext.currentTime);
-    }
+    private $position = 0;
+    private $isPlaying = false;
+    private $bpm = 130;
 
-    public get positionPercentage() {
-        return this.state.getPlayedPercents();
-    }
+    public get volume() { return this.gainNode.gain.value; }
+    public set volume(value: number) { this.gainNode.gain.setValueAtTime(value, this.audioContext.currentTime); }
 
-    public get positionSeconds() {
-        return this.audioContext.currentTime - this.lastPlay;
-    }
-
-    public get currentTime() {
-        return this.state.getCurrentTime();
-    }
-
-    public get isPaused() {
-        return this.state !== this.states.playing;
-    }
+    public get isPlaying() { return this.$isPlaying; }
 
     public get duration() {
         if (!this.buffer) {
@@ -58,45 +32,20 @@ export class MusicProcessor {
         return this.buffer.duration;
     }
 
-    private states: IStateDefinition = {
-        playing: {
-            init: () => {
-                this.addOnAudioProcess();
-            },
-            getPlayedPercents: () => {
-                return this.currentTime / this.duration || 0;
-            },
-            getCurrentTime: () => {
-                return this.startPosition + this.positionSeconds;
-            }
-        },
-        paused: {
-            init: () => {
-                this.removeOnAudioProcess();
-            },
-            getPlayedPercents: () => {
-                return this.currentTime / this.duration || 0;
-            },
-            getCurrentTime: () => {
-                return this.startPosition;
-            }
-        },
-        finished: {
-            init: () => {
-                this.removeOnAudioProcess();
-            },
-            getPlayedPercents: () => {
-                return 1;
-            },
-            getCurrentTime: () => {
-                return this.duration;
-            }
+    public get position() { return this.$position; }
+    public set position(value: number) {
+        let wasPlaying = false;
+        if (this.isPlaying) {
+            this.pause();
+            wasPlaying = true;
         }
-    };
+        this.$position = value;
+        if (wasPlaying) {
+            this.play();
+        }
+    }
 
     public constructor() {
-        this.state = this.states.paused;
-        this.state.init();
         this.gainNode.connect(this.audioContext.destination);
         this.analyserNode.connect(this.gainNode);
     }
@@ -106,14 +55,12 @@ export class MusicProcessor {
     }
 
     public decodeArrayBuffer(buffer: ArrayBuffer): Promise<AudioBuffer> {
-        return this.offlineAudioContext.decodeAudioData(buffer);
+        const offlineAudioContext = new OfflineAudioContext(1, 2, MusicProcessor.sampleRate);
+        return offlineAudioContext.decodeAudioData(buffer);
     }
 
     public load(buffer: AudioBuffer) {
-        this.startPosition = 0;
-        this.lastPlay = this.audioContext.currentTime;
         this.buffer = buffer;
-        this.source = this.createSource();
     }
 
     /**
@@ -151,97 +98,53 @@ export class MusicProcessor {
     }
 
     public play() {
-        if (!this.buffer) {
-            return;
-        }
+
+        if (!this.buffer) { return; }
 
         // need to re-create source on each playback
-        this.source = this.createSource();
-        this.source.start(0);
+        this.source = this.audioContext.createBufferSource();
+        this.source.buffer = this.buffer;
+        this.source.connect(this.analyserNode);
+        this.source.start(0, this.unitToSeconds(this.position));
+        this.startTime = this.audioContext.currentTime;
+        this.startPosition = this.position;
 
         if (this.audioContext.state === "suspended" && this.audioContext.resume) {
             this.audioContext.resume();
         }
 
-        this.setState(this.states.playing);
+        this.$isPlaying = true;
+
     }
 
     public pause() {
-        this.startPosition += this.positionSeconds;
-        if (this.source) { this.source.stop(0); }
-        this.setState(this.states.paused);
-    }
-
-    public seekTo(start: number, end: number) {
-        if (!this.buffer) {
-            return;
+        if (this.source) {
+            this.source.stop(0);
+            this.source.disconnect();
+            this.source = null;
         }
-
-        if (start === null) {
-            start = this.currentTime;
-            if (start >= this.duration) { start = 0; }
-        }
-        if (end === null) {
-            end = this.duration;
-        }
-
-        this.startPosition = start;
-        this.lastPlay = this.audioContext.currentTime;
-
-        if (this.state === this.states.finished) {
-            this.setState(this.states.paused);
-        }
-
-        return { start, end };
+        this.updatePosition();
+        this.$isPlaying = false;
     }
 
     public destroy() {
-        if (!this.isPaused) { this.pause(); }
+        if (!this.isPlaying) { this.pause(); }
         this.buffer = null;
-        this.disconnectSource();
         this.gainNode.disconnect();
-        this.scriptNode.disconnect();
         this.analyserNode.disconnect();
     }
 
-    private setState(state: IState) {
-        if (this.state !== state) {
-            this.state = state;
-            this.state.init();
-        }
+    public updatePosition() {
+        if (!this.isPlaying) { return; }
+        this.$position = this.startPosition + this.secondsToUnits(this.audioContext.currentTime - this.startTime);
     }
 
-    private createScriptNode() {
-        const scriptNode = this.audioContext.createScriptProcessor();
-        scriptNode.connect(this.audioContext.destination);
-        return scriptNode;
+    public unitToSeconds(units: number) {
+        return (units / 24) * (60 / this.$bpm);
     }
 
-    private addOnAudioProcess() {
-        this.scriptNode.onaudioprocess = () => {
-            const time = this.currentTime;
-            if (time >= this.duration) {
-                this.setState(this.states.finished);
-            }
-        };
-    }
-
-    private removeOnAudioProcess() {
-        this.scriptNode.onaudioprocess = null;
-    }
-
-    private disconnectSource() {
-        if (this.source) {
-            this.source.disconnect();
-        }
-    }
-
-    private createSource() {
-        this.disconnectSource();
-        const source = this.audioContext.createBufferSource();
-        source.buffer = this.buffer;
-        source.connect(this.analyserNode);
-        return source;
+    public secondsToUnits(seconds: number) {
+        return (seconds / 60) * this.$bpm * 24;
     }
 
 }
