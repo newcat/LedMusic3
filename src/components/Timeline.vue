@@ -1,23 +1,13 @@
 <template>
-<div style="display: flex; flex-direction: column; height: 100vh; width: 100vw;">
-    <baklava-editor :plugin="editor.viewPlugin"></baklava-editor>
-    <div style="height: 50vh;" ref="wrapper"></div>
-    <div>
-        <input type="file" @change="loadAudio" />
-        <button @click="playPause">Play/Pause</button>
-    </div>
-</div>
+<div style="height: 50vh;" ref="wrapper"></div>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
 
-import { BaklavaEditor } from "./editors/graph";
-import GlobalProperties from "@/GlobalProperties";
-
 import { createTimeline, Editor as LokumEditor, Track, Item } from "lokumjs";
 import { Text, TextStyle, Texture, Sprite, Graphics } from "pixi.js";
-import { AudioTrackProcessor } from "./processing/audioTrackProcessor";
+import { AudioTrackProcessor } from "../processing/audioTrackProcessor";
 
 interface IWaveformPart {
     start: number;
@@ -26,9 +16,7 @@ interface IWaveformPart {
 }
 
 @Component
-export default class App extends Vue {
-
-    public editor = new BaklavaEditor();
+export default class Timeline extends Vue {
 
     public lokumEditor = new LokumEditor();
     private mp = new AudioTrackProcessor();

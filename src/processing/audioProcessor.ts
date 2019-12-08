@@ -1,8 +1,8 @@
 // inspired by: https://github.com/katspaugh/wavesurfer.js/blob/master/src/webaudio.js
 
-export class MusicProcessor {
+export class AudioProcessor {
 
-    static sampleRate = 44100;
+    public static sampleRate = 44100;
 
     // WebAudio stuff
     private audioContext = new AudioContext();
@@ -54,7 +54,7 @@ export class MusicProcessor {
     }
 
     public decodeArrayBuffer(buffer: ArrayBuffer): Promise<AudioBuffer> {
-        const offlineAudioContext = new OfflineAudioContext(1, 2, MusicProcessor.sampleRate);
+        const offlineAudioContext = new OfflineAudioContext(1, 2, AudioProcessor.sampleRate);
         return offlineAudioContext.decodeAudioData(buffer);
     }
 
@@ -71,8 +71,10 @@ export class MusicProcessor {
             return new Uint8Array(0);
         }
 
+        const start = performance.now();
+
         // how many samples to analyze for a single peak
-        const peakSpan = Math.round(MusicProcessor.sampleRate / resolution);
+        const peakSpan = Math.round(AudioProcessor.sampleRate / resolution);
         const peakCount = Math.ceil(this.buffer.length / peakSpan);
         const peaks = new Uint8Array(peakCount);
 
@@ -91,6 +93,8 @@ export class MusicProcessor {
                 }
             }
         }
+
+        console.log(performance.now() - start);
 
         return peaks;
 
