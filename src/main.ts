@@ -10,5 +10,5 @@ Vue.use(BaklavaVuePlugin);
 import "./styles/all.scss";
 
 new Vue({
-    render: (h) => h(App),
+    render: (h) => h(App)
 }).$mount("#app");

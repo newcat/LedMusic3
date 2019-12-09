@@ -2,7 +2,7 @@ import { serialize, deserialize, Binary,  } from "bson";
 import { Texture } from "pixi.js";
 import { ILibraryItem, LibraryItemType } from "./libraryItem";
 import { AudioProcessor } from "../../processing/audioProcessor";
-import WaveformWorker from "worker-loader!../processing/waveformWorker";
+import WaveformWorker from "worker-loader!./waveformWorker";
 
 interface IWaveformPart {
     start: number;

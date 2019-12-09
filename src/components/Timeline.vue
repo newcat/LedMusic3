@@ -7,7 +7,7 @@ import { Component, Prop, Vue } from "vue-property-decorator";
 
 import { createTimeline, Editor as LokumEditor, Track, Item } from "lokumjs";
 import { Text, TextStyle, Texture, Sprite, Graphics } from "pixi.js";
-import { AudioTrackProcessor } from "../processing/audioTrackProcessor";
+import { AudioProcessor } from "../processing/audioProcessor";
 
 interface IWaveformPart {
     start: number;
@@ -19,7 +19,8 @@ interface IWaveformPart {
 export default class Timeline extends Vue {
 
     public lokumEditor = new LokumEditor();
-    private mp = new AudioTrackProcessor();
+    /*private mp = new AudioTrackProcessor();*/
+    private mp = {} as any;
     private waveformParts: IWaveformPart[]|null = null;
     private musicItem: Item|null = null;
     private playIndicatorGraphics = new Graphics();

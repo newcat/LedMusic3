@@ -24,7 +24,7 @@ function calculatePeaks(samples: Float32Array, sampleRate: number, resolution: n
 function getWaveformSprites(peaks: Uint8Array) {
     for (let i = 0; i < peaks.length; i += 1024) {
         const end = Math.min(i + 1024, peaks.length);
-        const image = createPartWaveformTexture(peaks, i, end)
+        const image = createPartWaveformTexture(peaks, i, end);
         ctx.postMessage({ type: "progress", start: i, end, total: peaks.length, image }, [image]);
     }
     ctx.postMessage({ type: "finished" });

@@ -11,5 +11,4 @@ interface IScene {
 
 interface IState {
     scene: IScene;
-    
 }
