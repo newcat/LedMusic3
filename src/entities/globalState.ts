@@ -1,3 +1,5 @@
+import { ILibraryItem } from "./library/libraryItem";
+
 interface IProp {
     type: string;
     x: number;
@@ -11,4 +13,12 @@ interface IScene {
 
 interface IState {
     scene: IScene;
+    library: ILibraryItem[];
 }
+
+const globalState: IState = {
+    scene: { props: [] },
+    library: []
+};
+
+export default globalState;

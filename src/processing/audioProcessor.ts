@@ -53,53 +53,6 @@ export class AudioProcessor {
         return !!(window.AudioContext || (window as any).webkitAudioContext);
     }
 
-    public decodeArrayBuffer(buffer: ArrayBuffer): Promise<AudioBuffer> {
-        const offlineAudioContext = new OfflineAudioContext(1, 2, AudioProcessor.sampleRate);
-        return offlineAudioContext.decodeAudioData(buffer);
-    }
-
-    public load(buffer: AudioBuffer) {
-        this.buffer = buffer;
-    }
-
-    /**
-     * Calculates the peaks for the loaded buffer
-     * @param resolution Number of peaks to calculate per second of samples
-     */
-    public getPeaks(resolution: number): Uint8Array {
-        if (!this.buffer) {
-            return new Uint8Array(0);
-        }
-
-        const start = performance.now();
-
-        // how many samples to analyze for a single peak
-        const peakSpan = Math.round(AudioProcessor.sampleRate / resolution);
-        const peakCount = Math.ceil(this.buffer.length / peakSpan);
-        const peaks = new Uint8Array(peakCount);
-
-        for (let c = 0; c < this.buffer.numberOfChannels; c++) {
-            const samples = this.buffer.getChannelData(c);
-            for (let i = 0; i < peakCount; i++) {
-                let max = 0;
-                for (let j = i * peakSpan; j < (i + 1) * peakSpan; j++) {
-                    if (Math.abs(samples[j]) > max) {
-                        max = Math.abs(samples[j]);
-                    }
-                }
-                const peakValue = Math.round(255 * max);
-                if (peakValue > peaks[i]) {
-                    peaks[i] = peakValue;
-                }
-            }
-        }
-
-        console.log(performance.now() - start);
-
-        return peaks;
-
-    }
-
     public play() {
 
         if (!this.buffer) { return; }

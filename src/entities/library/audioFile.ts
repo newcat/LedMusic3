@@ -19,6 +19,7 @@ export class AudioFile implements ILibraryItem {
 
     public type: LibraryItemType = "audioFile";
     public name: string;
+    public loading = true;
     public audioBuffer: AudioBuffer|null = null;
     public textures: IWaveformPart[] = [];
 
@@ -36,21 +37,24 @@ export class AudioFile implements ILibraryItem {
 
         const worker = new WaveformWorker();
         const samples = this.audioBuffer.getChannelData(0);
-        worker.postMessage({ samples: samples.buffer, sampleRate, resolution: 70 }, [samples.buffer]);
+        worker.postMessage({ samples, sampleRate, resolution: 70 }, [samples.buffer]);
 
         await new Promise((res) => {
             worker.addEventListener("message", (ev) => {
                 const { type } = ev.data;
                 if (type === "progress") {
                     const { start, end, image } = ev.data;
-                    this.textures.push({ start, end, texture: Texture.from(image) });
+                    const texture = Texture.from(image);
+                    this.textures.push({ start, end, texture });
                 } else if (type === "finished") {
                     res();
                 } else {
                     throw new Error("Invalid message type");
                 }
-            }, { once: true });
+            });
         });
+
+        this.loading = false;
     }
 
     public serialize() {

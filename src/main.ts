@@ -8,7 +8,9 @@ import "@baklavajs/plugin-renderer-vue/dist/styles.css";
 Vue.use(BaklavaVuePlugin);
 
 import "./styles/all.scss";
+import vuetify from "./plugins/vuetify";
 
-new Vue({
-    render: (h) => h(App)
+new (Vue as any)({
+    vuetify,
+    render: (h: any) => h(App)
 }).$mount("#app");
