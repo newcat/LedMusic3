@@ -6,15 +6,16 @@ v-card
         v-btn(icon)
             v-icon(@click="openFileDialog") add
 
-    div.d-flex.flex-row.flex-wrap.justify-space-between.pb-5
-        div.mx-5.mt-5(v-for="(item, i) in items", :key="i", style="width:240px;height:135px;")
-            v-hover(v-slot:default="{ hover }")
-                v-card.pa-3(outlined, style="height:100%;")
-                    div.d-flex.flex-column.justify-space-around.text-center(style="height:100%;")
-                        div
-                            v-progress-circular(v-if="item.loading", indeterminate, color="primary")
-                            v-icon(v-else) library_music
-                        .caption {{ item.name }}
+    v-container(fluid, style="overflow-y: auto;")
+        v-row
+            v-col(v-for="(item, i) in items", :key="i", cols="3")
+                v-hover(v-slot:default="{ hover }")
+                    v-card.pa-3(outlined, style="height:100%;")
+                        div.d-flex.flex-column.justify-space-around.text-center(style="height:100%;")
+                            div
+                                v-progress-circular(v-if="item.loading", indeterminate, color="primary")
+                                v-icon(v-else) library_music
+                            .caption {{ item.name }}
 
     input(ref="fileinput", type="file", @change="loadAudio", style="display: none;")
 </template>
