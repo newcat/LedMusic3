@@ -1,4 +1,5 @@
 import { serialize, deserialize, Binary,  } from "bson";
+import uuidv4 from "uuid/v4";
 import { Texture } from "pixi.js";
 import { ILibraryItem, LibraryItemType } from "./libraryItem";
 import { AudioProcessor } from "../../processing/audioProcessor";
@@ -17,6 +18,7 @@ export class AudioFile implements ILibraryItem {
         return new AudioFile(name, rawData as Buffer);
     }
 
+    public id = uuidv4();
     public type: LibraryItemType = "audioFile";
     public name: string;
     public loading = true;

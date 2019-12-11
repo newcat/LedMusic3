@@ -9,13 +9,12 @@ v-card
     v-container(fluid, style="overflow-y: auto;")
         v-row
             v-col(v-for="(item, i) in items", :key="i", cols="3")
-                v-hover(v-slot:default="{ hover }")
-                    v-card.pa-3(outlined, style="height:100%;")
-                        div.d-flex.flex-column.justify-space-around.text-center(style="height:100%;")
-                            div
-                                v-progress-circular(v-if="item.loading", indeterminate, color="primary")
-                                v-icon(v-else) library_music
-                            .caption {{ item.name }}
+                v-card.pa-3(outlined, draggable, @dragstart="dragstart($event, item.id)")
+                    div.d-flex.flex-column.justify-space-around.text-center
+                        div
+                            v-progress-circular(v-if="item.loading", indeterminate, color="primary")
+                            v-icon(v-else) library_music
+                        .caption {{ item.name }}
 
     input(ref="fileinput", type="file", @change="loadAudio", style="display: none;")
 </template>
@@ -49,6 +48,11 @@ export default class Library extends Vue {
         const item = new AudioFile(f.name, buff);
         this.globalState.library.push(item);
         await item.load();
+    }
+
+    public dragstart(ev: DragEvent, id: string) {
+        console.log("dragstart");
+        ev.dataTransfer!.setData("id", id);
     }
 
 }
