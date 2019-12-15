@@ -2,11 +2,13 @@ import { TimelineView } from "./components/timeline";
 import { Editor } from "./editor";
 import { Application } from "pixi.js";
 import { PositionCalculator } from "./positionCalculator";
-import { EventManager, Observer } from "./framework";
+import { EventBus, Observer, IRoot } from "./framework";
 import { loadTextures } from "./textureManager";
 
 export * from "./editor";
 export * from "./model";
+
+export { IRoot } from "./framework";
 
 export async function createTimeline(editor: Editor, wrapperEl: HTMLElement) {
 
@@ -18,9 +20,9 @@ export async function createTimeline(editor: Editor, wrapperEl: HTMLElement) {
     });
 
     const positionCalculator = new PositionCalculator(app);
-    const eventManager = new EventManager(app.renderer.plugins.interaction);
+    const eventBus = new EventBus(app.renderer.plugins.interaction);
     const textures = await loadTextures();
-    const root = { app, positionCalculator, eventManager, textures };
+    const root: IRoot = { app, editor, positionCalculator, eventBus, textures };
 
     const timeline = new TimelineView(root, { editor });
     timeline.setup();
@@ -28,15 +30,15 @@ export async function createTimeline(editor: Editor, wrapperEl: HTMLElement) {
     app.ticker.add(() => timeline.tick());
 
     // TODO: Only trigger when the current canvas is focused
-    window.addEventListener("keydown", (ev) => eventManager.events.keydown.emit(ev));
-    window.addEventListener("keyup", (ev) => eventManager.events.keyup.emit(ev));
+    window.addEventListener("keydown", (ev) => eventBus.events.keydown.emit(ev));
+    window.addEventListener("keyup", (ev) => eventBus.events.keyup.emit(ev));
 
     const proxy = Observer.observe(app.renderer.screen, true);
     app.renderer.screen = proxy;
     proxy._observer.registerWatcher(Symbol(), (changedPath) => {
         if (changedPath === "width" || changedPath === "height") {
             const { width, height } = app.renderer.screen;
-            eventManager.events.resize.emit({ width, height });
+            eventBus.events.resize.emit({ width, height });
         }
     });
 

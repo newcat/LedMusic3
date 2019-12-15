@@ -39,13 +39,13 @@ export default class Timeline extends Vue {
             // const x = root.positionCalculator.getX(this.mp.position) + timeline.props.trackHeaderWidth;
         });
         timeline.header.graphics.interactive = true;
-        root.eventManager.events.pointerdown.subscribe(timeline.header.graphics, (ev) => {
+        root.eventBus.events.pointerdown.subscribe(timeline.header.graphics, (ev) => {
             const x = ev.data.global.x as number;
             let unit = root.positionCalculator.getUnit(x - timeline.props.trackHeaderWidth);
             if (unit < 0) { unit = 0; }
             // this.mp.position = unit;
         });
-        root.eventManager.events.keydown.subscribe(this, (ev) => {
+        root.eventBus.events.keydown.subscribe(this, (ev) => {
             if (ev.key === " ") {
                 // TODO: this.playPause();
             }

@@ -13,17 +13,19 @@ export interface ITrackViewProps {
 export class TrackView extends Drawable<ITrackViewProps> {
 
     public header = this.createView(TrackHeader, { track: this.props.track });
-    public items = this.createView<ArrayRenderer<Item, ItemView>>(ArrayRenderer);
+    public itemsView = this.createView<ArrayRenderer<Item, ItemView>>(ArrayRenderer);
+    public items = [];
 
     public setup() {
 
-        this.addChild(this.items);
+        this.addChild(this.itemsView);
         this.addChild(this.header);
 
         this.addDependency(this.root, "positionCalculator", undefined, true);
-        this.root.eventManager.events.resize.subscribe(this, () => { this.needsRender = true; });
+        this.addDependency(this.root, "editor", "items", false);
+        this.root.eventBus.events.resize.subscribe(this, () => { this.needsRender = true; });
 
-        this.items.bind(this.props.track.items,
+        this.itemsView.bind(this.items,
             (newItem) => this.createView(ItemView, { item: newItem, track: this.props.track }));
 
         this.graphics.interactive = true;
@@ -45,8 +47,8 @@ export class TrackView extends Drawable<ITrackViewProps> {
                 this.drawLine(colors.markerLine, m.position, 0, m.position, this.props.track.height);
             });
 
-        this.items.graphics.x = this.props.headerWidth;
-        this.items.tick();
+        this.itemsView.graphics.x = this.props.headerWidth;
+        this.itemsView.tick();
 
         this.header.props.width = this.props.headerWidth;
         this.header.tick();

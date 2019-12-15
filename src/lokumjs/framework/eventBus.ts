@@ -11,7 +11,7 @@ export interface IMouseEventData {
     target: any;
 }
 
-export class EventManager {
+export class EventBus {
 
     public events = {
         pointerdown: new GraphicsEvent(),

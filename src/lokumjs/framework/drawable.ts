@@ -1,13 +1,16 @@
 import { Graphics, Application } from "pixi.js";
 import { Observer } from "./observer";
 import { PositionCalculator } from "../positionCalculator";
-import { EventManager } from "./eventManager";
+import { EventBus } from "./eventBus";
 import { ITextures } from "../textureManager";
+import { Editor } from "../editor";
+import { IEvent } from "./events";
 
 export interface IRoot {
     app: Application;
+    editor: Editor;
     positionCalculator: PositionCalculator;
-    eventManager: EventManager;
+    eventBus: EventBus;
     textures: ITextures;
 }
 
@@ -25,6 +28,7 @@ export abstract class Drawable<Props extends PropsType> {
 
     private children: Array<Drawable<any>> = [];
     private observers: Observer[] = [];
+    private subscribedEvents: Array<IEvent<any>> = [];
 
     public constructor(root: IRoot, props?: Partial<Props>) {
         this.root = root;
@@ -48,8 +52,9 @@ export abstract class Drawable<Props extends PropsType> {
     }
 
     public destroy() {
-        this.graphics.destroy();
         this.observers.forEach((o) => o.unregisterWatcher(this));
+        this.subscribedEvents.forEach((ev) => ev.unsubscribe(this));
+        this.graphics.destroy();
     }
 
     public addChild(child: Drawable<any>, addToGraphics = true) {
@@ -77,6 +82,10 @@ export abstract class Drawable<Props extends PropsType> {
         });
         this.observers.push(proxy._observer);
         object[key] = proxy;
+    }
+
+    protected renderOnEvent(ev: IEvent<any>) {
+        ev.subscribe(this, () => { this.needsRender = true; });
     }
 
     protected createView<V extends Drawable<P>, P = any>(type: ViewConstructor<P, V>, propValues?: Partial<P>): V {

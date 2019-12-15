@@ -32,8 +32,8 @@ export default class TrackHeaderView extends Drawable<ITrackHeaderViewProps> {
         this.btnCloseSprite.interactive = true;
         this.btnCloseSprite.buttonMode = true;
 
-        this.root.eventManager.events.pointerdown.subscribe(this.btnCloseSprite, () => {
-            this.root.eventManager.events.removeTrack.emit(this.props.track);
+        this.root.eventBus.events.pointerdown.subscribe(this.btnCloseSprite, () => {
+            this.root.eventBus.events.removeTrack.emit(this.props.track);
         });
 
     }

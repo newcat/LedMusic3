@@ -29,9 +29,15 @@ export class ItemView extends Drawable<IItemViewProps> {
 
         this.graphics.addChild(this.contentGraphics);
 
-        this.root.eventManager.events.pointerdown.subscribe(this.graphics, (data) => this.onClick(data, "center"));
-        this.root.eventManager.events.pointerdown.subscribe(this.leftHandle, (data) => this.onClick(data, "leftHandle"));
-        this.root.eventManager.events.pointerdown.subscribe(this.rightHandle, (data) => this.onClick(data, "rightHandle"));
+        this.root.eventBus.events.pointerdown.subscribe(this.graphics, (data) => this.onClick(data, "center"));
+        this.root.eventBus.events.pointerdown.subscribe(this.leftHandle, (data) => this.onClick(data, "leftHandle"));
+        this.root.eventBus.events.pointerdown.subscribe(this.rightHandle, (data) => this.onClick(data, "rightHandle"));
+
+        this.renderOnEvent(this.props.item.events.moved);
+        this.renderOnEvent(this.props.item.events.resizableChanged);
+        this.renderOnEvent(this.props.item.events.selectedChanged);
+        this.renderOnEvent(this.props.item.events.temporaryChanged);
+        this.renderOnEvent(this.props.)
         this.addDependency(this.root, "positionCalculator", undefined, true);
     }
 
@@ -74,16 +80,20 @@ export class ItemView extends Drawable<IItemViewProps> {
         this.contentGraphics.x = x;
         this.contentGraphics.y = 10;
         this.contentGraphics.clear();
-        this.root.eventManager.events.renderItem.emit({
+        this.root.eventBus.events.renderItem.emit({
             item: this.props.item,
             graphics: this.contentGraphics,
             width,
             height: this.props.track.height - 20
         });
+
+        if (this.props.item.temporary) {
+            this.graphics.alpha = 0.5;
+        }
     }
 
     private onClick(data: IMouseEventData, area: ItemArea) {
-        this.root.eventManager.events.itemClicked.emit({ item: this.props.item, area, event: data });
+        this.root.eventBus.events.itemClicked.emit({ item: this.props.item, area, event: data });
     }
 
 }

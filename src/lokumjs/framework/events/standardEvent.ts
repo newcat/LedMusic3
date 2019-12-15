@@ -1,6 +1,6 @@
 import { IEvent, ConsumerFunction } from "./event";
 
-export class StandardEvent<T> implements IEvent<T> {
+export class StandardEvent<T = void> implements IEvent<T> {
 
     private subscribers = new Map<any, ConsumerFunction<T>>();
 

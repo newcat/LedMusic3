@@ -1,15 +1,51 @@
 import { Application } from "pixi.js";
+import { StandardEvent } from "./framework";
+
+export interface IMarker {
+    type: "major"|"minor";
+    unit: number;
+    position: number;
+}
 
 export class PositionCalculator {
 
-    public offset = 0;
-    public unitWidth = 10;
+    public events = {
+        moved: new StandardEvent(),
+        markersChanged: new StandardEvent()
+    };
 
-    public markerSpace = 5;
-    public markerMajorMultiplier = 3;
+    private _offset = 0;
+    private _unitWidth = 0;
+    private _markerSpace = 5;
+    private _markerMajorMultiplier = 3;
+    private _markers: IMarker[] = [];
+
+    public get offset() { return this._offset; }
+    public set offset(v: number) {
+        this._offset = v;
+        this.events.moved.emit();
+        this.calculateMarkers();
+    }
+
+    public get unitWidth() { return this._unitWidth; }
+    public set unit
 
     public get markers() {
-        const markers = [];
+        return this._markers;
+    }
+
+    constructor(private _$_app: Application) { }
+
+    public getX(units: number) {
+        return units * this.unitWidth + this.offset;
+    }
+
+    public getUnit(x: number) {
+        return Math.floor((x - this.offset) / this.unitWidth);
+    }
+
+    private calculateMarkers() {
+        const markers: IMarker[] = [];
         let n = 0;
         let x = 0;
         do {
@@ -23,17 +59,8 @@ export class PositionCalculator {
             }
             n += this.markerSpace;
         } while (x < this._$_app.screen.width);
-        return markers;
-    }
-
-    constructor(private _$_app: Application) { }
-
-    public getX(units: number) {
-        return units * this.unitWidth + this.offset;
-    }
-
-    public getUnit(x: number) {
-        return Math.floor((x - this.offset) / this.unitWidth);
+        this._markers = markers;
+        this.events.markersChanged.emit();
     }
 
 }
