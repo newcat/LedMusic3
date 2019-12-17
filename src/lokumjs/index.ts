@@ -1,11 +1,11 @@
 import { TimelineView } from "./components/timeline";
-import { Editor } from "./editor";
+import { Editor } from "./model/editor";
 import { Application } from "pixi.js";
 import { PositionCalculator } from "./positionCalculator";
 import { EventBus, Observer, IRoot } from "./framework";
 import { loadTextures } from "./textureManager";
 
-export * from "./editor";
+export * from "./model/editor";
 export * from "./model";
 
 export { IRoot } from "./framework";

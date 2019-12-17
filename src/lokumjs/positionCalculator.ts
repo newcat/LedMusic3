@@ -28,7 +28,23 @@ export class PositionCalculator {
     }
 
     public get unitWidth() { return this._unitWidth; }
-    public set unit
+    public set unitWidth(v: number) {
+        this._unitWidth = v;
+        this.events.moved.emit();
+        this.calculateMarkers();
+    }
+
+    public get markerSpace() { return this._markerSpace; }
+    public set markerSpace(v: number) {
+        this._markerSpace = v;
+        this.calculateMarkers();
+    }
+
+    public get markerMajorMultiplier() { return this._markerMajorMultiplier; }
+    public set markerMajorMultiplier(v: number) {
+        this._markerMajorMultiplier = v;
+        this.calculateMarkers();
+    }
 
     public get markers() {
         return this._markers;

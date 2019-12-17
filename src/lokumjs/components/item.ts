@@ -37,8 +37,7 @@ export class ItemView extends Drawable<IItemViewProps> {
         this.renderOnEvent(this.props.item.events.resizableChanged);
         this.renderOnEvent(this.props.item.events.selectedChanged);
         this.renderOnEvent(this.props.item.events.temporaryChanged);
-        this.renderOnEvent(this.props.)
-        this.addDependency(this.root, "positionCalculator", undefined, true);
+        this.renderOnEvent(this.root.positionCalculator.events.moved);
     }
 
     public render() {

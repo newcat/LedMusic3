@@ -15,8 +15,8 @@ export class HeaderView extends Drawable<IHeaderViewProps> {
 
     public setup() {
         this.setDefaultPropValues({ headerHeight: 30 });
-        this.addDependency(this.root, "positionCalculator", undefined, true);
-        this.root.eventBus.events.resize.subscribe(this, () => { this.needsRender = true; });
+        this.renderOnEvent(this.root.positionCalculator.events.moved);
+        this.renderOnEvent(this.root.eventBus.events.resize);
         this.graphics.addChild(this.markerContainer);
     }
 

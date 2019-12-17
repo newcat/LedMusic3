@@ -3,8 +3,8 @@ import { Observer } from "./observer";
 import { PositionCalculator } from "../positionCalculator";
 import { EventBus } from "./eventBus";
 import { ITextures } from "../textureManager";
-import { Editor } from "../editor";
-import { IEvent } from "./events";
+import { Editor } from "../model/editor";
+import { IEvent } from "../events";
 
 export interface IRoot {
     app: Application;
@@ -74,14 +74,14 @@ export abstract class Drawable<Props extends PropsType> {
     protected abstract render(): void;
 
     protected addDependency(object: { [k: string]: any }, key: string, path?: string, deep = false) {
-        const proxy = Observer.observe(object[key], deep);
+        /*const proxy = Observer.observe(object[key], deep);
         (proxy._observer as Observer).registerWatcher(this, (changedPath) => {
             if (!path || (path && path === changedPath)) {
                 this.needsRender = true;
             }
         });
         this.observers.push(proxy._observer);
-        object[key] = proxy;
+        object[key] = proxy;*/
     }
 
     protected renderOnEvent(ev: IEvent<any>) {

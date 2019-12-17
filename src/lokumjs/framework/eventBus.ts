@@ -1,4 +1,4 @@
-import { GraphicsEvent, StandardEvent } from "./events";
+import { GraphicsEvent, StandardEvent } from "../events";
 import { interaction, Point, Graphics } from "pixi.js";
 import { Item, Track } from "../model";
 import { ItemArea } from "../types";
