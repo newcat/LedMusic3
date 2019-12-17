@@ -14,7 +14,9 @@ export class TrackView extends Drawable<ITrackViewProps> {
 
     public header = this.createView(TrackHeader, { track: this.props.track });
     public itemsView = this.createView<ArrayRenderer<Item, ItemView>>(ArrayRenderer);
-    public items = [];
+    public items: Item[] = [];
+
+    private subSymbol = Symbol("sub");
 
     public setup() {
 
@@ -26,12 +28,20 @@ export class TrackView extends Drawable<ITrackViewProps> {
         this.renderOnEvent(this.root.editor.events.itemRemoved);
         this.renderOnEvent(this.root.eventBus.events.resize);
 
-        this.itemsView.bind(this.items,
-            (newItem) => this.createView(ItemView, { item: newItem, track: this.props.track }));
+        this.root.editor.events.itemAdded.subscribe(this.subSymbol, () => this.updateItems());
+        this.root.editor.events.itemRemoved.subscribe(this.subSymbol, () => this.updateItems());
+
+        this.itemsView.onNewItem = (newItem) => this.createView(ItemView, { item: newItem, track: this.props.track });
 
         this.graphics.interactive = true;
         (this.graphics as any).ignoreClick = true;
 
+    }
+
+    public destroy() {
+        super.destroy();
+        this.root.editor.events.itemAdded.unsubscribe(this.subSymbol);
+        this.root.editor.events.itemRemoved.unsubscribe(this.subSymbol);
     }
 
     protected render(): void {
@@ -49,7 +59,8 @@ export class TrackView extends Drawable<ITrackViewProps> {
             });
 
         this.itemsView.graphics.x = this.props.headerWidth;
-        this.itemsView.tick();
+        this.itemsView.bind(this.items);
+        this.itemsView.render();
 
         this.header.props.width = this.props.headerWidth;
         this.header.tick();
@@ -61,6 +72,10 @@ export class TrackView extends Drawable<ITrackViewProps> {
             .lineStyle(1, color)
             .moveTo(x1, y1)
             .lineTo(x2, y2);
+    }
+
+    private updateItems() {
+        this.items = this.root.editor.items.filter((i) => i.trackId === this.props.track.id);
     }
 
 }

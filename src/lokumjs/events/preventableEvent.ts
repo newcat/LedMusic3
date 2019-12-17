@@ -15,7 +15,6 @@ export class PreventableEvent<T> implements IEvent<T> {
     }
 
     public emit(data: T): boolean {
-        console.log(this.subscribers);
         for (const [k, v] of this.subscribers.entries()) {
             if (v.call(k, data) === false) {
                 return false;

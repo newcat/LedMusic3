@@ -1,25 +1,23 @@
 import { Drawable } from "./drawable";
+import { IObservableCollection } from "./observableCollection";
+import { IEvent } from "../events";
 
 export class ArrayRenderer<T, V extends Drawable<any>, I = T> extends Drawable<{}> {
 
     public views = new Map<I, V>();
+    public onNewItem!: (newItem: T, index: number, array: ReadonlyArray<T>) => V;
+    public onRender?: (view: V, item: T, index: number, array: ReadonlyArray<T>) => void;
+    public idFn?: (item: T) => I;
 
     private array!: ReadonlyArray<T>;
-    private onNewItem!: (newItem: T, index: number, array: ReadonlyArray<T>) => V;
-    private onRender?: (view: V, item: T, index: number, array: ReadonlyArray<T>) => void;
-    private idFn?: (item: T) => I;
 
-    public bind(
-        array: ReadonlyArray<T>,
-        onNewItem: (newItem: T, index: number, array: ReadonlyArray<T>) => V,
-        onRender?: (view: V, item: T, index: number, array: ReadonlyArray<T>) => any,
-        idFn?: (item: T) => I
-    ) {
+    public bindObservable(array: IObservableCollection<T>) {
+        this.bind(array, [array.changed]);
+    }
+
+    public bind(array: ReadonlyArray<T>, events?: Array<IEvent<any>>) {
         this.array = array;
-        this.onNewItem = onNewItem;
-        this.onRender = onRender;
-        this.idFn = idFn;
-        this.addDependency(this, "array", undefined, true);
+        if (events) { events.forEach((ev) => this.renderOnEvent(ev)); }
     }
 
     public render() {

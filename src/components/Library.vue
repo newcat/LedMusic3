@@ -51,7 +51,6 @@ export default class Library extends Vue {
     }
 
     public dragstart(ev: DragEvent, id: string) {
-        console.log("dragstart");
         ev.dataTransfer!.setData("id", id);
     }
 

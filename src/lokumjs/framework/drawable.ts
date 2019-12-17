@@ -32,7 +32,6 @@ export abstract class Drawable<Props extends PropsType> {
 
     public constructor(root: IRoot, props?: Partial<Props>) {
         this.root = root;
-        this.addDependency(this, "props", undefined, true);
         if (props) {
             Object.keys(props).forEach((k) => {
                 (this.props as any)[k] = props[k];
@@ -72,17 +71,6 @@ export abstract class Drawable<Props extends PropsType> {
     }
 
     protected abstract render(): void;
-
-    protected addDependency(object: { [k: string]: any }, key: string, path?: string, deep = false) {
-        /*const proxy = Observer.observe(object[key], deep);
-        (proxy._observer as Observer).registerWatcher(this, (changedPath) => {
-            if (!path || (path && path === changedPath)) {
-                this.needsRender = true;
-            }
-        });
-        this.observers.push(proxy._observer);
-        object[key] = proxy;*/
-    }
 
     protected renderOnEvent(ev: IEvent<any>) {
         ev.subscribe(this, () => { this.needsRender = true; });

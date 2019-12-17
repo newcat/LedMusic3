@@ -13,6 +13,12 @@ interface ITimelineViewProps {
     trackHeaderWidth: number;
 }
 
+interface IItemState {
+    id: string;
+    start: number;
+    end: number;
+}
+
 export class TimelineView extends Drawable<ITimelineViewProps> {
 
     public header!: HeaderView;
@@ -25,7 +31,7 @@ export class TimelineView extends Drawable<ITimelineViewProps> {
     private dragItem?: Item;
     private dragStartPosition = new Point(0, 0);
     private dragStartTrack?: Track;
-    private dragStartStates: Array<{ item: Item, trackIndex: number }> = [];
+    private dragStartStates: Array<{ item: IItemState, trackIndex: number }> = [];
     private ctrlPressed = false;
     private yScroll = 0;
 
@@ -70,10 +76,12 @@ export class TimelineView extends Drawable<ITimelineViewProps> {
         this.addChild(this.tracks, false);
         this.trackContainer.addChild(this.tracks.graphics);
 
-        this.tracks.bind(this.props.editor.tracks,
-            (newTrack) => this.createView(TrackView, { track: newTrack, headerWidth: this.props.trackHeaderWidth }),
-            (trackView, t, i) => { trackView.graphics.y = this.trackOffsets[i]; }
-        );
+        this.tracks.onNewItem = (newTrack) => this.createView(TrackView, { track: newTrack, headerWidth: this.props.trackHeaderWidth });
+        this.tracks.onRender = (trackView, t, i) => { trackView.graphics.y = this.trackOffsets[i]; };
+        this.tracks.bind(this.props.editor.tracks, [
+            this.props.editor.events.itemAdded,
+            this.props.editor.events.itemRemoved
+        ]);
 
         this.yScroll = this.header.props.headerHeight;
 
@@ -219,7 +227,7 @@ export class TimelineView extends Drawable<ITimelineViewProps> {
         this.isDragging = true;
         this.dragStartStates = this.getSelectedItems()
             .map((i) => ({
-                item: JSON.parse(JSON.stringify(i)),
+                item: { id: i.id, start: i.start, end: i.end },
                 trackIndex: this.props.editor.tracks.findIndex((t) => t.id === i.trackId)
             }));
     }
