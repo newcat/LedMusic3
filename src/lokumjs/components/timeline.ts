@@ -236,11 +236,13 @@ export class TimelineView extends Drawable<ITimelineViewProps> {
     }
 
     private zoom(positionX: number, amount: number) {
-        const newScale = this.root.positionCalculator.unitWidth * (1 - amount / 3000);
-        const currentPoint = (positionX / this.root.positionCalculator.unitWidth) - this.root.positionCalculator.offset;
-        const newPoint = (positionX / newScale) - this.root.positionCalculator.offset;
-        this.root.positionCalculator.offset += newPoint - currentPoint;
-        this.root.positionCalculator.unitWidth = newScale;
+        const pc = this.root.positionCalculator;
+        const newScale = pc.unitWidth * (1 - amount / 3000);
+        const currentPoint = (positionX / pc.unitWidth) - pc.offset;
+        const newPoint = (positionX / newScale) - pc.offset;
+        pc.offset += newPoint - currentPoint;
+        if (pc.offset > 0) { pc.offset = 0; }
+        pc.unitWidth = newScale;
     }
 
     private findTrackByPoint(p: Point): Track|undefined {

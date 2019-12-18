@@ -11,6 +11,7 @@ export class PositionCalculator {
 
     public events = {
         moved: new StandardEvent(),
+        zoomed: new StandardEvent(),
         markersChanged: new StandardEvent()
     };
 
@@ -31,6 +32,7 @@ export class PositionCalculator {
     public set unitWidth(v: number) {
         this._unitWidth = v;
         this.events.moved.emit();
+        this.events.zoomed.emit();
         this.calculateMarkers();
     }
 
@@ -63,17 +65,19 @@ export class PositionCalculator {
     private calculateMarkers() {
         const markers: IMarker[] = [];
         let n = 0;
+        let unit = 0;
         let x = 0;
         do {
-            x = this.getX(n);
+            x = this.getX(unit);
             if (x >= 0 && x < this._$_app.screen.width) {
                 if (n % this.markerMajorMultiplier === 0) {
-                    markers.push({ type: "major", unit: n, position: x });
+                    markers.push({ type: "major", unit, position: x });
                 } else {
-                    markers.push({ type: "minor", unit: n, position: x });
+                    markers.push({ type: "minor", unit, position: x });
                 }
             }
-            n += this.markerSpace;
+            unit += this.markerSpace;
+            n++;
         } while (x < this._$_app.screen.width);
         this._markers = markers;
         this.events.markersChanged.emit();

@@ -18,6 +18,8 @@ export class Editor {
     private _tracks: Track[] = [];
     private _items: Item[] = [];
 
+    public labelFunction: (unit: number) => string = (u) => u.toString();
+
     public get tracks() { return this._tracks as ReadonlyArray<Track>; }
     public get items() { return this._items as ReadonlyArray<Item>; }
 

@@ -47,7 +47,7 @@ export class HeaderView extends Drawable<IHeaderViewProps> {
                 }
 
                 text.used = true;
-                text.text.text = m.unit.toString();
+                text.text.text = this.root.editor.labelFunction(m.unit);
                 text.text.position.set(m.position, this.props.headerHeight - 10);
                 text.text.visible = true;
 

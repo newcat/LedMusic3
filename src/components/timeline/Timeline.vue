@@ -5,7 +5,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
 
-import { createTimeline, Editor as LokumEditor, Track, Item } from "@/lokumjs";
+import { createTimeline, Editor, Track, Item } from "@/lokumjs";
 import { Text, TextStyle, Texture, Sprite, Graphics } from "pixi.js";
 import { AudioProcessor } from "../../processing/audioProcessor";
 import globalState from "../../entities/globalState";
@@ -19,21 +19,29 @@ interface IWaveformPart {
     sprite: Sprite;
 }
 
+enum LabelMode {
+    BEATS,
+    BARS
+}
+
 @Component
 export default class Timeline extends Vue {
 
-    public lokumEditor = new LokumEditor();
+    public editor = new Editor();
+
     private playIndicatorGraphics = new Graphics();
     private fpsText = new Text("FPS", new TextStyle({ fontSize: 10, fill: 0xffffff }));
 
     private musicTrack = new Track("Music");
 
+    private labelMode: LabelMode = LabelMode.BEATS;
+
     public async mounted() {
 
-        const { root, timeline } = await createTimeline(this.lokumEditor as any, this.$refs.wrapper as HTMLElement);
+        const { root, timeline } = await createTimeline(this.editor as any, this.$refs.wrapper as HTMLElement);
 
         this.musicTrack.removable = false;
-        this.lokumEditor.addTrack(this.musicTrack);
+        this.editor.addTrack(this.musicTrack);
 
         this.fpsText.position.set(10, 10);
         root.app.stage.addChild(this.fpsText);
@@ -63,9 +71,22 @@ export default class Timeline extends Vue {
         });
 
         root.app.stage.addChild(this.playIndicatorGraphics);
-        root.positionCalculator.unitWidth = 2;
-        root.positionCalculator.markerSpace = 24;
-        root.positionCalculator.markerMajorMultiplier = 24 * 4;
+
+        root.positionCalculator.unitWidth = 0.5;
+        root.positionCalculator.markerSpace = TICKS_PER_BEAT * 4;
+        root.positionCalculator.markerMajorMultiplier = 4;
+        this.editor.labelFunction = (u) => (u / (TICKS_PER_BEAT * 16)).toString();
+        root.positionCalculator.events.zoomed.subscribe(this, () => {
+            const pc = root.positionCalculator;
+            if (pc.unitWidth < 0.25) {
+                pc.markerSpace = TICKS_PER_BEAT * 16;
+                pc.markerMajorMultiplier = 1;
+            } else {
+                pc.markerSpace = TICKS_PER_BEAT * 4;
+                pc.markerMajorMultiplier = 4;
+            }
+        });
+
         (window as any).$data = timeline;
     }
 
@@ -82,7 +103,7 @@ export default class Timeline extends Vue {
         }
 
         if (item) {
-            this.lokumEditor.addItem(item);
+            this.editor.addItem(item);
         }
     }
 
