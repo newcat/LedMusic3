@@ -55,7 +55,8 @@ export class TrackView extends Drawable<ITrackViewProps> {
         this.root.positionCalculator.markers
             .filter((m) => m.type === "major")
             .forEach((m) => {
-                this.drawLine(colors.markerLine, m.position, 0, m.position, this.props.track.height);
+                const position = m.position + this.props.headerWidth;
+                this.drawLine(colors.markerLine, position, 0, position, this.props.track.height);
             });
 
         this.itemsView.graphics.x = this.props.headerWidth;

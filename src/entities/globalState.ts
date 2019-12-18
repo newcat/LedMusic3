@@ -14,11 +14,13 @@ interface IScene {
 interface IState {
     scene: IScene;
     library: ILibraryItem[];
+    bpm: number;
 }
 
 const globalState: IState = {
     scene: { props: [] },
-    library: []
+    library: [],
+    bpm: 130
 };
 
 export default globalState;

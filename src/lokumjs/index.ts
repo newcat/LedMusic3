@@ -30,8 +30,16 @@ export async function createTimeline(editor: Editor, wrapperEl: HTMLElement) {
     app.ticker.add(() => timeline.tick());
 
     // TODO: Only trigger when the current canvas is focused
-    window.addEventListener("keydown", (ev) => eventBus.events.keydown.emit(ev));
-    window.addEventListener("keyup", (ev) => eventBus.events.keyup.emit(ev));
+    canvasEl.addEventListener("keydown", (ev) => eventBus.events.keydown.emit(ev));
+    canvasEl.addEventListener("keyup", (ev) => eventBus.events.keyup.emit(ev));
+    canvasEl.addEventListener("wheel", (ev) => {
+        ev.preventDefault();
+        let scrollAmount = ev.deltaY;
+        if (ev.deltaMode === 1) {
+            scrollAmount *= 32; // Firefox fix, multiplier is trial & error
+        }
+        eventBus.events.zoom.emit({ positionX: ev.offsetX, amount: scrollAmount });
+    });
 
     const proxy = Observer.observe(app.renderer.screen, true);
     app.renderer.screen = proxy;

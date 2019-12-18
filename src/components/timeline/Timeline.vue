@@ -10,6 +10,8 @@ import { Text, TextStyle, Texture, Sprite, Graphics } from "pixi.js";
 import { AudioProcessor } from "../../processing/audioProcessor";
 import globalState from "../../entities/globalState";
 import renderWaveform from "./renderWaveform";
+import { AudioFile } from "../../entities/library";
+import { TICKS_PER_BEAT } from "../../constants";
 
 interface IWaveformPart {
     start: number;
@@ -70,11 +72,26 @@ export default class Timeline extends Vue {
     public drop(ev: DragEvent) {
         const id = ev.dataTransfer!.getData("id");
         const libraryItem = globalState.library.find((i) => i.id === id);
-        if (libraryItem) {
-            const item = new Item(this.musicTrack.id, 0, 100, { libraryItem });
-            // item.resizable = false;
+        if (!libraryItem) { return; }
+
+        let item: Item|undefined;
+        switch (libraryItem.type) {
+            case "audioFile":
+                item = this.addMusicItem(libraryItem as AudioFile);
+                break;
+        }
+
+        if (item) {
             this.lokumEditor.addItem(item);
         }
+    }
+
+    private addMusicItem(libraryItem: AudioFile): Item|undefined {
+        if (libraryItem.loading) { return; }
+        const length = libraryItem.audioBuffer!.duration * (globalState.bpm / 60) * TICKS_PER_BEAT;
+        const item = new Item(this.musicTrack.id, 0, length, { libraryItem });
+        item.resizable = false;
+        return item;
     }
 
 }

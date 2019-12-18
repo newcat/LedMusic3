@@ -62,6 +62,9 @@ export class TimelineView extends Drawable<ITimelineViewProps> {
         this.root.eventBus.events.keyup.subscribe(this, (ev) => {
             if (ev.key === "Control") { this.ctrlPressed = false; }
         });
+        this.root.eventBus.events.zoom.subscribe(this, ({ positionX, amount }) => {
+            this.zoom(positionX, amount);
+        });
         this.root.eventBus.events.resize.subscribe(this, () => { this.needsRender = true; });
 
         this.root.eventBus.events.itemClicked.subscribe(this, (data) => {
@@ -230,6 +233,14 @@ export class TimelineView extends Drawable<ITimelineViewProps> {
                 item: { id: i.id, start: i.start, end: i.end },
                 trackIndex: this.props.editor.tracks.findIndex((t) => t.id === i.trackId)
             }));
+    }
+
+    private zoom(positionX: number, amount: number) {
+        const newScale = this.root.positionCalculator.unitWidth * (1 - amount / 3000);
+        const currentPoint = (positionX / this.root.positionCalculator.unitWidth) - this.root.positionCalculator.offset;
+        const newPoint = (positionX / newScale) - this.root.positionCalculator.offset;
+        this.root.positionCalculator.offset += newPoint - currentPoint;
+        this.root.positionCalculator.unitWidth = newScale;
     }
 
     private findTrackByPoint(p: Point): Track|undefined {

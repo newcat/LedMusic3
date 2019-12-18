@@ -65,14 +65,14 @@ export class ItemView extends Drawable<IItemViewProps> {
             }
             this.graphics
                 .lineStyle(2, colors.accent)
-                .beginFill(colors.secondary)
+                .beginFill(colors.secondary, 0.3)
                     .drawRoundedRect(x, 10, width, this.props.track.height - 20, 5)
                 .endFill();
         } else {
             this.leftHandle.visible = false;
             this.rightHandle.visible = false;
             this.graphics
-                .beginFill(colors.secondary)
+                .beginFill(colors.secondary, 0.3)
                     .drawRoundedRect(x, 10, width, this.props.track.height - 20, 5)
                 .endFill();
         }

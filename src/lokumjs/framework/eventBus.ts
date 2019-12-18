@@ -21,6 +21,7 @@ export class EventBus {
         pointerout: new GraphicsEvent(),
         keydown: new StandardEvent<KeyboardEvent>(),
         keyup: new StandardEvent<KeyboardEvent>(),
+        zoom: new StandardEvent<{ positionX: number, amount: number }>(),
         itemClicked: new StandardEvent<{ item: Item, area: ItemArea, event: IMouseEventData }>(),
         removeTrack: new StandardEvent<Track>(),
         renderItem: new StandardEvent<{ item: Item, graphics: Graphics, width: number, height: number }>(),
