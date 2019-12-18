@@ -26,7 +26,7 @@ export default function renderWaveformItem(item: Item, graphics: Graphics, width
             const factor = width / totalLength;
             (item.data.sprites as ISpriteWaveformPart[]).forEach((p) => {
                 p.sprite.x = p.start * factor;
-                p.sprite.width = (p.end - p.start) * factor;
+                p.sprite.width = (p.end + 1 - p.start) * factor;
                 p.sprite.height = height;
             });
         }

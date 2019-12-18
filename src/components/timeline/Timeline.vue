@@ -71,7 +71,9 @@ export default class Timeline extends Vue {
         const id = ev.dataTransfer!.getData("id");
         const libraryItem = globalState.library.find((i) => i.id === id);
         if (libraryItem) {
-            this.lokumEditor.addItem(new Item(this.musicTrack.id, 0, 100, { libraryItem }));
+            const item = new Item(this.musicTrack.id, 0, 100, { libraryItem });
+            // item.resizable = false;
+            this.lokumEditor.addItem(item);
         }
     }
 
