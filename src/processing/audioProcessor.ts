@@ -1,5 +1,11 @@
 // inspired by: https://github.com/katspaugh/wavesurfer.js/blob/master/src/webaudio.js
 
+interface IAudioTrack {
+    buffer: AudioBuffer;
+    startUnit: number;
+    source: AudioBufferSourceNode|null;
+}
+
 export class AudioProcessor {
 
     public static sampleRate = 44100;
@@ -8,10 +14,9 @@ export class AudioProcessor {
     private audioContext = new AudioContext();
     private gainNode = this.audioContext.createGain();
     private analyserNode = this.audioContext.createAnalyser();
-    private source: AudioBufferSourceNode|null = null;
 
     // State
-    private buffer: AudioBuffer|null = null;
+    private tracks: IAudioTrack[] = [];
     private startTime = 0;
     private startPosition = 0;
 
@@ -23,13 +28,6 @@ export class AudioProcessor {
     public set volume(value: number) { this.gainNode.gain.setValueAtTime(value, this.audioContext.currentTime); }
 
     public get isPlaying() { return this.$isPlaying; }
-
-    public get duration() {
-        if (!this.buffer) {
-            return 0;
-        }
-        return this.buffer.duration;
-    }
 
     public get position() { return this.$position; }
     public set position(value: number) {
@@ -55,13 +53,11 @@ export class AudioProcessor {
 
     public play() {
 
-        if (!this.buffer) { return; }
-
-        // need to re-create source on each playback
-        this.source = this.audioContext.createBufferSource();
-        this.source.buffer = this.buffer;
-        this.source.connect(this.analyserNode);
-        this.source.start(0, this.unitToSeconds(this.position));
+        // need to re-create sources on each playback
+        for (const t of this.tracks) {
+            this.destroySource(t.source);
+            t.source = this.createSource(t.buffer, t.startUnit);
+        }
         this.startTime = this.audioContext.currentTime;
         this.startPosition = this.position;
 
@@ -74,10 +70,9 @@ export class AudioProcessor {
     }
 
     public pause() {
-        if (this.source) {
-            this.source.stop(0);
-            this.source.disconnect();
-            this.source = null;
+        for (const t of this.tracks) {
+            this.destroySource(t.source);
+            t.source = null;
         }
         this.updatePosition();
         this.$isPlaying = false;
@@ -85,7 +80,7 @@ export class AudioProcessor {
 
     public destroy() {
         if (!this.isPlaying) { this.pause(); }
-        this.buffer = null;
+        this.tracks = [];
         this.gainNode.disconnect();
         this.analyserNode.disconnect();
     }
@@ -101,6 +96,35 @@ export class AudioProcessor {
 
     public secondsToUnits(seconds: number) {
         return (seconds / 60) * this.$bpm * 24;
+    }
+
+    public registerBuffer(buffer: AudioBuffer, startUnit: number) {
+        const source = this.isPlaying ? this.createSource(buffer, startUnit) : null;
+        this.tracks.push({ buffer, startUnit, source });
+    }
+
+    public unregisterBuffer(buffer: AudioBuffer) {
+        const i = this.tracks.findIndex((t) => t.buffer === buffer);
+        if (i >= 0) {
+            this.destroySource(this.tracks[i].source);
+            this.tracks.splice(i, 1);
+        }
+    }
+
+    private createSource(buffer: AudioBuffer, startUnit: number) {
+        const source = this.audioContext.createBufferSource();
+        source.buffer = buffer;
+        source.connect(this.analyserNode);
+        const offset = this.unitToSeconds(this.position - startUnit);
+        source.start(0, offset);
+        return source;
+    }
+
+    private destroySource(source: AudioBufferSourceNode|null) {
+        if (source) {
+            source.stop(0);
+            source.disconnect();
+        }
     }
 
 }

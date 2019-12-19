@@ -7,8 +7,8 @@ import { loadTextures } from "./textureManager";
 
 export * from "./model/editor";
 export * from "./model";
+export * from "./framework";
 
-export { IRoot } from "./framework";
 
 export async function createTimeline(editor: Editor, wrapperEl: HTMLElement) {
 
@@ -30,8 +30,8 @@ export async function createTimeline(editor: Editor, wrapperEl: HTMLElement) {
     app.ticker.add(() => timeline.tick());
 
     // TODO: Only trigger when the current canvas is focused
-    canvasEl.addEventListener("keydown", (ev) => eventBus.events.keydown.emit(ev));
-    canvasEl.addEventListener("keyup", (ev) => eventBus.events.keyup.emit(ev));
+    document.addEventListener("keydown", (ev) => eventBus.events.keydown.emit(ev));
+    document.addEventListener("keyup", (ev) => eventBus.events.keyup.emit(ev));
     canvasEl.addEventListener("wheel", (ev) => {
         ev.preventDefault();
         let scrollAmount = ev.deltaY;

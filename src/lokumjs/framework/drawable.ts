@@ -19,6 +19,12 @@ type ViewConstructor<P, V extends Drawable<P>> = new (root: IRoot, propValues?: 
 
 export abstract class Drawable<Props extends PropsType> {
 
+    public static createView<V extends Drawable<P>, P = any>(root: IRoot, type: ViewConstructor<P, V>, propValues?: Partial<P>): V {
+        const view = new type(root, propValues);
+        view.setup();
+        return view;
+    }
+
     public graphics: Graphics = new Graphics();
     public needsRender: boolean = true;
 
@@ -29,12 +35,13 @@ export abstract class Drawable<Props extends PropsType> {
     private children: Array<Drawable<any>> = [];
     private observers: Observer[] = [];
     private subscribedEvents: Array<IEvent<any>> = [];
+    private propValues: Props = {} as any;
 
     public constructor(root: IRoot, props?: Partial<Props>) {
         this.root = root;
         if (props) {
             Object.keys(props).forEach((k) => {
-                (this.props as any)[k] = props[k];
+                this.setProp(k, props[k]);
             });
         }
     }
@@ -77,21 +84,33 @@ export abstract class Drawable<Props extends PropsType> {
     }
 
     protected createView<V extends Drawable<P>, P = any>(type: ViewConstructor<P, V>, propValues?: Partial<P>): V {
-        const view = new type(this.root, propValues);
-        view.setup();
-        return view;
+        return Drawable.createView(this.root, type, propValues);
     }
 
     protected setDefaultPropValues(values: Partial<Props>) {
         Object.keys(values).forEach((k) => {
-            if (this.props[k] === undefined) {
-                (this.props as any)[k] = values[k];
-            }
+            this.setProp(k, values[k]);
         });
     }
 
     private doesNeedRender(): boolean {
         return this.needsRender || this.children.some((c) => c.doesNeedRender());
+    }
+
+    private setProp(key: string, value: any) {
+        if (!Object.getOwnPropertyDescriptor(this.props, key)) {
+            Object.defineProperty(this.props, key, {
+                get: () => this.propValues[key],
+                set: (v) => {
+                    const oldValue = this.propValues[key];
+                    if (oldValue !== v) {
+                        (this.propValues as any)[key] = v;
+                        this.needsRender = true;
+                    }
+                }
+            });
+        }
+        (this.propValues as any)[key] = value;
     }
 
 }

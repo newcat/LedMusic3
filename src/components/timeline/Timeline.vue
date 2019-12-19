@@ -5,13 +5,16 @@
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
 
-import { createTimeline, Editor, Track, Item } from "@/lokumjs";
+import { createTimeline, Drawable, Editor, Track, Item } from "@/lokumjs";
 import { Text, TextStyle, Texture, Sprite, Graphics } from "pixi.js";
-import { AudioProcessor } from "../../processing/audioProcessor";
-import globalState from "../../entities/globalState";
+import { TICKS_PER_BEAT } from "@/constants";
+import globalState from "@/entities/globalState";
+import { AudioFile } from "@/entities/library";
+import { ItemTypes } from "@/entities/timeline/itemTypes";
+import { AudioProcessor } from "@/processing/audioProcessor";
+import { TimelineProcessor } from "@/processing/timelineProcessor";
 import renderWaveform from "./renderWaveform";
-import { AudioFile } from "../../entities/library";
-import { TICKS_PER_BEAT } from "../../constants";
+import { PositionIndicator } from "./positionIndicator";
 
 interface IWaveformPart {
     start: number;
@@ -28,8 +31,10 @@ enum LabelMode {
 export default class Timeline extends Vue {
 
     public editor = new Editor();
+    private audioProcessor = new AudioProcessor();
+    private timelineProcessor = new TimelineProcessor(this.audioProcessor, this.editor);
 
-    private playIndicatorGraphics = new Graphics();
+    private positionIndicator!: PositionIndicator;
     private fpsText = new Text("FPS", new TextStyle({ fontSize: 10, fill: 0xffffff }));
 
     private musicTrack = new Track("Music");
@@ -46,10 +51,16 @@ export default class Timeline extends Vue {
         this.fpsText.position.set(10, 10);
         root.app.stage.addChild(this.fpsText);
 
+        this.positionIndicator = Drawable.createView(root, PositionIndicator, { position: 0, trackHeaderWidth: timeline.props.trackHeaderWidth });
+        root.app.stage.addChild(this.positionIndicator.graphics);
+
         root.app.ticker.add(() => {
             this.fpsText.text = root.app.ticker.elapsedMS.toFixed(2);
-            // this.mp.updatePosition();
-            // const x = root.positionCalculator.getX(this.mp.position) + timeline.props.trackHeaderWidth;
+            this.audioProcessor.updatePosition();
+            const position = this.audioProcessor.position;
+            this.timelineProcessor.process(position);
+            this.positionIndicator.props.position = position;
+            this.positionIndicator.tick();
         });
 
         timeline.header.graphics.interactive = true;
@@ -57,20 +68,22 @@ export default class Timeline extends Vue {
             const x = ev.data.global.x as number;
             let unit = root.positionCalculator.getUnit(x - timeline.props.trackHeaderWidth);
             if (unit < 0) { unit = 0; }
-            // this.mp.position = unit;
+            this.audioProcessor.position = unit;
         });
 
         root.eventBus.events.keydown.subscribe(this, (ev) => {
             if (ev.key === " ") {
-                // TODO: this.playPause();
+                if (this.audioProcessor.isPlaying) {
+                    this.audioProcessor.pause();
+                } else {
+                    this.audioProcessor.play();
+                }
             }
         });
 
         root.eventBus.events.renderItem.subscribe(this, ({ item, graphics, width, height }) => {
             renderWaveform(item, graphics, width, height);
         });
-
-        root.app.stage.addChild(this.playIndicatorGraphics);
 
         root.positionCalculator.unitWidth = 0.5;
         root.positionCalculator.markerSpace = TICKS_PER_BEAT * 4;
@@ -110,7 +123,7 @@ export default class Timeline extends Vue {
     private addMusicItem(libraryItem: AudioFile): Item|undefined {
         if (libraryItem.loading) { return; }
         const length = libraryItem.audioBuffer!.duration * (globalState.bpm / 60) * TICKS_PER_BEAT;
-        const item = new Item(this.musicTrack.id, 0, length, { libraryItem });
+        const item = new Item(this.musicTrack.id, 0, length, { type: ItemTypes.AUDIO, libraryItem });
         item.resizable = false;
         return item;
     }
