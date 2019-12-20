@@ -24,12 +24,11 @@ export class TrackView extends Drawable<ITrackViewProps> {
         this.addChild(this.header);
 
         this.renderOnEvent(this.root.positionCalculator.events.moved);
-        this.renderOnEvent(this.root.editor.events.itemAdded);
-        this.renderOnEvent(this.root.editor.events.itemRemoved);
         this.renderOnEvent(this.root.eventBus.events.resize);
 
         this.root.editor.events.itemAdded.subscribe(this.subSymbol, () => this.updateItems());
         this.root.editor.events.itemRemoved.subscribe(this.subSymbol, () => this.updateItems());
+        this.updateItems();
 
         this.itemsView.onNewItem = (newItem) => this.createView(ItemView, { item: newItem, track: this.props.track });
 
@@ -77,6 +76,7 @@ export class TrackView extends Drawable<ITrackViewProps> {
 
     private updateItems() {
         this.items = this.root.editor.items.filter((i) => i.trackId === this.props.track.id);
+        this.needsRender = true;
     }
 
 }

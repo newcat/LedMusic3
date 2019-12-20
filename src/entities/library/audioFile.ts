@@ -19,7 +19,7 @@ export class AudioFile implements ILibraryItem {
     }
 
     public id = uuidv4();
-    public type: LibraryItemType = "audioFile";
+    public type = LibraryItemType.AUDIO_FILE;
     public name: string;
     public loading = true;
     public audioBuffer: AudioBuffer|null = null;
@@ -39,7 +39,7 @@ export class AudioFile implements ILibraryItem {
 
         const worker = new WaveformWorker();
         const samples = this.audioBuffer.getChannelData(0);
-        worker.postMessage({ samples, sampleRate, resolution: 70 }, [samples.buffer]);
+        worker.postMessage({ samples, sampleRate, resolution: 256 }, [samples.buffer]);
 
         await new Promise((res) => {
             worker.addEventListener("message", (ev) => {

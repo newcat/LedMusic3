@@ -1,7 +1,6 @@
 import { AudioProcessor } from "./audioProcessor";
-import { Editor, Item } from "../lokumjs";
-import { ItemTypes } from "@/entities/timeline/itemTypes";
-import { AudioFile } from "@/entities/library";
+import { Editor, Item } from "@/lokumjs";
+import { AudioFile, ILibraryItem, LibraryItemType, GraphLibraryItem } from "@/entities/library";
 
 export class TimelineProcessor {
 
@@ -28,30 +27,38 @@ export class TimelineProcessor {
     }
 
     private activate(item: Item) {
-        if (!item.data || typeof(item.data.type) !== "number") { return; }
-        const type = item.data.type as ItemTypes;
-        if (type === ItemTypes.AUDIO) {
-            const libraryItem = item.data.libraryItem as AudioFile;
-            this.audioProcessor.registerBuffer(libraryItem.audioBuffer!, item.start);
+        if (!item.data || !item.data.libraryItem) { return; }
+        const libraryItem = item.data.libraryItem as ILibraryItem;
+        if (libraryItem.type === LibraryItemType.AUDIO_FILE) {
+            const af = libraryItem as AudioFile;
+            this.audioProcessor.registerBuffer(af.audioBuffer!, item.start);
             item.events.moved.subscribe(this, () => {
-                this.audioProcessor.unregisterBuffer(libraryItem.audioBuffer!);
-                this.audioProcessor.registerBuffer(libraryItem.audioBuffer!, item.start);
+                this.audioProcessor.unregisterBuffer(af.audioBuffer!);
+                this.audioProcessor.registerBuffer(af.audioBuffer!, item.start);
             });
         }
     }
 
     private deactivate(item: Item) {
-        if (!item.data || !item.data.type) { return; }
-        const type = item.data.type as ItemTypes;
-        if (type === ItemTypes.AUDIO) {
-            const libraryItem = item.data.libraryItem as AudioFile;
+        if (!item.data || !item.data.libraryItem) { return; }
+        const libraryItem = item.data.libraryItem as ILibraryItem;
+        if (libraryItem.type === LibraryItemType.AUDIO_FILE) {
+            const af = libraryItem as AudioFile;
             item.events.moved.unsubscribe(this);
-            this.audioProcessor.unregisterBuffer(libraryItem.audioBuffer!);
+            this.audioProcessor.unregisterBuffer(af.audioBuffer!);
         }
     }
 
     private processItem(item: Item) {
+        if (!item.data || !item.data.libraryItem) { return; }
         // TODO: apply the automation clips and perform all necessary graph calculations
+        const libraryItem = item.data.libraryItem as ILibraryItem;
+        switch (libraryItem.type) {
+            case LibraryItemType.GRAPH:
+                const graph = libraryItem as GraphLibraryItem;
+                graph.editor.enginePlugin.calculate();
+                break;
+        }
     }
 
 }

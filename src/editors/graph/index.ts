@@ -1,7 +1,7 @@
 import { Editor } from "@baklavajs/core";
 import { ViewPlugin } from "@baklavajs/plugin-renderer-vue";
 import { InterfaceTypePlugin } from "@baklavajs/plugin-interface-types";
-import { OptionPlugin, NumberOption } from "@baklavajs/plugin-options-vue";
+import { OptionPlugin } from "@baklavajs/plugin-options-vue";
 import { Engine } from "@baklavajs/plugin-engine";
 
 import chroma from "chroma-js";

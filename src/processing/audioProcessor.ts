@@ -11,9 +11,9 @@ export class AudioProcessor {
     public static sampleRate = 44100;
 
     // WebAudio stuff
-    private audioContext = new AudioContext();
+    public audioContext = new AudioContext();
+    public analyserNode = this.audioContext.createAnalyser();
     private gainNode = this.audioContext.createGain();
-    private analyserNode = this.audioContext.createAnalyser();
 
     // State
     private tracks: IAudioTrack[] = [];
@@ -116,7 +116,11 @@ export class AudioProcessor {
         source.buffer = buffer;
         source.connect(this.analyserNode);
         const offset = this.unitToSeconds(this.position - startUnit);
-        source.start(0, offset);
+        if (offset < 0) {
+            // tslint:disable-next-line:no-console
+            console.warn("Source offset < 0");
+        }
+        source.start(0, Math.max(offset, 0));
         return source;
     }
 

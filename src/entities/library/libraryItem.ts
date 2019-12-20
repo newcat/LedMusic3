@@ -1,4 +1,7 @@
-export type LibraryItemType = "audioFile";
+export enum LibraryItemType {
+    AUDIO_FILE = 1,
+    GRAPH = 2
+}
 
 export interface ILibraryItem {
     id: string;

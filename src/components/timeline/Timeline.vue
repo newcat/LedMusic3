@@ -1,18 +1,20 @@
-<template>
-<div style="height: 100%;" ref="wrapper" @drop="drop" @dragover="$event.preventDefault()"></div>
+<template lang="pug">
+.d-flex.flex-column
+    .flex-grow-0
+        v-btn(text, @click="() => editor.addTrack()") Add Track
+    .flex-grow-1(ref="wrapper" @drop="drop" @dragover="$event.preventDefault()")
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
 
-import { createTimeline, Drawable, Editor, Track, Item } from "@/lokumjs";
+import { createTimeline, Drawable, Track, Item } from "@/lokumjs";
 import { Text, TextStyle, Texture, Sprite, Graphics } from "pixi.js";
 import { TICKS_PER_BEAT } from "@/constants";
+import { LokumEditor } from "@/editors/timeline";
 import globalState from "@/entities/globalState";
-import { AudioFile } from "@/entities/library";
-import { ItemTypes } from "@/entities/timeline/itemTypes";
-import { AudioProcessor } from "@/processing/audioProcessor";
-import { TimelineProcessor } from "@/processing/timelineProcessor";
+import { AudioFile, LibraryItemType } from "@/entities/library";
+import { AudioProcessor, TimelineProcessor, globalProcessor } from "@/processing";
 import renderWaveform from "./renderWaveform";
 import { PositionIndicator } from "./positionIndicator";
 
@@ -30,23 +32,16 @@ enum LabelMode {
 @Component
 export default class Timeline extends Vue {
 
-    public editor = new Editor();
-    private audioProcessor = new AudioProcessor();
-    private timelineProcessor = new TimelineProcessor(this.audioProcessor, this.editor);
+    public editor = globalState.timeline;
 
     private positionIndicator!: PositionIndicator;
     private fpsText = new Text("FPS", new TextStyle({ fontSize: 10, fill: 0xffffff }));
-
-    private musicTrack = new Track("Music");
 
     private labelMode: LabelMode = LabelMode.BEATS;
 
     public async mounted() {
 
-        const { root, timeline } = await createTimeline(this.editor as any, this.$refs.wrapper as HTMLElement);
-
-        this.musicTrack.removable = false;
-        this.editor.addTrack(this.musicTrack);
+        const { root, timeline } = await createTimeline(this.editor, this.$refs.wrapper as HTMLElement);
 
         this.fpsText.position.set(10, 10);
         root.app.stage.addChild(this.fpsText);
@@ -55,10 +50,11 @@ export default class Timeline extends Vue {
         root.app.stage.addChild(this.positionIndicator.graphics);
 
         root.app.ticker.add(() => {
+            globalProcessor.tick();
             this.fpsText.text = root.app.ticker.elapsedMS.toFixed(2);
-            this.audioProcessor.updatePosition();
-            const position = this.audioProcessor.position;
-            this.timelineProcessor.process(position);
+        });
+
+        globalProcessor.events.positionChanged.subscribe(this, (position) => {
             this.positionIndicator.props.position = position;
             this.positionIndicator.tick();
         });
@@ -68,15 +64,15 @@ export default class Timeline extends Vue {
             const x = ev.data.global.x as number;
             let unit = root.positionCalculator.getUnit(x - timeline.props.trackHeaderWidth);
             if (unit < 0) { unit = 0; }
-            this.audioProcessor.position = unit;
+            globalProcessor.position = unit;
         });
 
         root.eventBus.events.keydown.subscribe(this, (ev) => {
             if (ev.key === " ") {
-                if (this.audioProcessor.isPlaying) {
-                    this.audioProcessor.pause();
+                if (globalProcessor.isPlaying) {
+                    globalProcessor.pause();
                 } else {
-                    this.audioProcessor.play();
+                    globalProcessor.play();
                 }
             }
         });
@@ -85,15 +81,17 @@ export default class Timeline extends Vue {
             renderWaveform(item, graphics, width, height);
         });
 
-        root.positionCalculator.unitWidth = 0.5;
+        root.positionCalculator.unitWidth = 2.5;
         root.positionCalculator.markerSpace = TICKS_PER_BEAT * 4;
         root.positionCalculator.markerMajorMultiplier = 4;
-        this.editor.labelFunction = (u) => (u / (TICKS_PER_BEAT * 16)).toString();
         root.positionCalculator.events.zoomed.subscribe(this, () => {
             const pc = root.positionCalculator;
             if (pc.unitWidth < 0.25) {
                 pc.markerSpace = TICKS_PER_BEAT * 16;
                 pc.markerMajorMultiplier = 1;
+            } else if (pc.unitWidth > 2) {
+                pc.markerSpace = TICKS_PER_BEAT;
+                pc.markerMajorMultiplier = 4;
             } else {
                 pc.markerSpace = TICKS_PER_BEAT * 4;
                 pc.markerMajorMultiplier = 4;
@@ -110,7 +108,7 @@ export default class Timeline extends Vue {
 
         let item: Item|undefined;
         switch (libraryItem.type) {
-            case "audioFile":
+            case LibraryItemType.AUDIO_FILE:
                 item = this.addMusicItem(libraryItem as AudioFile);
                 break;
         }
@@ -123,7 +121,15 @@ export default class Timeline extends Vue {
     private addMusicItem(libraryItem: AudioFile): Item|undefined {
         if (libraryItem.loading) { return; }
         const length = libraryItem.audioBuffer!.duration * (globalState.bpm / 60) * TICKS_PER_BEAT;
-        const item = new Item(this.musicTrack.id, 0, length, { type: ItemTypes.AUDIO, libraryItem });
+
+        // find a free track, if no one exists, create a new one
+        let track = this.editor.tracks.find((t) => {
+            const trackItems = this.editor.items.filter((i) => i.trackId === t.id);
+            return !trackItems.some((i) => i.start < length);
+        });
+        if (!track) { track = this.editor.addTrack(); }
+
+        const item = new Item(track.id, 0, length, { libraryItem });
         item.resizable = false;
         return item;
     }

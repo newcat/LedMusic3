@@ -7,6 +7,8 @@ interface IPositionIndicatorProps {
 
 export class PositionIndicator extends Drawable<IPositionIndicatorProps> {
 
+    private color = 0x37e89c;
+
     public setup() {
         this.renderOnEvent(this.root.positionCalculator.events.moved);
     }
@@ -15,13 +17,13 @@ export class PositionIndicator extends Drawable<IPositionIndicatorProps> {
 
         this.graphics
             .clear()
-            .beginFill(0xFFFF00)
+            .beginFill(this.color)
             .moveTo(-4, 0)
             .lineTo(0, 6)
             .lineTo(4, 0)
             .closePath()
             .endFill()
-            .lineStyle(1, 0xFFFF00)
+            .lineStyle(1, this.color)
             .moveTo(0, 0)
             .lineTo(0, this.root.app.screen.height);
 

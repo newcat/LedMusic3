@@ -1,5 +1,4 @@
 import { Drawable } from "./drawable";
-import { IObservableCollection } from "./observableCollection";
 import { IEvent } from "../events";
 
 export class ArrayRenderer<T, V extends Drawable<any>, I = T> extends Drawable<{}> {
@@ -10,10 +9,6 @@ export class ArrayRenderer<T, V extends Drawable<any>, I = T> extends Drawable<{
     public idFn?: (item: T) => I;
 
     private array!: ReadonlyArray<T>;
-
-    public bindObservable(array: IObservableCollection<T>) {
-        this.bind(array, [array.changed]);
-    }
 
     public bind(array: ReadonlyArray<T>, events?: Array<IEvent<any>>) {
         this.array = array;

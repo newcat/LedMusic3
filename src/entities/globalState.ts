@@ -1,4 +1,5 @@
 import { ILibraryItem } from "./library/libraryItem";
+import { LokumEditor } from "@/editors/timeline";
 
 interface IProp {
     type: string;
@@ -14,12 +15,14 @@ interface IScene {
 interface IState {
     scene: IScene;
     library: ILibraryItem[];
+    timeline: LokumEditor;
     bpm: number;
 }
 
 const globalState: IState = {
     scene: { props: [] },
     library: [],
+    timeline: new LokumEditor(),
     bpm: 130
 };
 

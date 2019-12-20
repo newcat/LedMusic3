@@ -1,5 +1,6 @@
 import { Editor } from "@baklavajs/core";
 
+import * as AudioNodes from "./audio";
 import * as ColorNodes from "./colors";
 import * as ConverterNodes from "./converters";
 import * as GeneratorNodes from "./generators";
@@ -12,6 +13,7 @@ function registerCategory(editor: Editor, nodes: any, category?: string) {
 }
 
 export function registerNodes(editor: Editor) {
+    registerCategory(editor, AudioNodes, "Audio");
     registerCategory(editor, ColorNodes, "Colors");
     registerCategory(editor, ConverterNodes, "Converters");
     registerCategory(editor, GeneratorNodes, "Generators");

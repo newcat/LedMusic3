@@ -1,6 +1,6 @@
 import { Item } from "@/lokumjs";
 import { Graphics, Sprite } from "pixi.js";
-import { AudioFile, ILibraryItem } from "@/entities/library";
+import { AudioFile, ILibraryItem, LibraryItemType } from "@/entities/library";
 
 interface ISpriteWaveformPart {
     start: number;
@@ -11,7 +11,12 @@ interface ISpriteWaveformPart {
 export default function renderWaveformItem(item: Item, graphics: Graphics, width: number, height: number) {
     if (item.data && item.data.libraryItem) {
         const libraryItem = item.data.libraryItem as ILibraryItem;
-        if (libraryItem.type === "audioFile" && !libraryItem.loading) {
+        if (libraryItem.type === LibraryItemType.AUDIO_FILE && !libraryItem.loading) {
+
+            if (item.data.renderedWidth === width && item.data.renderedHeight === height) {
+                return;
+            }
+
             const waveformParts = (libraryItem as AudioFile).textures;
             if (graphics.children.length === 0) {
                 const sprites: ISpriteWaveformPart[] = [];
@@ -29,6 +34,10 @@ export default function renderWaveformItem(item: Item, graphics: Graphics, width
                 p.sprite.width = (p.end + 1 - p.start) * factor;
                 p.sprite.height = height;
             });
+
+            item.data.renderedWidth = width;
+            item.data.renderedHeight = height;
+
         }
     }
 }
