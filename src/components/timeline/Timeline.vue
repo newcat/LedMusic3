@@ -1,8 +1,8 @@
 <template lang="pug">
-v-card.d-flex.flex-column
+.fill-height
     .d-flex.px-3.align-items-center.elevation-4(style="height:48px")
         v-btn(text, @click="() => editor.addTrack()") Add Track
-    .flex-grow-1(ref="wrapper" @drop="drop" @dragover="$event.preventDefault()")
+    div#wrapper(ref="wrapper" @drop="drop" @dragover="$event.preventDefault()")
 </template>
 
 <script lang="ts">
@@ -152,3 +152,10 @@ export default class Timeline extends Vue {
 
 }
 </script>
+
+<style scoped>
+#wrapper {
+    height: calc(100% - 48px);
+    overflow: hidden;
+}
+</style>

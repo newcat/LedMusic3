@@ -1,16 +1,13 @@
 <template lang="pug">
 v-app
     v-content
-        v-container.fill-height(fluid)
-            .d-flex.flex-column.fill-height(style="width: 100%;")
-                .flex-grow-1
-                    v-row.fill-height
-                        v-col(cols="6")
-                            c-library.fill-height
-                        v-col(colr="6")
-                            c-graph.fill-height
-                .flex-grow-1
-                    c-timeline
+        #app-container
+            #top-left.content-container
+                c-library.fill-height
+            #top-right.content-container
+                c-graph.fill-height
+            #bottom.content-container
+                c-timeline
 </template>
 
 <script lang="ts">
@@ -27,3 +24,33 @@ import globalState from "@/entities/globalState";
 })
 export default class App extends Vue {}
 </script>
+
+<style>
+#app-container {
+    display: grid;
+    grid-template-rows: 50vh 50vh;
+    grid-template-columns: 50vw 50vw;
+    height: 100%;
+    width: 100%;
+    padding: 5px;
+}
+
+.content-container {
+    padding: 5px;
+}
+
+#top-left {
+    grid-column: 1 / span 1;
+    grid-row: 1 / span 1;
+}
+
+#top-right {
+    grid-column: 2 / span 1;
+    grid-row: 1 / span 1;
+}
+
+#bottom {
+    grid-column: 1 / span 2;
+    grid-row: 2 / span 1;
+}
+</style>

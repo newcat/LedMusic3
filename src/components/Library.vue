@@ -13,7 +13,7 @@ v-card
                 v-list-item(@click="addGraph")
                     v-list-item-title Graph
 
-    v-container(fluid, style="overflow-y: auto;", grid-list-md)
+    v-container(fluid, style="height: calc(100% - 48px); overflow-y: auto;", grid-list-md)
         v-layout(row, wrap)
             v-flex(v-for="(item, i) in items", :key="i", xs4)
                 v-card.pa-3(outlined, draggable, @dragstart="dragstart($event, item.id)")
