@@ -12,11 +12,11 @@ export class PeakNode extends Node {
     }
 
     public calculate() {
-        const data = new Float32Array(256);
-        globalProcessor.audioProcessor.analyserNode.getFloatTimeDomainData(data);
+        const data = new Uint8Array(globalProcessor.audioProcessor.analyserNode.fftSize);
+        globalProcessor.audioProcessor.analyserNode.getByteTimeDomainData(data);
         let max = data[0];
         for (const d of data) { if (d > max) { max = d; } }
-        this.getInterface("Output").value = max;
+        this.getInterface("Peak").value = Math.min(1, Math.max(0, (max - 128) / 128));
     }
 
 }

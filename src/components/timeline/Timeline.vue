@@ -13,7 +13,7 @@ import { Text, TextStyle, Texture, Sprite, Graphics } from "pixi.js";
 import { TICKS_PER_BEAT } from "@/constants";
 import { LokumEditor } from "@/editors/timeline";
 import globalState from "@/entities/globalState";
-import { AudioFile, LibraryItemType } from "@/entities/library";
+import { AudioFile, LibraryItemType, GraphLibraryItem } from "@/entities/library";
 import { AudioProcessor, TimelineProcessor, globalProcessor } from "@/processing";
 import renderWaveform from "./renderWaveform";
 import { PositionIndicator } from "./positionIndicator";
@@ -51,12 +51,12 @@ export default class Timeline extends Vue {
 
         root.app.ticker.add(() => {
             globalProcessor.tick();
+            this.positionIndicator.tick();
             this.fpsText.text = root.app.ticker.elapsedMS.toFixed(2);
         });
 
         globalProcessor.events.positionChanged.subscribe(this, (position) => {
             this.positionIndicator.props.position = position;
-            this.positionIndicator.tick();
         });
 
         timeline.header.graphics.interactive = true;
@@ -111,6 +111,9 @@ export default class Timeline extends Vue {
             case LibraryItemType.AUDIO_FILE:
                 item = this.addMusicItem(libraryItem as AudioFile);
                 break;
+            case LibraryItemType.GRAPH:
+                item = this.addGraphItem(libraryItem as GraphLibraryItem);
+                break;
         }
 
         if (item) {
@@ -131,6 +134,20 @@ export default class Timeline extends Vue {
 
         const item = new Item(track.id, 0, length, { libraryItem });
         item.resizable = false;
+        return item;
+    }
+
+    private addGraphItem(libraryItem: GraphLibraryItem): Item {
+        const length = TICKS_PER_BEAT * 4;
+
+        // find a free track, if no one exists, create a new one
+        let track = this.editor.tracks.find((t) => {
+            const trackItems = this.editor.items.filter((i) => i.trackId === t.id);
+            return !trackItems.some((i) => i.start < length);
+        });
+        if (!track) { track = this.editor.addTrack(); }
+
+        const item = new Item(track.id, 0, length, { libraryItem });
         return item;
     }
 

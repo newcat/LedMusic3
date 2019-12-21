@@ -17,6 +17,7 @@ class GlobalProcessor {
     public get position() { return this._position; }
     public set position(v: number) {
         this._position = v;
+        this.audioProcessor.position = v;
         this.events.positionChanged.emit(v);
     }
 
@@ -32,8 +33,9 @@ class GlobalProcessor {
         const oldPosition = this._position;
         this._position = this.audioProcessor.position;
         if (oldPosition !== this._position) {
-            this.events.positionChanged.emit(this._position);
+            this.events.positionChanged.emit(this.position);
         }
+        this.timelineProcessor.process(this.position);
     }
 
     public play() {

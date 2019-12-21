@@ -8,7 +8,7 @@ v-app
                         v-col(cols="6")
                             c-library.fill-height
                         v-col(colr="6")
-                            baklava-editor(:plugin="graph.viewPlugin")
+                            c-graph.fill-height
                 div(style="height:50%;")
                     c-timeline
 </template>
@@ -18,15 +18,12 @@ import { Component, Prop, Vue } from "vue-property-decorator";
 
 import CLibrary from "@/components/Library.vue";
 import CTimeline from "@/components/timeline/Timeline.vue";
+import CGraph from "@/components/Graph.vue";
 import { BaklavaEditor } from "@/editors/graph";
 import globalState from "@/entities/globalState";
 
 @Component({
-    components: { CLibrary, CTimeline }
+    components: { CLibrary, CTimeline, CGraph }
 })
-export default class App extends Vue {
-
-    graph = new BaklavaEditor();
-
-}
+export default class App extends Vue {}
 </script>
