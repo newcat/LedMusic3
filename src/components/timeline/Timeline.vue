@@ -1,6 +1,6 @@
 <template lang="pug">
-.d-flex.flex-column
-    .flex-grow-0
+v-card.d-flex.flex-column
+    .d-flex.px-3.align-items-center.elevation-4(style="height:48px")
         v-btn(text, @click="() => editor.addTrack()") Add Track
     .flex-grow-1(ref="wrapper" @drop="drop" @dragover="$event.preventDefault()")
 </template>
@@ -50,7 +50,6 @@ export default class Timeline extends Vue {
         root.app.stage.addChild(this.positionIndicator.graphics);
 
         root.app.ticker.add(() => {
-            globalProcessor.tick();
             this.positionIndicator.tick();
             this.fpsText.text = root.app.ticker.elapsedMS.toFixed(2);
         });

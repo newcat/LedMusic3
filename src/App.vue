@@ -2,14 +2,14 @@
 v-app
     v-content
         v-container.fill-height(fluid)
-            div.d-flex.flex-column.fill-height(style="width: 100%;")
-                div(style="height:50%;")
+            .d-flex.flex-column.fill-height(style="width: 100%;")
+                .flex-grow-1
                     v-row.fill-height
                         v-col(cols="6")
                             c-library.fill-height
                         v-col(colr="6")
                             c-graph.fill-height
-                div(style="height:50%;")
+                .flex-grow-1
                     c-timeline
 </template>
 
