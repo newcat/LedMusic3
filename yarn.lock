@@ -118,30 +118,30 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
-"@baklavajs/core@^1.3.1-next.5":
-  version "1.3.1-next.5"
-  resolved "https://registry.yarnpkg.com/@baklavajs/core/-/core-1.3.1-next.5.tgz#b0cc7e2c12424a36319c03647357b5ca71e103b1"
-  integrity sha512-qVpmBLhazYSPTxHvqBESHHCe0+W+Rx+1391BT+jyMSUMtiGXXizMFv+TaE18vKfx+c8pLJ0W7ST/rqSMrtxJeg==
+"@baklavajs/core@^1.4.3":
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/@baklavajs/core/-/core-1.4.3.tgz#603b9e42143bf752de6be8cf3574a06238c3f342"
+  integrity sha512-RNf53ryy8ED6li692mvBXVkUawEx3Geiqfb+ZCitgy+4KlH5rwhoSaXnYHN0rHh+6OD8dvqlhKt17tI8vzzaYw==
 
-"@baklavajs/plugin-engine@^1.3.1-next.4":
-  version "1.3.1-next.4"
-  resolved "https://registry.yarnpkg.com/@baklavajs/plugin-engine/-/plugin-engine-1.3.1-next.4.tgz#b56a5b87d641f637d28c874ee31f38f115733465"
-  integrity sha512-yQUmI9cVQaLhgkXnijZCo5jNvmGzUwR3avaXw3r1uvxIn5awFtlkwvXPzu4C/TyCY9ol2kbdEIV5siyICdTu3Q==
+"@baklavajs/plugin-engine@^1.4.3":
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/@baklavajs/plugin-engine/-/plugin-engine-1.4.3.tgz#2db46fefc8b7e03ba8fdf56318041b1bb898100a"
+  integrity sha512-0VYb4cOyCQrKlVLL8n8wXyNKVf+BOSZKfVoYfasHq+PGbM8vRk+baIqFbYU80O/70gn1bXXQEkeOpjHyq96GvQ==
 
-"@baklavajs/plugin-interface-types@^1.3.1-next.9":
-  version "1.3.1-next.9"
-  resolved "https://registry.yarnpkg.com/@baklavajs/plugin-interface-types/-/plugin-interface-types-1.3.1-next.9.tgz#79f3558eb60ddf3a23a9a1e5614de6a8f590d25f"
-  integrity sha512-rb+/1ceT+QZkXHjwYO53YO12NGak3p8LghD7r6e3IRtcCB/al7lnHvtuQhTV6E0NT2Mct8/1zEVtykDIg+3T2g==
+"@baklavajs/plugin-interface-types@^1.4.3":
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/@baklavajs/plugin-interface-types/-/plugin-interface-types-1.4.3.tgz#26ac55e36400d063fb8ca64732c1d1a0fe77eca1"
+  integrity sha512-gVRTFDz+xKpUSYzUj/yv+L8XJMc8wcOMxtqKEaJbZwBduOABv0zaCoqzMjVqYT8MkqjCopSGTmz3azElTKkekA==
 
-"@baklavajs/plugin-options-vue@^1.2.1-next.18":
-  version "1.2.1-next.18"
-  resolved "https://registry.yarnpkg.com/@baklavajs/plugin-options-vue/-/plugin-options-vue-1.2.1-next.18.tgz#c9a6923905abcd06c3d3e676883e07b2d797728a"
-  integrity sha512-+ufcmE1zLX1HLP/n7Zgv2OnbjOx3UYBIUYzCkZ3z2Kc84Xco7aks36Sdiw+c2Ums6GMuC8VJHHfhdXJatdolAg==
+"@baklavajs/plugin-options-vue@^1.4.3":
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/@baklavajs/plugin-options-vue/-/plugin-options-vue-1.4.3.tgz#4281c31e440fd71c2b3f014c1f7a4a1a76e5b82e"
+  integrity sha512-x3mCfcnh2Mz/3VyAgOJpeovAoPlIBmlIHjBCCs3QPofQskTGcjEClXBQM50mh5AxfAZosVddWjysWmCc07AZZA==
 
-"@baklavajs/plugin-renderer-vue@^1.3.3-next.2":
-  version "1.3.3-next.2"
-  resolved "https://registry.yarnpkg.com/@baklavajs/plugin-renderer-vue/-/plugin-renderer-vue-1.3.3-next.2.tgz#8a6c8bb8d620ae853c80af366a5ecb963859505c"
-  integrity sha512-wq2YpZs/WTiXSHMg4xdRNa/xr7hE3G1aFnTUzca5n2tXPsdsgQUiQKCiTAd6nrn6/fu5F5PShcliMf5FriMxOg==
+"@baklavajs/plugin-renderer-vue@^1.4.3":
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/@baklavajs/plugin-renderer-vue/-/plugin-renderer-vue-1.4.3.tgz#094c0c28c9441cd34518f16ae4b7921cca953e5f"
+  integrity sha512-qncwfaZbU4D3wwnIMPfo27l3Ss7pViuQlYTTmkhpZFzpkDjQ4/ipaDPwAM/xXZDDPgmuPaHPqu0HZSv2Ds3Ykg==
 
 "@hapi/address@2.x.x":
   version "2.1.4"
@@ -1308,6 +1308,17 @@ babylon@^6.18.0:
   version "6.18.0"
   resolved "https://registry.yarnpkg.com/babylon/-/babylon-6.18.0.tgz#af2f3b88fa6f5c1e4c634d1a0f8eac4f55b395e3"
   integrity sha512-q/UEjfGJ2Cm3oKV71DJz9d25TPnq5rhBVL2Q4fA5wcC3jcrdn7+SssEybFIxwAvvP+YCsCYNKughoF33GxgycQ==
+
+baklavajs@^1.4.5:
+  version "1.4.5"
+  resolved "https://registry.yarnpkg.com/baklavajs/-/baklavajs-1.4.5.tgz#7138da53997642e1946a11d21598e1f66855d96d"
+  integrity sha512-KIDZipsNHNTEn35S1xeqG+OgjAAVRF6745EXj61oJubXkElWFhJ7hnaRlj9EfvD3MoMoofEtJgEF/OZOfMgT6w==
+  dependencies:
+    "@baklavajs/core" "^1.4.3"
+    "@baklavajs/plugin-engine" "^1.4.3"
+    "@baklavajs/plugin-interface-types" "^1.4.3"
+    "@baklavajs/plugin-options-vue" "^1.4.3"
+    "@baklavajs/plugin-renderer-vue" "^1.4.3"
 
 balanced-match@^1.0.0:
   version "1.0.0"
