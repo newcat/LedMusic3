@@ -34,7 +34,14 @@ enum LabelMode {
 }
 
 const customColors = {
-    // TODO
+    accent: 0x5379B5,
+    header: 0x353535,
+    timeline: 0x424242,
+    labelsMajor: 0xbbbbbb,
+    labelsMinor: 0x555555,
+    text: 0xffffff,
+    markerLine: 0x555555,
+    secondary: 0x888888
 } as IColorDefinitions;
 
 @Component({

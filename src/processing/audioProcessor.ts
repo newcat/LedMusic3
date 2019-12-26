@@ -45,7 +45,7 @@ export class AudioProcessor {
     public constructor() {
         this.gainNode.connect(this.audioContext.destination);
         this.analyserNode.connect(this.gainNode);
-        this.analyserNode.fftSize = 1024;
+        this.analyserNode.fftSize = 2048;
     }
 
     public supportsWebAudio() {
