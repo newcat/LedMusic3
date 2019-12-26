@@ -10,7 +10,7 @@ export class PositionIndicator extends Drawable<IPositionIndicatorProps> {
     private color = 0x37e89c;
 
     public setup() {
-        this.renderOnEvent(this.root.positionCalculator.events.moved);
+        this.renderOnEvent(this.viewInstance.positionCalculator.events.moved);
     }
 
     public render() {
@@ -25,9 +25,9 @@ export class PositionIndicator extends Drawable<IPositionIndicatorProps> {
             .endFill()
             .lineStyle(1, this.color)
             .moveTo(0, 0)
-            .lineTo(0, this.root.app.screen.height);
+            .lineTo(0, this.viewInstance.app.screen.height);
 
-        const x = this.root.positionCalculator.getX(this.props.position) + this.props.trackHeaderWidth;
+        const x = this.viewInstance.positionCalculator.getX(this.props.position) + this.props.trackHeaderWidth;
         if (x < this.props.trackHeaderWidth) {
             this.graphics.visible = false;
         } else {

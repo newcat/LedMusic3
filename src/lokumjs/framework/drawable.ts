@@ -1,26 +1,15 @@
-import { Graphics, Application } from "pixi.js";
+import { Graphics } from "pixi.js";
 import { Observer } from "./observer";
-import { PositionCalculator } from "../positionCalculator";
-import { EventBus } from "./eventBus";
-import { ITextures } from "../textureManager";
-import { Editor } from "../model/editor";
 import { IEvent } from "../events";
+import { View } from "../view";
 
-export interface IRoot {
-    app: Application;
-    editor: Editor;
-    positionCalculator: PositionCalculator;
-    eventBus: EventBus;
-    textures: ITextures;
-}
-
-type PropsType = Record<string, any>;
-type ViewConstructor<P, V extends Drawable<P>> = new (root: IRoot, propValues?: Partial<P>) => V;
+export type PropsType = Record<string, any>;
+export type ViewConstructor<P, V extends Drawable<P>> = new (viewInstance: View, propValues?: Partial<P>) => V;
 
 export abstract class Drawable<Props extends PropsType> {
 
-    public static createView<V extends Drawable<P>, P = any>(root: IRoot, type: ViewConstructor<P, V>, propValues?: Partial<P>): V {
-        const view = new type(root, propValues);
+    public static createView<V extends Drawable<P>, P = any>(viewInstance: View, type: ViewConstructor<P, V>, propValues?: Partial<P>): V {
+        const view = new type(viewInstance, propValues);
         view.setup();
         return view;
     }
@@ -30,15 +19,15 @@ export abstract class Drawable<Props extends PropsType> {
 
     public props: Props = {} as any;
 
-    protected root: IRoot;
+    protected viewInstance: View;
 
     private children: Array<Drawable<any>> = [];
     private observers: Observer[] = [];
     private subscribedEvents: Array<IEvent<any>> = [];
     private propValues: Props = {} as any;
 
-    public constructor(root: IRoot, props?: Partial<Props>) {
-        this.root = root;
+    public constructor(viewInstance: View, props?: Partial<Props>) {
+        this.viewInstance = viewInstance;
         if (props) {
             Object.keys(props).forEach((k) => {
                 this.setProp(k, props[k]);
@@ -84,7 +73,7 @@ export abstract class Drawable<Props extends PropsType> {
     }
 
     protected createView<V extends Drawable<P>, P = any>(type: ViewConstructor<P, V>, propValues?: Partial<P>): V {
-        return Drawable.createView(this.root, type, propValues);
+        return Drawable.createView(this.viewInstance, type, propValues);
     }
 
     protected setDefaultPropValues(values: Partial<Props>) {

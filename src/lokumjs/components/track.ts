@@ -1,7 +1,6 @@
 import { Drawable, ArrayRenderer } from "../framework";
 import TrackHeader from "./trackHeader";
 import { Track, Item } from "../model";
-import colors from "../colors";
 import { ItemView } from "./item";
 import { Rectangle } from "pixi.js";
 
@@ -23,11 +22,11 @@ export class TrackView extends Drawable<ITrackViewProps> {
         this.addChild(this.itemsView);
         this.addChild(this.header);
 
-        this.renderOnEvent(this.root.positionCalculator.events.moved);
-        this.renderOnEvent(this.root.eventBus.events.resize);
+        this.renderOnEvent(this.viewInstance.positionCalculator.events.moved);
+        this.renderOnEvent(this.viewInstance.eventBus.events.resize);
 
-        this.root.editor.events.itemAdded.subscribe(this.subSymbol, () => this.updateItems());
-        this.root.editor.events.itemRemoved.subscribe(this.subSymbol, () => this.updateItems());
+        this.viewInstance.editor.events.itemAdded.subscribe(this.subSymbol, () => this.updateItems());
+        this.viewInstance.editor.events.itemRemoved.subscribe(this.subSymbol, () => this.updateItems());
         this.updateItems();
 
         this.itemsView.onNewItem = (newItem) => this.createView(ItemView, { item: newItem, track: this.props.track });
@@ -39,23 +38,23 @@ export class TrackView extends Drawable<ITrackViewProps> {
 
     public destroy() {
         super.destroy();
-        this.root.editor.events.itemAdded.unsubscribe(this.subSymbol);
-        this.root.editor.events.itemRemoved.unsubscribe(this.subSymbol);
+        this.viewInstance.editor.events.itemAdded.unsubscribe(this.subSymbol);
+        this.viewInstance.editor.events.itemRemoved.unsubscribe(this.subSymbol);
     }
 
     protected render(): void {
 
         // top and bottom borders
-        this.drawLine(colors.markerLine, 0, 0, this.root.app.screen.width, 0);
-        this.drawLine(colors.markerLine, 0, this.props.track.height, this.root.app.screen.width, this.props.track.height);
-        this.graphics.hitArea = new Rectangle(0, 0, this.root.app.screen.width, this.props.track.height);
+        this.drawLine(this.viewInstance.colors.markerLine, 0, 0, this.viewInstance.app.screen.width, 0);
+        this.drawLine(this.viewInstance.colors.markerLine, 0, this.props.track.height, this.viewInstance.app.screen.width, this.props.track.height);
+        this.graphics.hitArea = new Rectangle(0, 0, this.viewInstance.app.screen.width, this.props.track.height);
 
         // markers
-        this.root.positionCalculator.markers
+        this.viewInstance.positionCalculator.markers
             .filter((m) => m.type === "major")
             .forEach((m) => {
                 const position = m.position + this.props.headerWidth;
-                this.drawLine(colors.markerLine, position, 0, position, this.props.track.height);
+                this.drawLine(this.viewInstance.colors.markerLine, position, 0, position, this.props.track.height);
             });
 
         this.itemsView.graphics.x = this.props.headerWidth;
@@ -75,7 +74,7 @@ export class TrackView extends Drawable<ITrackViewProps> {
     }
 
     private updateItems() {
-        this.items = this.root.editor.items.filter((i) => i.trackId === this.props.track.id);
+        this.items = this.viewInstance.editor.items.filter((i) => i.trackId === this.props.track.id);
         this.needsRender = true;
     }
 

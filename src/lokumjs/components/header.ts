@@ -1,6 +1,5 @@
 import { Graphics, Text, TextStyle } from "pixi.js";
 import { Drawable } from "../framework";
-import colors from "../colors";
 
 interface IHeaderViewProps {
     headerHeight: number;
@@ -10,13 +9,13 @@ interface IHeaderViewProps {
 export class HeaderView extends Drawable<IHeaderViewProps> {
 
     private markerContainer = new Graphics();
-    private textStyle = new TextStyle({ fill: colors.labelsMajor, fontSize: 10 });
+    private textStyle = new TextStyle({ fill: this.viewInstance.colors.labelsMajor, fontSize: 10 });
     private textPool: Array<{ used: boolean, text: Text }> = [];
 
     public setup() {
         this.setDefaultPropValues({ headerHeight: 30 });
-        this.renderOnEvent(this.root.positionCalculator.events.moved);
-        this.renderOnEvent(this.root.eventBus.events.resize);
+        this.renderOnEvent(this.viewInstance.positionCalculator.events.moved);
+        this.renderOnEvent(this.viewInstance.eventBus.events.resize);
         this.graphics.addChild(this.markerContainer);
     }
 
@@ -24,11 +23,11 @@ export class HeaderView extends Drawable<IHeaderViewProps> {
 
         this.graphics.clear();
         this.graphics
-            .beginFill(colors.header)
-                .drawRect(0, 0, this.root.app.screen.width, this.props.headerHeight)
+            .beginFill(this.viewInstance.colors.header)
+                .drawRect(0, 0, this.viewInstance.app.screen.width, this.props.headerHeight)
             .endFill();
 
-        const markers = this.root.positionCalculator.markers;
+        const markers = this.viewInstance.positionCalculator.markers;
         this.markerContainer.clear();
         this.markerContainer.x = this.props.trackHeaderWidth;
 
@@ -47,14 +46,14 @@ export class HeaderView extends Drawable<IHeaderViewProps> {
                 }
 
                 text.used = true;
-                text.text.text = this.root.editor.labelFunction(m.unit);
+                text.text.text = this.viewInstance.editor.labelFunction(m.unit);
                 text.text.position.set(m.position, this.props.headerHeight - 10);
                 text.text.visible = true;
 
             }
 
             this.markerContainer
-                .beginFill(m.type === "major" ? colors.labelsMajor : colors.labelsMinor)
+                .beginFill(m.type === "major" ? this.viewInstance.colors.labelsMajor : this.viewInstance.colors.labelsMinor)
                     .drawRect(m.position - 2, this.props.headerHeight - 6, 4, 6)
                 .endFill();
 

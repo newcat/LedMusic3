@@ -4,7 +4,6 @@ import { Drawable, ArrayRenderer, IMouseEventData } from "../framework";
 
 import { HeaderView } from "./header";
 import { TrackView } from "./track";
-import colors from "../colors";
 import { Track, Item } from "../model";
 import { ItemArea } from "../types";
 
@@ -43,34 +42,34 @@ export class TimelineView extends Drawable<ITimelineViewProps> {
         this.header = this.createView(HeaderView, { trackHeaderWidth: this.props.trackHeaderWidth });
         this.tracks = this.createView<ArrayRenderer<Track, TrackView>>(ArrayRenderer);
 
-        this.root.eventBus.events.pointerdown.subscribe(this.graphics, (data) => {
+        this.viewInstance.eventBus.events.pointerdown.subscribe(this.graphics, (data) => {
             this.onMousedown(data);
         }, true);
-        this.root.eventBus.events.pointerup.subscribe(this.graphics, () => {
+        this.viewInstance.eventBus.events.pointerup.subscribe(this.graphics, () => {
             this.onMouseup();
         }, true);
-        this.root.eventBus.events.pointermove.subscribe(this.graphics, (data) => {
+        this.viewInstance.eventBus.events.pointermove.subscribe(this.graphics, (data) => {
             this.onMousemove(data);
         }, true);
-        this.root.eventBus.events.pointerout.subscribe(this.graphics, () => {
+        this.viewInstance.eventBus.events.pointerout.subscribe(this.graphics, () => {
             this.isDragging = false;
         }, true);
-        this.root.eventBus.events.keydown.subscribe(this, (ev) => {
+        this.viewInstance.eventBus.events.keydown.subscribe(this, (ev) => {
             if (ev.key === "Control") { this.ctrlPressed = true; }
             if (ev.key === "Delete") { this.getSelectedItems().forEach((i) => this.props.editor.removeItem(i)); }
         });
-        this.root.eventBus.events.keyup.subscribe(this, (ev) => {
+        this.viewInstance.eventBus.events.keyup.subscribe(this, (ev) => {
             if (ev.key === "Control") { this.ctrlPressed = false; }
         });
-        this.root.eventBus.events.zoom.subscribe(this, ({ positionX, amount }) => {
+        this.viewInstance.eventBus.events.zoom.subscribe(this, ({ positionX, amount }) => {
             this.zoom(positionX, amount);
         });
-        this.root.eventBus.events.resize.subscribe(this, () => { this.needsRender = true; });
+        this.viewInstance.eventBus.events.resize.subscribe(this, () => { this.needsRender = true; });
 
-        this.root.eventBus.events.itemClicked.subscribe(this, (data) => {
+        this.viewInstance.eventBus.events.itemClicked.subscribe(this, (data) => {
             this.onItemMousedown(data.item, data.area, data.event);
         });
-        this.root.eventBus.events.removeTrack.subscribe(this, (track) => {
+        this.viewInstance.eventBus.events.removeTrack.subscribe(this, (track) => {
             this.props.editor.removeTrack(track);
         });
 
@@ -93,8 +92,8 @@ export class TimelineView extends Drawable<ITimelineViewProps> {
     public render() {
 
         this.graphics
-            .beginFill(colors.timeline)
-                .drawRect(0, 0, this.root.app.screen.width, this.root.app.screen.height)
+            .beginFill(this.viewInstance.colors.timeline)
+                .drawRect(0, 0, this.viewInstance.app.screen.width, this.viewInstance.app.screen.height)
             .endFill();
 
         this.header.tick();
@@ -132,14 +131,14 @@ export class TimelineView extends Drawable<ITimelineViewProps> {
         if (this.isDragging) {
             if (this.dragItem) {
                 if (this.dragArea === "leftHandle" || this.dragArea === "rightHandle") {
-                    const unit = this.root.positionCalculator.getUnit(x - this.props.trackHeaderWidth);
+                    const unit = this.viewInstance.positionCalculator.getUnit(x - this.props.trackHeaderWidth);
                     const newStart = this.dragArea === "leftHandle" ? unit : this.dragItem.start;
                     const newEnd = this.dragArea === "rightHandle" ? unit : this.dragItem.end;
                     if (this.props.editor.validateItem()) {
                         this.dragItem.move(newStart, newEnd);
                     }
                 } else if (this.dragArea === "center") {
-                    const diffUnits = Math.floor((x - this.dragStartPosition.x) / this.root.positionCalculator.unitWidth);
+                    const diffUnits = Math.floor((x - this.dragStartPosition.x) / this.viewInstance.positionCalculator.unitWidth);
                     let diffTracks = 0;
                     const hoveredTrack = this.findTrackByPoint(data.data.global);
                     if (this.dragStartTrack && hoveredTrack) {
@@ -185,17 +184,17 @@ export class TimelineView extends Drawable<ITimelineViewProps> {
                 }
             } else {
 
-                this.root.positionCalculator.offset += data.data.global.x - this.dragStartPosition.x;
+                this.viewInstance.positionCalculator.offset += data.data.global.x - this.dragStartPosition.x;
                 this.yScroll += data.data.global.y - this.dragStartPosition.y;
 
                 this.dragStartPosition = data.data.global.clone();
 
-                if (this.root.positionCalculator.offset > 0) {
-                    this.root.positionCalculator.offset = 0;
+                if (this.viewInstance.positionCalculator.offset > 0) {
+                    this.viewInstance.positionCalculator.offset = 0;
                 }
 
-                if (this.root.app.renderer.screen.height - (this.yScroll + this.trackContainer.height) > 0) {
-                    this.yScroll = this.root.app.renderer.screen.height - this.trackContainer.height;
+                if (this.viewInstance.app.renderer.screen.height - (this.yScroll + this.trackContainer.height) > 0) {
+                    this.yScroll = this.viewInstance.app.renderer.screen.height - this.trackContainer.height;
                 }
                 if (this.yScroll > this.header.props.headerHeight) {
                     this.yScroll = this.header.props.headerHeight;
@@ -236,7 +235,7 @@ export class TimelineView extends Drawable<ITimelineViewProps> {
     }
 
     private zoom(positionX: number, amount: number) {
-        const pc = this.root.positionCalculator;
+        const pc = this.viewInstance.positionCalculator;
         const newScale = pc.unitWidth * (1 - amount / 3000);
         const currentPoint = ((positionX - pc.offset) / pc.unitWidth);
         const newPoint = ((positionX - pc.offset) / newScale);
@@ -248,7 +247,7 @@ export class TimelineView extends Drawable<ITimelineViewProps> {
     private findTrackByPoint(p: Point): Track|undefined {
         const arr = Array.from(this.tracks.views.entries());
         for (const [k, v] of arr) {
-            if (this.root.app.renderer.plugins.interaction.hitTest(p, v.graphics)) {
+            if (this.viewInstance.app.renderer.plugins.interaction.hitTest(p, v.graphics)) {
                 return k;
             }
         }

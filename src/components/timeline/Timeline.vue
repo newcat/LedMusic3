@@ -9,17 +9,18 @@
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
 
-import { createTimeline, Drawable, Track, Item } from "@/lokumjs";
+import { View, Drawable, Track, Item } from "@/lokumjs";
 import { Text, TextStyle, Texture, Sprite, Graphics } from "pixi.js";
 import { TICKS_PER_BEAT } from "@/constants";
 import { LokumEditor } from "@/editors/timeline";
 import globalState from "@/entities/globalState";
 import { AudioFile, LibraryItemType, GraphLibraryItem, AutomationClip, ILibraryItem } from "@/entities/library";
 import { AudioProcessor, TimelineProcessor, globalProcessor } from "@/processing";
-import renderWaveform from "./renderWaveform";
-import renderAutomationClip from "./renderAutomationClip";
+import { AutomationClipDrawable } from "./automationClipDrawable";
+import { WaveformDrawable } from "./waveformDrawable";
 import { PositionIndicator } from "./positionIndicator";
 import { PluginOptionsVue } from "baklavajs";
+import { IColorDefinitions } from "@/lokumjs/colors";
 
 interface IWaveformPart {
     start: number;
@@ -31,6 +32,10 @@ enum LabelMode {
     BEATS,
     BARS
 }
+
+const customColors = {
+    // TODO
+} as IColorDefinitions;
 
 @Component({
     components: { CSlider: PluginOptionsVue.SliderOption }
@@ -47,32 +52,32 @@ export default class Timeline extends Vue {
 
     public async mounted() {
 
-        const { root, timeline } = await createTimeline(this.editor, this.$refs.wrapper as HTMLElement);
+        const view = await View.mount(this.editor, this.$refs.wrapper as HTMLElement);
 
         this.fpsText.position.set(10, 10);
-        root.app.stage.addChild(this.fpsText);
+        view.app.stage.addChild(this.fpsText);
 
-        this.positionIndicator = Drawable.createView(root, PositionIndicator, { position: 0, trackHeaderWidth: timeline.props.trackHeaderWidth });
-        root.app.stage.addChild(this.positionIndicator.graphics);
+        this.positionIndicator = Drawable.createView(view, PositionIndicator, { position: 0, trackHeaderWidth: view.timelineDrawable.props.trackHeaderWidth });
+        view.app.stage.addChild(this.positionIndicator.graphics);
 
-        root.app.ticker.add(() => {
+        view.app.ticker.add(() => {
             this.positionIndicator.tick();
-            this.fpsText.text = root.app.ticker.elapsedMS.toFixed(2);
+            this.fpsText.text = view.app.ticker.elapsedMS.toFixed(2);
         });
 
         globalProcessor.events.positionChanged.subscribe(this, (position) => {
             this.positionIndicator.props.position = position;
         });
 
-        timeline.header.graphics.interactive = true;
-        root.eventBus.events.pointerdown.subscribe(timeline.header.graphics, (ev) => {
+        view.timelineDrawable.header.graphics.interactive = true;
+        view.eventBus.events.pointerdown.subscribe(view.timelineDrawable.header.graphics, (ev) => {
             const x = ev.data.global.x as number;
-            let unit = root.positionCalculator.getUnit(x - timeline.props.trackHeaderWidth);
+            let unit = view.positionCalculator.getUnit(x - view.timelineDrawable.props.trackHeaderWidth);
             if (unit < 0) { unit = 0; }
             globalProcessor.position = unit;
         });
 
-        root.eventBus.events.keydown.subscribe(this, (ev) => {
+        view.eventBus.events.keydown.subscribe(this, (ev) => {
             if (ev.key === " ") {
                 if (globalProcessor.isPlaying) {
                     globalProcessor.pause();
@@ -82,16 +87,11 @@ export default class Timeline extends Vue {
             }
         });
 
-        root.eventBus.events.renderItem.subscribe(this, ({ item, graphics, width, height }) => {
-            renderWaveform(item, graphics, width, height);
-            renderAutomationClip(item, graphics, width, height, root.eventBus, root.positionCalculator);
-        });
-
-        root.positionCalculator.unitWidth = 2.5;
-        root.positionCalculator.markerSpace = TICKS_PER_BEAT * 4;
-        root.positionCalculator.markerMajorMultiplier = 4;
-        root.positionCalculator.events.zoomed.subscribe(this, () => {
-            const pc = root.positionCalculator;
+        view.positionCalculator.unitWidth = 2.5;
+        view.positionCalculator.markerSpace = TICKS_PER_BEAT * 4;
+        view.positionCalculator.markerMajorMultiplier = 4;
+        view.positionCalculator.events.zoomed.subscribe(this, () => {
+            const pc = view.positionCalculator;
             if (pc.unitWidth < 0.25) {
                 pc.markerSpace = TICKS_PER_BEAT * 16;
                 pc.markerMajorMultiplier = 1;
@@ -104,7 +104,10 @@ export default class Timeline extends Vue {
             }
         });
 
-        (window as any).$data = timeline;
+        view.colors = { ...view.colors, ...customColors };
+        view.itemDrawableFunction = (item) => this.getItemDrawable(item);
+
+        (window as any).$data = view;
     }
 
     public drop(ev: DragEvent) {
@@ -163,6 +166,18 @@ export default class Timeline extends Vue {
 
         const item = new Item(track.id, 0, length, { libraryItem });
         return item;
+    }
+
+    private getItemDrawable(item: Item) {
+        if (!item.data || !item.data.libraryItem) { return null; }
+        switch (item.data.libraryItem.type as LibraryItemType) {
+            case LibraryItemType.AUDIO_FILE:
+                return WaveformDrawable;
+            case LibraryItemType.AUTOMATION_CLIP:
+                return AutomationClipDrawable;
+            default:
+                return null;
+        }
     }
 
 }

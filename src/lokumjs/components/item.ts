@@ -1,8 +1,8 @@
 import { Item, Track } from "../model";
-import colors from "../colors";
 import { Drawable, IMouseEventData } from "../framework";
 import { Graphics } from "pixi.js";
 import { ItemArea } from "../types";
+import { IItemDrawableProps } from "../view";
 
 interface IItemViewProps {
     item: Item;
@@ -13,7 +13,7 @@ export class ItemView extends Drawable<IItemViewProps> {
 
     private leftHandle = new Graphics();
     private rightHandle = new Graphics();
-    private contentGraphics = new Graphics();
+    private contentDrawable: Drawable<IItemDrawableProps>|null = null;
 
     public setup() {
         this.graphics.interactive = true;
@@ -27,34 +27,38 @@ export class ItemView extends Drawable<IItemViewProps> {
         this.rightHandle.cursor = "col-resize";
         this.graphics.addChild(this.rightHandle);
 
-        this.graphics.addChild(this.contentGraphics);
+        const contentDrawableType = this.viewInstance.itemDrawableFunction?.call(undefined, this.props.item);
+        if (contentDrawableType) {
+            this.contentDrawable = this.createView(contentDrawableType, { item: this.props.item, width: 0, height: 0 });
+            this.addChild(this.contentDrawable);
+        }
 
-        this.root.eventBus.events.pointerdown.subscribe(this.graphics, (data) => this.onClick(data, "center"));
-        this.root.eventBus.events.pointerdown.subscribe(this.leftHandle, (data) => this.onClick(data, "leftHandle"));
-        this.root.eventBus.events.pointerdown.subscribe(this.rightHandle, (data) => this.onClick(data, "rightHandle"));
+        this.viewInstance.eventBus.events.pointerdown.subscribe(this.graphics, (data) => this.onClick(data, "center"));
+        this.viewInstance.eventBus.events.pointerdown.subscribe(this.leftHandle, (data) => this.onClick(data, "leftHandle"));
+        this.viewInstance.eventBus.events.pointerdown.subscribe(this.rightHandle, (data) => this.onClick(data, "rightHandle"));
 
         this.renderOnEvent(this.props.item.events.moved);
         this.renderOnEvent(this.props.item.events.resizableChanged);
         this.renderOnEvent(this.props.item.events.selectedChanged);
         this.renderOnEvent(this.props.item.events.temporaryChanged);
-        this.renderOnEvent(this.root.positionCalculator.events.moved);
+        this.renderOnEvent(this.viewInstance.positionCalculator.events.moved);
     }
 
     public render() {
-        const x = this.root.positionCalculator.getX(this.props.item.start);
-        const width = this.root.positionCalculator.getX(this.props.item.end) - x;
+        const x = this.viewInstance.positionCalculator.getX(this.props.item.start);
+        const width = this.viewInstance.positionCalculator.getX(this.props.item.end) - x;
         if (this.props.item.selected) {
             if (this.props.item.resizable) {
                 this.leftHandle.clear();
                 this.rightHandle.clear();
                 this.leftHandle
-                    .lineStyle(2, colors.accent)
-                    .beginFill(colors.accent)
+                    .lineStyle(2, this.viewInstance.colors.accent)
+                    .beginFill(this.viewInstance.colors.accent)
                         .drawRoundedRect(x - 5, this.props.track.height / 2 - 20, 5, 40, 3)
                     .endFill();
                 this.rightHandle
-                    .lineStyle(2, colors.accent)
-                    .beginFill(colors.accent)
+                    .lineStyle(2, this.viewInstance.colors.accent)
+                    .beginFill(this.viewInstance.colors.accent)
                         .drawRoundedRect(x + width, this.props.track.height / 2 - 20, 5, 40, 3)
                     .endFill();
                 this.leftHandle.visible = true;
@@ -64,27 +68,26 @@ export class ItemView extends Drawable<IItemViewProps> {
                 this.rightHandle.visible = false;
             }
             this.graphics
-                .lineStyle(2, colors.accent)
-                .beginFill(colors.secondary, 0.3)
+                .lineStyle(2, this.viewInstance.colors.accent)
+                .beginFill(this.viewInstance.colors.secondary, 0.3)
                     .drawRoundedRect(x, 10, width, this.props.track.height - 20, 5)
                 .endFill();
         } else {
             this.leftHandle.visible = false;
             this.rightHandle.visible = false;
             this.graphics
-                .beginFill(colors.secondary, 0.3)
+                .beginFill(this.viewInstance.colors.secondary, 0.3)
                     .drawRoundedRect(x, 10, width, this.props.track.height - 20, 5)
                 .endFill();
         }
-        this.contentGraphics.x = x;
-        this.contentGraphics.y = 10;
-        this.contentGraphics.clear();
-        this.root.eventBus.events.renderItem.emit({
-            item: this.props.item,
-            graphics: this.contentGraphics,
-            width,
-            height: this.props.track.height - 20
-        });
+
+        if (this.contentDrawable) {
+            this.contentDrawable.graphics.x = x;
+            this.contentDrawable.graphics.y = 10;
+            this.contentDrawable.props.width = width;
+            this.contentDrawable.props.height = this.props.track.height - 20;
+            this.contentDrawable.tick();
+        }
 
         if (this.props.item.temporary) {
             this.graphics.alpha = 0.5;
@@ -92,7 +95,7 @@ export class ItemView extends Drawable<IItemViewProps> {
     }
 
     private onClick(data: IMouseEventData, area: ItemArea) {
-        this.root.eventBus.events.itemClicked.emit({ item: this.props.item, area, event: data });
+        this.viewInstance.eventBus.events.itemClicked.emit({ item: this.props.item, area, event: data });
     }
 
 }
