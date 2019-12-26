@@ -238,9 +238,9 @@ export class TimelineView extends Drawable<ITimelineViewProps> {
     private zoom(positionX: number, amount: number) {
         const pc = this.root.positionCalculator;
         const newScale = pc.unitWidth * (1 - amount / 3000);
-        const currentPoint = (positionX / pc.unitWidth) - pc.offset;
-        const newPoint = (positionX / newScale) - pc.offset;
-        pc.offset += newPoint - currentPoint;
+        const currentPoint = ((positionX - pc.offset) / pc.unitWidth);
+        const newPoint = ((positionX - pc.offset) / newScale);
+        pc.offset += (newPoint - currentPoint) * pc.unitWidth;
         if (pc.offset > 0) { pc.offset = 0; }
         pc.unitWidth = newScale;
     }

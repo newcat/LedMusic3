@@ -12,6 +12,8 @@ v-card
                     v-list-item-title Audio
                 v-list-item(@click="addGraph")
                     v-list-item-title Graph
+                v-list-item(@click="addAutomationClip")
+                    v-list-item-title Automation Clip
 
     v-container(fluid, style="height: calc(100% - 48px); overflow-y: auto;", grid-list-md)
         v-layout(row, wrap)
@@ -28,7 +30,7 @@ v-card
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
-import { AudioFile, GraphLibraryItem, LibraryItemType } from "@/entities/library";
+import { AudioFile, AutomationClip, GraphLibraryItem, LibraryItemType } from "@/entities/library";
 import globalState from "@/entities/globalState";
 
 @Component
@@ -67,6 +69,8 @@ export default class Library extends Vue {
                 return "library_music";
             case LibraryItemType.GRAPH:
                 return "device_hub";
+            case LibraryItemType.AUTOMATION_CLIP:
+                return "timeline";
             default:
                 return "note";
         }
@@ -74,6 +78,10 @@ export default class Library extends Vue {
 
     public addGraph() {
         this.globalState.library.push(new GraphLibraryItem());
+    }
+
+    public addAutomationClip() {
+        this.globalState.library.push(new AutomationClip());
     }
 
 }

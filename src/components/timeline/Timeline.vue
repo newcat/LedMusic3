@@ -2,6 +2,7 @@
 .fill-height
     .d-flex.px-3.align-items-center.elevation-4(style="height:48px")
         v-btn(text, @click="() => editor.addTrack()") Add Track
+        c-slider(:value="volume", @input="setVolume", name="Volume", :option="{ min: 0, max: 1 }")
     div#wrapper(ref="wrapper" @drop="drop" @dragover="$event.preventDefault()")
 </template>
 
@@ -13,10 +14,12 @@ import { Text, TextStyle, Texture, Sprite, Graphics } from "pixi.js";
 import { TICKS_PER_BEAT } from "@/constants";
 import { LokumEditor } from "@/editors/timeline";
 import globalState from "@/entities/globalState";
-import { AudioFile, LibraryItemType, GraphLibraryItem } from "@/entities/library";
+import { AudioFile, LibraryItemType, GraphLibraryItem, AutomationClip, ILibraryItem } from "@/entities/library";
 import { AudioProcessor, TimelineProcessor, globalProcessor } from "@/processing";
 import renderWaveform from "./renderWaveform";
+import renderAutomationClip from "./renderAutomationClip";
 import { PositionIndicator } from "./positionIndicator";
+import { PluginOptionsVue } from "baklavajs";
 
 interface IWaveformPart {
     start: number;
@@ -29,10 +32,13 @@ enum LabelMode {
     BARS
 }
 
-@Component
+@Component({
+    components: { CSlider: PluginOptionsVue.SliderOption }
+})
 export default class Timeline extends Vue {
 
     public editor = globalState.timeline;
+    public volume = globalProcessor.audioProcessor.volume;
 
     private positionIndicator!: PositionIndicator;
     private fpsText = new Text("FPS", new TextStyle({ fontSize: 10, fill: 0xffffff }));
@@ -78,6 +84,7 @@ export default class Timeline extends Vue {
 
         root.eventBus.events.renderItem.subscribe(this, ({ item, graphics, width, height }) => {
             renderWaveform(item, graphics, width, height);
+            renderAutomationClip(item, graphics, width, height, root.eventBus, root.positionCalculator);
         });
 
         root.positionCalculator.unitWidth = 2.5;
@@ -113,6 +120,9 @@ export default class Timeline extends Vue {
             case LibraryItemType.GRAPH:
                 item = this.addGraphItem(libraryItem as GraphLibraryItem);
                 break;
+            case LibraryItemType.AUTOMATION_CLIP:
+                item = this.addAutomationItem(libraryItem as AutomationClip);
+                break;
         }
 
         if (item) {
@@ -120,25 +130,30 @@ export default class Timeline extends Vue {
         }
     }
 
+    public setVolume(v: number) {
+        globalProcessor.audioProcessor.volume = Math.max(0, Math.min(1, v));
+        this.volume = globalProcessor.audioProcessor.volume;
+    }
+
     private addMusicItem(libraryItem: AudioFile): Item|undefined {
         if (libraryItem.loading) { return; }
         const length = libraryItem.audioBuffer!.duration * (globalState.bpm / 60) * TICKS_PER_BEAT;
-
-        // find a free track, if no one exists, create a new one
-        let track = this.editor.tracks.find((t) => {
-            const trackItems = this.editor.items.filter((i) => i.trackId === t.id);
-            return !trackItems.some((i) => i.start < length);
-        });
-        if (!track) { track = this.editor.addTrack(); }
-
-        const item = new Item(track.id, 0, length, { libraryItem });
+        const item = this.addItem(length, libraryItem);
         item.resizable = false;
         return item;
     }
 
     private addGraphItem(libraryItem: GraphLibraryItem): Item {
         const length = TICKS_PER_BEAT * 4;
+        return this.addItem(length, libraryItem);
+    }
 
+    private addAutomationItem(libraryItem: AutomationClip): Item {
+        const length = libraryItem.points.reduce((p, c) => Math.max(p, c.unit), 0);
+        return this.addItem(length, libraryItem);
+    }
+
+    private addItem(length: number, libraryItem: ILibraryItem) {
         // find a free track, if no one exists, create a new one
         let track = this.editor.tracks.find((t) => {
             const trackItems = this.editor.items.filter((i) => i.trackId === t.id);

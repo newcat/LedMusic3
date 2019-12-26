@@ -8,7 +8,7 @@ import { loadTextures } from "./textureManager";
 export * from "./model/editor";
 export * from "./model";
 export * from "./framework";
-
+export * from "./positionCalculator";
 
 export async function createTimeline(editor: Editor, wrapperEl: HTMLElement) {
 
