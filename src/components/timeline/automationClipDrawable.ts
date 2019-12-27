@@ -1,17 +1,16 @@
 import { Drawable, IItemDrawableProps } from "@/lokumjs";
-import { Graphics } from "pixi.js";
+import { Graphics, Point } from "pixi.js";
 import { AutomationClip, IAutomationPoint } from "@/entities/library";
 
 export class AutomationClipDrawable extends Drawable<IItemDrawableProps> {
 
-    private automationGraphics = new Graphics();
     private clipGraphics = new Graphics();
 
+    private points: Point[] = [];
+
     public setup() {
-        this.automationGraphics.addChild(this.clipGraphics);
-        this.automationGraphics.mask = this.clipGraphics;
-        this.graphics.addChild(this.automationGraphics);
-        // todo subscribe events
+        this.graphics.addChild(this.clipGraphics);
+        this.graphics.mask = this.clipGraphics;
     }
 
     public render() {
@@ -20,27 +19,27 @@ export class AutomationClipDrawable extends Drawable<IItemDrawableProps> {
         this.graphics.clear().lineStyle(1, 0xffffff);
 
         const points = (this.props.item.data!.libraryItem as AutomationClip).points;
-        points.forEach((p, i) => {
-            const { x, y } = this.getCoordinates(p);
+        this.points = points.map((p) => this.getCoordinates(p));
+
+        this.points.forEach((p, i) => {
             if (i === 0) {
-                this.graphics.moveTo(x, y);
+                this.graphics.moveTo(p.x, p.y);
             } else {
-                this.graphics.lineTo(x, y);
+                this.graphics.lineTo(p.x, p.y);
             }
         });
 
         this.graphics.lineStyle().beginFill(0xffffff);
-        points.forEach((p) => {
-            const { x, y } = this.getCoordinates(p);
-            this.graphics.drawCircle(x, y, 3);
+        this.points.forEach((p) => {
+            this.graphics.drawCircle(p.x, p.y, 3);
         });
 
     }
 
-    private getCoordinates(p: IAutomationPoint) {
+    private getCoordinates(p: IAutomationPoint): Point {
         const x = p.unit * this.viewInstance.positionCalculator.unitWidth;
         const y = this.props.height * (1 - p.value);
-        return { x, y };
+        return new Point(x, y);
     }
 
 }

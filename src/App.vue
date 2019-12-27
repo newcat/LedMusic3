@@ -5,7 +5,8 @@ v-app
             #top-left.content-container
                 c-library.fill-height
             #top-right.content-container
-                c-graph.fill-height
+                // c-graph.fill-height
+                c-automation.fill-height
             #bottom.content-container
                 c-timeline
 </template>
@@ -16,11 +17,12 @@ import { Component, Prop, Vue } from "vue-property-decorator";
 import CLibrary from "@/components/Library.vue";
 import CTimeline from "@/components/timeline/Timeline.vue";
 import CGraph from "@/components/Graph.vue";
+import CAutomation from "@/components/automation/AutomationEditor.vue";
 import { BaklavaEditor } from "@/editors/graph";
 import globalState from "@/entities/globalState";
 
 @Component({
-    components: { CLibrary, CTimeline, CGraph }
+    components: { CLibrary, CTimeline, CGraph, CAutomation }
 })
 export default class App extends Vue {}
 </script>
