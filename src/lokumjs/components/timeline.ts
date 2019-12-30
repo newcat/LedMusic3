@@ -1,6 +1,6 @@
-import { Container, Point } from "pixi.js";
+import { Container, Point, interaction } from "pixi.js";
 import { Editor } from "../model/editor";
-import { Drawable, ArrayRenderer, IMouseEventData } from "../framework";
+import { Drawable, ArrayRenderer } from "../framework";
 
 import { HeaderView } from "./header";
 import { TrackView } from "./track";
@@ -42,18 +42,10 @@ export class TimelineView extends Drawable<ITimelineViewProps> {
         this.header = this.createView(HeaderView, { trackHeaderWidth: this.props.trackHeaderWidth });
         this.tracks = this.createView<ArrayRenderer<Track, TrackView>>(ArrayRenderer);
 
-        this.viewInstance.eventBus.events.pointerdown.subscribe(this.graphics, (data) => {
-            this.onMousedown(data);
-        }, true);
-        this.viewInstance.eventBus.events.pointerup.subscribe(this.graphics, () => {
-            this.onMouseup();
-        }, true);
-        this.viewInstance.eventBus.events.pointermove.subscribe(this.graphics, (data) => {
-            this.onMousemove(data);
-        }, true);
-        this.viewInstance.eventBus.events.pointerout.subscribe(this.graphics, () => {
-            this.isDragging = false;
-        }, true);
+        this.viewInstance.eventBus.events.pointerdown.subscribe(this.graphics, (data) => { this.onMousedown(data); });
+        this.viewInstance.eventBus.events.pointerup.subscribe(this.graphics, () => { this.onMouseup(); });
+        this.viewInstance.eventBus.events.pointermove.subscribe(this.graphics, (data) => { this.onMousemove(data); });
+        this.viewInstance.eventBus.events.pointerout.subscribe(this.graphics, () => { this.isDragging = false; });
         this.viewInstance.eventBus.events.keydown.subscribe(this, (ev) => {
             if (ev.key === "Control") { this.ctrlPressed = true; }
             if (ev.key === "Delete") { this.getSelectedItems().forEach((i) => this.props.editor.removeItem(i)); }
@@ -61,17 +53,11 @@ export class TimelineView extends Drawable<ITimelineViewProps> {
         this.viewInstance.eventBus.events.keyup.subscribe(this, (ev) => {
             if (ev.key === "Control") { this.ctrlPressed = false; }
         });
-        this.viewInstance.eventBus.events.zoom.subscribe(this, ({ positionX, amount }) => {
-            this.zoom(positionX, amount);
-        });
+        this.viewInstance.eventBus.events.zoom.subscribe(this, ({ positionX, amount }) => { this.zoom(positionX, amount); });
         this.viewInstance.eventBus.events.resize.subscribe(this, () => { this.needsRender = true; });
 
-        this.viewInstance.eventBus.events.itemClicked.subscribe(this, (data) => {
-            this.onItemMousedown(data.item, data.area, data.event);
-        });
-        this.viewInstance.eventBus.events.removeTrack.subscribe(this, (track) => {
-            this.props.editor.removeTrack(track);
-        });
+        this.viewInstance.eventBus.events.itemClicked.subscribe(this, (data) => { this.onItemMousedown(data.item, data.area, data.event); });
+        this.viewInstance.eventBus.events.removeTrack.subscribe(this, (track) => { this.props.editor.removeTrack(track); });
 
         this.graphics.addChild(this.trackContainer);
         this.addChild(this.header);
@@ -117,17 +103,16 @@ export class TimelineView extends Drawable<ITimelineViewProps> {
         return this.props.editor.items.filter((i) => i.selected);
     }
 
-    private onMousedown(data: IMouseEventData) {
-        this.dragStartPosition = data.data.global.clone();
-        if (data.target && !data.target.ignoreClick && data.target !== this.graphics) { return; }
+    private onMousedown(ev: interaction.InteractionEvent) {
+        this.dragStartPosition = ev.data.global.clone();
         if (!this.ctrlPressed) {
             this.props.editor.items.forEach((i) => { i.selected = false; });
         }
         this.isDragging = true;
     }
 
-    private onMousemove(data: IMouseEventData) {
-        const x = data.data.global.x;
+    private onMousemove(ev: interaction.InteractionEvent) {
+        const x = ev.data.global.x;
         if (this.isDragging) {
             if (this.dragItem) {
                 if (this.dragArea === "leftHandle" || this.dragArea === "rightHandle") {
@@ -140,7 +125,7 @@ export class TimelineView extends Drawable<ITimelineViewProps> {
                 } else if (this.dragArea === "center") {
                     const diffUnits = Math.floor((x - this.dragStartPosition.x) / this.viewInstance.positionCalculator.unitWidth);
                     let diffTracks = 0;
-                    const hoveredTrack = this.findTrackByPoint(data.data.global);
+                    const hoveredTrack = this.findTrackByPoint(ev.data.global);
                     if (this.dragStartTrack && hoveredTrack) {
                         const startTrackIndex = this.props.editor.tracks.indexOf(this.dragStartTrack);
                         const endTrackIndex = this.props.editor.tracks.indexOf(hoveredTrack);
@@ -184,10 +169,10 @@ export class TimelineView extends Drawable<ITimelineViewProps> {
                 }
             } else {
 
-                this.viewInstance.positionCalculator.offset += data.data.global.x - this.dragStartPosition.x;
-                this.yScroll += data.data.global.y - this.dragStartPosition.y;
+                this.viewInstance.positionCalculator.offset += ev.data.global.x - this.dragStartPosition.x;
+                this.yScroll += ev.data.global.y - this.dragStartPosition.y;
 
-                this.dragStartPosition = data.data.global.clone();
+                this.dragStartPosition = ev.data.global.clone();
 
                 if (this.viewInstance.positionCalculator.offset > 0) {
                     this.viewInstance.positionCalculator.offset = 0;
@@ -210,7 +195,7 @@ export class TimelineView extends Drawable<ITimelineViewProps> {
         this.dragArea = "";
     }
 
-    private onItemMousedown(item: Item, area: ItemArea, data: IMouseEventData) {
+    private onItemMousedown(item: Item, area: ItemArea, data: interaction.InteractionEvent) {
         if (area === "center") {
             if (this.ctrlPressed) {
                 if (item.selected) {
@@ -232,6 +217,7 @@ export class TimelineView extends Drawable<ITimelineViewProps> {
                 item: { id: i.id, start: i.start, end: i.end },
                 trackIndex: this.props.editor.tracks.findIndex((t) => t.id === i.trackId)
             }));
+        this.dragStartPosition = data.data.global.clone();
     }
 
     private zoom(positionX: number, amount: number) {

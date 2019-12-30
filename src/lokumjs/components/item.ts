@@ -1,6 +1,6 @@
 import { Item, Track } from "../model";
-import { Drawable, IMouseEventData } from "../framework";
-import { Graphics } from "pixi.js";
+import { Drawable } from "../framework";
+import { Graphics, interaction } from "pixi.js";
 import { ItemArea } from "../types";
 import { IItemDrawableProps } from "../view";
 
@@ -33,9 +33,9 @@ export class ItemView extends Drawable<IItemViewProps> {
             this.addChild(this.contentDrawable);
         }
 
-        this.viewInstance.eventBus.events.pointerdown.subscribe(this.graphics, (data) => this.onClick(data, "center"));
-        this.viewInstance.eventBus.events.pointerdown.subscribe(this.leftHandle, (data) => this.onClick(data, "leftHandle"));
-        this.viewInstance.eventBus.events.pointerdown.subscribe(this.rightHandle, (data) => this.onClick(data, "rightHandle"));
+        this.viewInstance.eventBus.events.pointerdown.subscribe(this.graphics, (ev) => this.onClick(ev, "center"));
+        this.viewInstance.eventBus.events.pointerdown.subscribe(this.leftHandle, (ev) => this.onClick(ev, "leftHandle"));
+        this.viewInstance.eventBus.events.pointerdown.subscribe(this.rightHandle, (ev) => this.onClick(ev, "rightHandle"));
 
         this.renderOnEvent(this.props.item.events.moved);
         this.renderOnEvent(this.props.item.events.resizableChanged);
@@ -94,8 +94,9 @@ export class ItemView extends Drawable<IItemViewProps> {
         }
     }
 
-    private onClick(data: IMouseEventData, area: ItemArea) {
-        this.viewInstance.eventBus.events.itemClicked.emit({ item: this.props.item, area, event: data });
+    private onClick(event: interaction.InteractionEvent, area: ItemArea) {
+        this.viewInstance.eventBus.events.itemClicked.emit({ item: this.props.item, area, event });
+        return false;
     }
 
 }

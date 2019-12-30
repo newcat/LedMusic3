@@ -1,28 +1,20 @@
 import { GraphicsEvent, StandardEvent } from "../events";
-import { interaction, Point, Graphics } from "pixi.js";
+import { interaction, Graphics } from "pixi.js";
 import { Item, Track } from "../model";
 import { ItemArea } from "../types";
-
-export interface IMouseEventData {
-    data: {
-        global: Point;
-        originalEvent: PointerEvent;
-    };
-    target: any;
-}
 
 export class EventBus {
 
     public events = {
-        pointerdown: new GraphicsEvent(),
-        pointerup: new GraphicsEvent(),
-        pointermove: new GraphicsEvent(),
-        pointerover: new GraphicsEvent(),
-        pointerout: new GraphicsEvent(),
+        pointerdown: new GraphicsEvent<interaction.InteractionEvent>(),
+        pointerup: new GraphicsEvent<interaction.InteractionEvent>(),
+        pointermove: new GraphicsEvent<interaction.InteractionEvent>(),
+        pointerover: new GraphicsEvent<interaction.InteractionEvent>(),
+        pointerout: new GraphicsEvent<interaction.InteractionEvent>(),
         keydown: new StandardEvent<KeyboardEvent>(),
         keyup: new StandardEvent<KeyboardEvent>(),
         zoom: new StandardEvent<{ positionX: number, amount: number }>(),
-        itemClicked: new StandardEvent<{ item: Item, area: ItemArea, event: IMouseEventData }>(),
+        itemClicked: new StandardEvent<{ item: Item, area: ItemArea, event: interaction.InteractionEvent }>(),
         removeTrack: new StandardEvent<Track>(),
         renderItem: new StandardEvent<{ item: Item, graphics: Graphics, width: number, height: number }>(),
         resize: new StandardEvent<{ width: number, height: number }>()
