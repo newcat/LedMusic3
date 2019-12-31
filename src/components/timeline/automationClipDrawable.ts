@@ -3,9 +3,9 @@ import { Graphics, Point, interaction } from "pixi.js";
 import { AutomationClip, IAutomationPoint } from "@/entities/library";
 
 interface IScreenPoint {
+    id: string;
     x: number;
     y: number;
-    automationPoint: IAutomationPoint;
 }
 
 export class AutomationClipDrawable extends Drawable<IItemDrawableProps> {
@@ -13,8 +13,14 @@ export class AutomationClipDrawable extends Drawable<IItemDrawableProps> {
     private clipGraphics = new Graphics();
 
     private points: IScreenPoint[] = [];
-    private hoveredPoint: IScreenPoint|null = null;
+    private hoveredPointId: string = "";
     private dragging = false;
+
+    private lastClickTime = 0; // for detecting double-clicks
+
+    private get libItem() {
+        return this.props.item.data!.libraryItem as AutomationClip;
+    }
 
     public setup() {
         this.graphics.addChild(this.clipGraphics);
@@ -33,7 +39,7 @@ export class AutomationClipDrawable extends Drawable<IItemDrawableProps> {
         const points = (this.props.item.data!.libraryItem as AutomationClip).points;
         this.points = points.map((p) => {
             const { x, y } = this.getCoordinates(p);
-            return { x, y, automationPoint: p };
+            return { x, y, id: p.id };
         });
 
         this.points.forEach((p, i) => {
@@ -46,7 +52,7 @@ export class AutomationClipDrawable extends Drawable<IItemDrawableProps> {
 
         this.graphics.lineStyle().beginFill(0xffffff);
         this.points.forEach((p) => {
-            const isHovered = !!this.hoveredPoint && p.x === this.hoveredPoint.x && p.y === this.hoveredPoint.y;
+            const isHovered = this.hoveredPointId && p.id === this.hoveredPointId;
             this.graphics.drawCircle(p.x, p.y, isHovered ? 6 : 3);
         });
 
@@ -66,28 +72,40 @@ export class AutomationClipDrawable extends Drawable<IItemDrawableProps> {
 
     private onMouseMove(data: interaction.InteractionData) {
         const mousePoint = data.getLocalPosition(this.graphics);
-        if (this.dragging && this.hoveredPoint) {
-            const libPoints = (this.props.item.data!.libraryItem as AutomationClip).points;
-            const i = libPoints.indexOf(this.hoveredPoint.automationPoint);
+        if (this.dragging && this.hoveredPointId) {
+            const point = this.libItem.points.find((p) => p.id === this.hoveredPointId);
             const { unit, value } = this.getUnitValue(mousePoint);
-            libPoints.splice(i, 1, { type: this.hoveredPoint.automationPoint.type, unit, value });
+            if (!point) { return; }
+            point.unit = unit;
+            point.value = value;
+            this.libItem.sortPoints();
             this.needsRender = true;
         } else {
-            const oldHoveredPoint = this.hoveredPoint;
-            this.hoveredPoint = this.points.find((p) => Math.pow(mousePoint.x - p.x, 2) + Math.pow(mousePoint.y - p.y, 2) < 25) || null;
-            if (this.hoveredPoint !== oldHoveredPoint) { this.needsRender = true; }
+            const oldHoveredPointId = this.hoveredPointId;
+            const hoveredPoint = this.points.find((p) => Math.pow(mousePoint.x - p.x, 2) + Math.pow(mousePoint.y - p.y, 2) < 25);
+            this.hoveredPointId = hoveredPoint?.id ?? "";
+            if (this.hoveredPointId !== oldHoveredPointId) { this.needsRender = true; }
         }
     }
 
     private onMouseDown(data: interaction.InteractionData) {
-        if (this.hoveredPoint) {
+        if (this.hoveredPointId) {
             this.dragging = true;
             return false;
+        } else if (Date.now() - this.lastClickTime < 400) {
+            this.addPoint(data.getLocalPosition(this.graphics));
         }
+        this.lastClickTime = Date.now();
     }
 
     private onMouseUp() {
         this.dragging = false;
+    }
+
+    private addPoint(localCoords: Point) {
+        const { unit, value } = this.getUnitValue(localCoords);
+        this.libItem.addPoint(unit, value);
+        this.needsRender = true;
     }
 
 }

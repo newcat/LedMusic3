@@ -1,8 +1,10 @@
 import { AudioProcessor } from "./audioProcessor";
 import { Editor, Item } from "@/lokumjs";
-import { AudioFile, ILibraryItem, LibraryItemType, GraphLibraryItem } from "@/entities/library";
+import { AudioFile, ILibraryItem, LibraryItemType, GraphLibraryItem, AutomationClip } from "@/entities/library";
 
 export class TimelineProcessor {
+
+    public automationClipValues = new Map<string, number>(); // maps trackId -> value
 
     private activeItems: Item[] = [];
 
@@ -21,7 +23,8 @@ export class TimelineProcessor {
         const newInactiveItems = this.activeItems.filter((i) => !currentActiveItems.includes(i));
         newInactiveItems.forEach((i) => this.deactivate(i));
 
-        currentActiveItems.forEach((i) => this.processItem(i));
+        currentActiveItems.filter((i) => this.isType(i, LibraryItemType.AUTOMATION_CLIP)).forEach((i) => this.processAutomationClip(unit, i));
+        currentActiveItems.filter((i) => this.isType(i, LibraryItemType.GRAPH)).forEach((i) => this.processGraph(i));
         this.activeItems = currentActiveItems;
 
     }
@@ -49,16 +52,21 @@ export class TimelineProcessor {
         }
     }
 
-    private processItem(item: Item) {
-        if (!item.data || !item.data.libraryItem) { return; }
-        // TODO: apply the automation clips and perform all necessary graph calculations
+    private isType(item: Item, type: LibraryItemType): boolean {
+        if (!item.data || !item.data.libraryItem) { return false; }
         const libraryItem = item.data.libraryItem as ILibraryItem;
-        switch (libraryItem.type) {
-            case LibraryItemType.GRAPH:
-                const graph = libraryItem as GraphLibraryItem;
-                graph.editor.enginePlugin.calculate();
-                break;
-        }
+        return libraryItem.type === type;
+    }
+
+    private processGraph(item: Item): void {
+        const graph = item.data!.libraryItem as GraphLibraryItem;
+        graph.editor.enginePlugin.calculate();
+    }
+
+    private processAutomationClip(unit: number, item: Item): void {
+        const ac = item.data!.libraryItem as AutomationClip;
+        const value = ac.getValueAt(unit - item.start);
+        this.automationClipValues.set(item.trackId, value);
     }
 
 }

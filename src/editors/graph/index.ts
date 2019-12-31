@@ -36,6 +36,11 @@ export class BaklavaEditor extends Editor {
         this.intfTypePlugin.addConversion("number", "color_single", (v) => chroma(v * 255, v * 255, v * 255));
         this.intfTypePlugin.addConversion("number", "color_array", (v) => [chroma(v * 255, v * 255, v * 255)]);
         this.intfTypePlugin.addConversion("boolean", "number");
+
+        this.events.removeNode.addListener(this, (n) => {
+            if ((n as any).destroy) { (n as any).destroy(); }
+        });
+
     }
 
 }
