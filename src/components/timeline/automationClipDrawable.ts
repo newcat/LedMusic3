@@ -29,6 +29,11 @@ export class AutomationClipDrawable extends Drawable<IItemDrawableProps> {
         this.viewInstance.eventBus.events.pointermove.subscribe(this.graphics, (ev) => this.onMouseMove(ev.data));
         this.viewInstance.eventBus.events.pointerdown.subscribe(this.graphics, (ev) => this.onMouseDown(ev.data));
         this.viewInstance.eventBus.events.pointerup.subscribe(this.graphics, (ev) => this.onMouseUp());
+        this.graphics.addListener("pointerout", () => {
+            this.dragging = false;
+            this.hoveredPointId = "";
+            this.needsRender = true;
+        });
     }
 
     public render() {
