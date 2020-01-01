@@ -19,7 +19,6 @@ export class ParticleNode extends Node {
     public name = this.type;
 
     private particles: IParticle[] = [];
-    private direction = false; // false = left; true = right
     private particlesToSpawn = 0.0;
 
     constructor() {
@@ -66,17 +65,21 @@ export class ParticleNode extends Node {
 
             this.particlesToSpawn += rate;
             while (this.particlesToSpawn > 1) {
-                this.particles.push({
+                const p = {
                     totalLifetime: lifetimeInFrames,
                     currentLifetime: 0,
                     position: emitterPosition,
-                    startVelocity: symmetric && !this.direction ? -startVelocity : startVelocity,
-                    endVelocity: symmetric && !this.direction ? -endVelocity : endVelocity,
+                    startVelocity,
+                    endVelocity,
                     color: startColor,
                     startColor,
                     endColor
-                });
-                if (symmetric) { this.direction = !this.direction; }
+                };
+                this.particles.push(p);
+                if (symmetric) {
+                    const p2 = { ...p, startVelocity: -startVelocity, endVelocity: -endVelocity };
+                    this.particles.push(p2);
+                }
                 this.particlesToSpawn--;
             }
         }
