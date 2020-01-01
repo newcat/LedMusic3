@@ -7,6 +7,10 @@ import { BaklavaVuePlugin } from "@baklavajs/plugin-renderer-vue";
 import "@baklavajs/plugin-renderer-vue/dist/styles.css";
 Vue.use(BaklavaVuePlugin);
 
+// @ts-ignore
+import splitPane from "vue-splitpane";
+Vue.component("split-pane", splitPane);
+
 import "./styles/all.scss";
 import vuetify from "./plugins/vuetify";
 

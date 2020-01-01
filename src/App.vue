@@ -2,12 +2,15 @@
 v-app
     v-content
         #app-container
-            #top-left.content-container
-                c-library.fill-height
-            #top-right.content-container
-                c-graph.fill-height
-            #bottom.content-container
-                c-timeline
+            split-pane(split="horizontal")
+                template(slot="paneL")
+                    split-pane(split="vertical")
+                        template(slot="paneL")
+                            c-library.fill-height
+                        template(slot="paneR")
+                            c-graph.fill-height
+                template(slot="paneR")
+                    c-timeline
 </template>
 
 <script lang="ts">
@@ -48,29 +51,19 @@ export default class App extends Vue {
 
 <style>
 #app-container {
-    display: grid;
-    grid-template-rows: 50vh 50vh;
-    grid-template-columns: 50vw 50vw;
     height: 100vh;
     width: 100vw;
 }
 
 .content-container {
-    padding: 10px;
+    margin: 5px;
 }
 
-#top-left {
-    grid-column: 1 / span 1;
-    grid-row: 1 / span 1;
-}
-
-#top-right {
-    grid-column: 2 / span 1;
-    grid-row: 1 / span 1;
-}
-
-#bottom {
-    grid-column: 1 / span 2;
-    grid-row: 2 / span 1;
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
 }
 </style>

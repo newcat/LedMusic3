@@ -8,6 +8,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
+import throttle from "lodash/throttle";
 
 import { View, Drawable, Track, Item } from "@/lokumjs";
 import { Text, TextStyle, Texture, Sprite, Graphics } from "pixi.js";
@@ -56,6 +57,7 @@ export default class Timeline extends Vue {
     private fpsText = new Text("FPS", new TextStyle({ fontSize: 10, fill: 0xffffff }));
 
     private labelMode: LabelMode = LabelMode.BEATS;
+    private resizeObserver!: ResizeObserver;
 
     public async mounted() {
 
@@ -115,6 +117,10 @@ export default class Timeline extends Vue {
         view.itemDrawableFunction = (item) => this.getItemDrawable(item);
 
         (window as any).$data = view;
+
+        this.resizeObserver = new ResizeObserver(throttle(view.app.resize, 200));
+        this.resizeObserver.observe(this.$refs.wrapper as Element);
+
     }
 
     public drop(ev: DragEvent) {
@@ -148,22 +154,22 @@ export default class Timeline extends Vue {
     private addMusicItem(libraryItem: AudioFile): Item|undefined {
         if (libraryItem.loading) { return; }
         const length = libraryItem.audioBuffer!.duration * (globalState.bpm / 60) * TICKS_PER_BEAT;
-        const item = this.addItem(length, libraryItem);
+        const item = this.createItem(length, libraryItem);
         item.resizable = false;
         return item;
     }
 
     private addGraphItem(libraryItem: GraphLibraryItem): Item {
         const length = TICKS_PER_BEAT * 4;
-        return this.addItem(length, libraryItem);
+        return this.createItem(length, libraryItem);
     }
 
     private addAutomationItem(libraryItem: AutomationClip): Item {
         const length = libraryItem.points.reduce((p, c) => Math.max(p, c.unit), 0);
-        return this.addItem(length, libraryItem);
+        return this.createItem(length, libraryItem);
     }
 
-    private addItem(length: number, libraryItem: ILibraryItem) {
+    private createItem(length: number, libraryItem: ILibraryItem) {
         // find a free track, if no one exists, create a new one
         let track = this.editor.tracks.find((t) => {
             const trackItems = this.editor.items.filter((i) => i.trackId === t.id);

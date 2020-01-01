@@ -10,11 +10,13 @@
     "@types/bson": "^4.0.1",
     "@types/chart.js": "^2.9.7",
     "@types/chroma-js": "^1.4.2",
+    "@types/lodash": "^4.14.149",
     "@types/uuid": "^3.4.6",
     "baklavajs": "^1.4.5",
     "bson": "^4.0.2",
     "chart.js": "^2.9.3",
     "chroma-js": "^2.0.6",
+    "lodash": "^4.17.15",
     "lokumjs": "^0.2.5",
     "pixi.js": "^5.2.0",
     "uuid": "^3.3.3",
@@ -23,6 +25,7 @@
     "vue-class-component": "^7.0.2",
     "vue-color": "^2.7.0",
     "vue-property-decorator": "^8.1.0",
+    "vue-splitpane": "^1.0.6",
     "vuetify": "^2.1.0"
   },
   "devDependencies": {
