@@ -1,4 +1,4 @@
-import { serialize, deserialize, Binary,  } from "bson";
+import { serialize, deserialize, Binary } from "bson";
 import uuidv4 from "uuid/v4";
 import { Texture } from "pixi.js";
 import { ILibraryItem, LibraryItemType } from "./libraryItem";
@@ -14,8 +14,10 @@ interface IWaveformPart {
 export class AudioFile implements ILibraryItem {
 
     public static deserialize(data: Buffer) {
-        const { name, rawData } = deserialize(data);
-        return new AudioFile(name, rawData as Buffer);
+        const { id, name, rawData } = deserialize(data);
+        const af = new AudioFile(name, rawData as Buffer);
+        af.id = id;
+        return af;
     }
 
     public id = uuidv4();
@@ -61,6 +63,8 @@ export class AudioFile implements ILibraryItem {
 
     public serialize() {
         return serialize({
+            id: this.id,
+            type: this.type,
             name: this.name,
             rawData: new Binary(Buffer.from(this.rawData)),
         });

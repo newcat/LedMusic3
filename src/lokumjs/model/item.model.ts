@@ -1,7 +1,23 @@
 import uuidv4 from "uuid/v4";
 import { PreventableEvent, StandardEvent } from "../framework";
 
+export interface IItemState {
+    id: string;
+    start: number;
+    end: number;
+    trackId: string;
+    resizable: boolean;
+    data?: Record<string, any>;
+}
+
 export class Item {
+
+    public static load(state: IItemState): Item {
+        const i = new Item(state.trackId, state.start, state.end, state.data);
+        (i as any).id = state.id;
+        i.resizable = state.resizable;
+        return i;
+    }
 
     public readonly id = uuidv4();
     public data?: Record<string, any>;
@@ -74,6 +90,17 @@ export class Item {
             this._end = end;
             this.events.moved.emit({ start, end });
         }
+    }
+
+    public save(): IItemState {
+        return {
+            id: this.id,
+            start: this.start,
+            end: this.end,
+            trackId: this.trackId,
+            resizable: this.resizable,
+            data: this.data
+        };
     }
 
 }

@@ -1,14 +1,35 @@
+import { serialize, deserialize } from "bson";
 import { ILibraryItem, LibraryItemType } from "./libraryItem";
 import uuidv4 from "uuid/v4";
 import { BaklavaEditor } from "@/editors/graph";
+import { IState } from "@baklavajs/core/dist/types";
 
 export class GraphLibraryItem implements ILibraryItem {
 
-    public readonly id = uuidv4();
+    public static deserialize(data: Buffer) {
+        const { id, state } = deserialize(data);
+        const g = new GraphLibraryItem(state);
+        g.id = id;
+        return g;
+    }
+
+    public id = uuidv4();
     public type = LibraryItemType.GRAPH;
     public name = "Graph";
     public loading = false;
 
     public editor = new BaklavaEditor();
+
+    public constructor(state?: IState) {
+        if (state) { this.editor.load(state); }
+    }
+
+    public serialize() {
+        return serialize({
+            id: this.id,
+            type: this.type,
+            state: this.editor.save(),
+        });
+    }
 
 }

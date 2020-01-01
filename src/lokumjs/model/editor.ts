@@ -1,6 +1,11 @@
-import { Track } from "./track.model";
-import { Item } from "./item.model";
+import { Track, ITrackState } from "./track.model";
+import { Item, IItemState } from "./item.model";
 import { PreventableEvent, StandardEvent } from "../framework";
+
+export interface IEditorState {
+    tracks: ITrackState[];
+    items: IItemState[];
+}
 
 export class Editor {
 
@@ -22,6 +27,18 @@ export class Editor {
 
     public get tracks() { return this._tracks as ReadonlyArray<Track>; }
     public get items() { return this._items as ReadonlyArray<Item>; }
+
+    public load(state: IEditorState) {
+        state.tracks.forEach((ts) => this.addTrack(Track.load(ts)));
+        state.items.forEach((is) => this.addItem(Item.load(is)));
+    }
+
+    public save(): IEditorState {
+        return {
+            tracks: this.tracks.map((t) => t.save()),
+            items: this.items.map((i) => i.save())
+        };
+    }
 
     public addTrack(track: Track, index = -1) {
         if (this.events.beforeTrackAdded.emit(track)) {
