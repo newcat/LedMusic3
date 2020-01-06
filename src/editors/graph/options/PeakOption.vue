@@ -1,5 +1,5 @@
 <template>
-<canvas class="spectrum-canvas" ref="canvas"></canvas>
+<canvas class="peak-canvas" ref="canvas"></canvas>
 </template>
 
 <script lang="ts">
@@ -9,7 +9,7 @@ import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 export default class SpectrumOption extends Vue {
 
     @Prop()
-    public value!: Float32Array;
+    public value!: number;
 
     private canvas!: HTMLCanvasElement;
     private ctx!: CanvasRenderingContext2D;
@@ -32,13 +32,12 @@ export default class SpectrumOption extends Vue {
 
         if (!this.value) { return; }
 
-        const barWidth = width / this.value.length;
+        const grad = this.ctx.createLinearGradient(0, 0, width, 0);
+        grad.addColorStop(0, "green");
+        grad.addColorStop(1, "red");
 
-        this.value.forEach((v, i) => {
-            const b = 255 * v;
-            this.ctx.fillStyle = `rgb(${b}, ${b}, ${b})`;
-            this.ctx.fillRect(i * barWidth, 0, barWidth, height);
-        });
+        this.ctx.fillStyle = grad;
+        this.ctx.fillRect(0, 0, this.value * width, height);
 
     }
 
@@ -46,7 +45,7 @@ export default class SpectrumOption extends Vue {
 </script>
 
 <style scoped>
-.spectrum-canvas {
+.peak-canvas {
     width: 100%;
     height: 20px;
 }
