@@ -28,6 +28,7 @@ class GlobalProcessor {
         this.audioProcessor = new AudioProcessor();
         this.timelineProcessor = new TimelineProcessor(this.audioProcessor, globalState.timeline);
         setInterval(() => this.tick(), 1000 / 30);
+        (window as any).globalProcessor = this;
     }
 
     public play() {
