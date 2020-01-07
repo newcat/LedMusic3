@@ -49,6 +49,9 @@ export class TimelineProcessor {
             const af = libraryItem as AudioFile;
             item.events.moved.unsubscribe(this);
             this.audioProcessor.unregisterBuffer(af.audioBuffer!);
+        } else if (libraryItem.type === LibraryItemType.AUTOMATION_CLIP) {
+            const ac = libraryItem as AutomationClip;
+            this.automationClipValues.set(item.trackId, ac.lastValue);
         }
     }
 

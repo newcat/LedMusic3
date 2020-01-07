@@ -28,6 +28,9 @@ export class AutomationClip implements ILibraryItem {
 
     public points: IAutomationPoint[];
 
+    public get firstValue() { return this.points.length > 0 ? this.points[0].value : 0; }
+    public get lastValue() { return this.points.length > 0 ? this.points[this.points.length - 1].value : 0; }
+
     public constructor(name = "Automation Clip", points?: IAutomationPoint[]) {
         this.name = name;
         this.points = points || [
