@@ -1,6 +1,7 @@
 import { Drawable, IItemDrawableProps } from "@/lokumjs";
 import { Graphics, Point, interaction } from "pixi.js";
 import { AutomationClip, IAutomationPoint } from "@/entities/library";
+import { LokumEditor } from "@/editors/timeline";
 
 interface IScreenPoint {
     id: string;
@@ -10,6 +11,7 @@ interface IScreenPoint {
 
 export class AutomationClipDrawable extends Drawable<IItemDrawableProps> {
 
+    private editor = this.viewInstance.editor as LokumEditor;
     private clipGraphics = new Graphics();
 
     private points: IScreenPoint[] = [];
@@ -81,7 +83,7 @@ export class AutomationClipDrawable extends Drawable<IItemDrawableProps> {
             const point = this.libItem.points.find((p) => p.id === this.hoveredPointId);
             const { unit, value } = this.getUnitValue(mousePoint);
             if (!point) { return; }
-            point.unit = unit;
+            point.unit = this.editor.snap(unit);
             point.value = value;
             this.libItem.sortPoints();
             this.needsRender = true;
@@ -109,7 +111,7 @@ export class AutomationClipDrawable extends Drawable<IItemDrawableProps> {
 
     private addPoint(localCoords: Point) {
         const { unit, value } = this.getUnitValue(localCoords);
-        this.libItem.addPoint(unit, value);
+        this.libItem.addPoint(this.editor.snap(unit), value);
         this.needsRender = true;
     }
 

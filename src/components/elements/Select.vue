@@ -16,7 +16,7 @@
             <div
                 v-for="item in items"
                 :key="item.value"
-                :class="['item', { '--active': value.value === item.value }]"
+                :class="['item', { '--active': value === item.value }]"
                 @click="setSelected(item)"
             >{{ item.text }}</div>
         </div>

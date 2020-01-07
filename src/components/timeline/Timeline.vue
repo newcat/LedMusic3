@@ -2,7 +2,8 @@
 .fill-height
     .d-flex.px-3.align-items-center.elevation-4(style="height:48px")
         v-btn(text, @click="() => editor.addTrack()") Add Track
-        c-slider(:value="volume", @input="setVolume", name="Volume", :option="{ min: 0, max: 1 }")
+        c-slider.ml-3(:value="volume", @input="setVolume", name="Volume", :option="{ min: 0, max: 1 }")
+        c-select.ml-3(:value="snapUnits", @input="setSnap", label="Snap", :items="snapItems", style="width: 10em;")
     div#wrapper(ref="wrapper" @drop="drop" @dragover="$event.preventDefault()")
 </template>
 
@@ -22,6 +23,7 @@ import { WaveformDrawable } from "./waveformDrawable";
 import { PositionIndicator } from "./positionIndicator";
 import { PluginOptionsVue } from "baklavajs";
 import { IColorDefinitions } from "@/lokumjs/colors";
+import CSelect from "@/components/elements/Select.vue";
 
 interface IWaveformPart {
     start: number;
@@ -46,18 +48,35 @@ const customColors = {
 } as IColorDefinitions;
 
 @Component({
-    components: { CSlider: PluginOptionsVue.SliderOption }
+    components: { CSlider: PluginOptionsVue.SliderOption, CSelect }
 })
 export default class Timeline extends Vue {
 
     public editor = globalState.timeline;
     public volume = globalProcessor.audioProcessor.volume;
 
+    public snapItems = [
+        { text: "Disabled", value: "1" },
+        { text: "1/8 Beat", value: (TICKS_PER_BEAT / 8).toString() },
+        { text: "1/6 Beat", value: (TICKS_PER_BEAT / 6).toString() },
+        { text: "1/4 Beat", value: (TICKS_PER_BEAT / 4).toString() },
+        { text: "1/3 Beat", value: (TICKS_PER_BEAT / 3).toString() },
+        { text: "1/2 Beat", value: (TICKS_PER_BEAT / 2).toString() },
+        { text: "1 Beat", value: (TICKS_PER_BEAT).toString() },
+        { text: "2 Beats", value: (2 * TICKS_PER_BEAT).toString() },
+        { text: "4 Beats", value: (4 * TICKS_PER_BEAT).toString() },
+        { text: "8 Beats", value: (8 * TICKS_PER_BEAT).toString() },
+    ];
+
     private positionIndicator!: PositionIndicator;
     private fpsText = new Text("FPS", new TextStyle({ fontSize: 10, fill: 0xffffff }));
 
     private labelMode: LabelMode = LabelMode.BEATS;
     private resizeObserver!: ResizeObserver;
+
+    public get snapUnits() {
+        return this.editor.snapUnits.toString();
+    }
 
     public async mounted() {
 
@@ -149,6 +168,10 @@ export default class Timeline extends Vue {
     public setVolume(v: number) {
         globalProcessor.audioProcessor.volume = Math.max(0, Math.min(1, v));
         this.volume = globalProcessor.audioProcessor.volume;
+    }
+
+    public setSnap(value: string) {
+        this.editor.snapUnits = parseInt(value, 10);
     }
 
     private addMusicItem(libraryItem: AudioFile): Item|undefined {
