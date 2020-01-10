@@ -51,6 +51,7 @@ export class TimelineProcessor {
             this.audioProcessor.unregisterBuffer(af.audioBuffer!);
         } else if (libraryItem.type === LibraryItemType.AUTOMATION_CLIP) {
             const ac = libraryItem as AutomationClip;
+            // TODO: This doesn't work if the automation clip ends before the last point
             this.automationClipValues.set(item.trackId, ac.lastValue);
         }
     }

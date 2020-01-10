@@ -36,6 +36,7 @@ export class AutomationClipDrawable extends Drawable<IItemDrawableProps> {
             this.hoveredPointId = "";
             this.needsRender = true;
         });
+        this.libItem.events.pointsUpdated.subscribe(this, () => { this.needsRender = true; });
     }
 
     public render() {
@@ -43,7 +44,7 @@ export class AutomationClipDrawable extends Drawable<IItemDrawableProps> {
         this.clipGraphics.clear().beginFill(0xffffff).drawRect(0, 0, this.props.width, this.props.height).endFill();
         this.graphics.clear().lineStyle(1, 0xffffff);
 
-        const points = (this.props.item.data!.libraryItem as AutomationClip).points;
+        const points = this.libItem.points;
         this.points = points.map((p) => {
             const { x, y } = this.getCoordinates(p);
             return { x, y, id: p.id };
@@ -63,6 +64,11 @@ export class AutomationClipDrawable extends Drawable<IItemDrawableProps> {
             this.graphics.drawCircle(p.x, p.y, isHovered ? 6 : 3);
         });
 
+    }
+
+    public destroy() {
+        super.destroy();
+        this.libItem.events.pointsUpdated.unsubscribe(this);
     }
 
     private getCoordinates(p: IAutomationPoint): Point {
@@ -86,6 +92,7 @@ export class AutomationClipDrawable extends Drawable<IItemDrawableProps> {
             point.unit = this.editor.snap(unit);
             point.value = value;
             this.libItem.sortPoints();
+            this.libItem.events.pointsUpdated.emit();
             this.needsRender = true;
         } else {
             const oldHoveredPointId = this.hoveredPointId;

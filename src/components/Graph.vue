@@ -6,7 +6,7 @@ v-card.d-flex.flex-column
         div.flex-grow-1
             c-select.flex-grow-1(v-model="selectedGraphId", label="Edit Graph", :items="graphs")
 
-    baklava-editor(v-if="selectedGraph", :plugin="selectedGraph.editor.viewPlugin")
+    baklava-editor(v-if="selectedGraph", :plugin="selectedGraph.editor.viewPlugin", :key="selectedGraphId")
 </template>
 
 <script lang="ts">

@@ -2,6 +2,7 @@ import { serialize, deserialize } from "bson";
 import { ILibraryItem, LibraryItemType } from "./libraryItem";
 import uuidv4 from "uuid/v4";
 import { TICKS_PER_BEAT } from "@/constants";
+import { StandardEvent } from "@/lokumjs";
 
 export type AutomationPointType = "linear"|"step";
 
@@ -28,6 +29,10 @@ export class AutomationClip implements ILibraryItem {
 
     public points: IAutomationPoint[];
 
+    public events = {
+        pointsUpdated: new StandardEvent()
+    };
+
     public get firstValue() { return this.points.length > 0 ? this.points[0].value : 0; }
     public get lastValue() { return this.points.length > 0 ? this.points[this.points.length - 1].value : 0; }
 
@@ -42,6 +47,7 @@ export class AutomationClip implements ILibraryItem {
     public addPoint(unit: number, value: number, type: AutomationPointType = "linear") {
         this.points.push({ id: uuidv4(), unit, value, type });
         this.sortPoints();
+        this.events.pointsUpdated.emit();
     }
 
     public sortPoints() {
