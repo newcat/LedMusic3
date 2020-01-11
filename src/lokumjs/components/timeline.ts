@@ -57,7 +57,10 @@ export class TimelineView extends Drawable<ITimelineViewProps> {
         this.viewInstance.eventBus.events.resize.subscribe(this, () => { this.needsRender = true; });
 
         this.viewInstance.eventBus.events.itemClicked.subscribe(this, (data) => { this.onItemMousedown(data.item, data.area, data.event); });
-        this.viewInstance.eventBus.events.removeTrack.subscribe(this, (track) => { this.props.editor.removeTrack(track); });
+        this.viewInstance.eventBus.events.removeTrack.subscribe(this, (track) => {
+            this.props.editor.items.filter((i) => i.trackId === track.id).forEach((i) => this.props.editor.removeItem(i));
+            this.props.editor.removeTrack(track);
+        });
 
         this.graphics.addChild(this.trackContainer);
         this.addChild(this.header);

@@ -34,6 +34,7 @@ export default class SpectrumOption extends Vue {
 
         const grad = this.ctx.createLinearGradient(0, 0, width, 0);
         grad.addColorStop(0, "green");
+        grad.addColorStop(0.5, "orange");
         grad.addColorStop(1, "red");
 
         this.ctx.fillStyle = grad;

@@ -25,8 +25,15 @@ export class TrackView extends Drawable<ITrackViewProps> {
         this.renderOnEvent(this.viewInstance.positionCalculator.events.moved);
         this.renderOnEvent(this.viewInstance.eventBus.events.resize);
 
-        this.viewInstance.editor.events.itemAdded.subscribe(this.subSymbol, () => this.updateItems());
-        this.viewInstance.editor.events.itemRemoved.subscribe(this.subSymbol, () => this.updateItems());
+        this.viewInstance.editor.items.forEach((item) => item.events.trackChanged.subscribe(this.subSymbol, () => this.updateItems()));
+        this.viewInstance.editor.events.itemAdded.subscribe(this.subSymbol, (item) => {
+            item.events.trackChanged.subscribe(this.subSymbol, () => this.updateItems());
+            this.updateItems();
+        });
+        this.viewInstance.editor.events.itemRemoved.subscribe(this.subSymbol, (item) => {
+            item.events.trackChanged.unsubscribe(this.subSymbol);
+            this.updateItems();
+        });
         this.updateItems();
 
         this.itemsView.onNewItem = (newItem) => this.createView(ItemView, { item: newItem, track: this.props.track });
