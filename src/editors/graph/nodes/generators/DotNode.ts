@@ -66,6 +66,7 @@ export class DotNode extends Node {
     }
 
     private clamp(v: number, min: number, max: number) {
+        if (!Number.isFinite(v)) { return 0; }
         return Math.min(max, Math.max(min, v));
     }
 

@@ -1,5 +1,5 @@
 <template>
-<canvas class="peak-canvas" ref="canvas"></canvas>
+<canvas class="option-canvas" ref="canvas"></canvas>
 </template>
 
 <script lang="ts">
@@ -44,10 +44,3 @@ export default class SpectrumOption extends Vue {
 
 }
 </script>
-
-<style scoped>
-.peak-canvas {
-    width: 100%;
-    height: 20px;
-}
-</style>

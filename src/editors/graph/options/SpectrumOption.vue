@@ -1,5 +1,5 @@
 <template>
-<canvas class="spectrum-canvas" ref="canvas"></canvas>
+<canvas class="option-canvas" ref="canvas"></canvas>
 </template>
 
 <script lang="ts">
@@ -44,10 +44,3 @@ export default class SpectrumOption extends Vue {
 
 }
 </script>
-
-<style scoped>
-.spectrum-canvas {
-    width: 100%;
-    height: 20px;
-}
-</style>

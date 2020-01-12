@@ -1,9 +1,9 @@
 <template>
-<div class="preview-option" :style="{ background: gradient }"></div>
+<canvas class="option-canvas" ref="canvas"></canvas>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import { Color } from "chroma-js";
 
 @Component
@@ -12,24 +12,36 @@ export default class PreviewOption extends Vue {
     @Prop({})
     public value!: Color[];
 
-    get gradient() {
-        if (this.value && this.value.length > 0) {
-            if (this.value.length > 1) {
-                return `linear-gradient(to right, ${this.value.map((c) => c.css()).join(",")})`;
-            } else {
-                return this.value[0].css();
-            }
-        } else {
-            return "black";
-        }
+    private canvas!: HTMLCanvasElement;
+    private ctx!: CanvasRenderingContext2D;
+
+    public mounted() {
+        this.canvas = this.$refs.canvas as HTMLCanvasElement;
+        this.ctx = this.canvas.getContext("2d")!;
+        this.draw();
+    }
+
+    @Watch("value")
+    public draw() {
+
+        if (!this.canvas || !this.ctx) { return; }
+
+        const { width, height } = this.canvas;
+
+        this.ctx.fillStyle = "black";
+        this.ctx.fillRect(0, 0, width, height);
+
+        if (!this.value || this.value.length === 0) { return; }
+
+        const grad = this.ctx.createLinearGradient(0, 0, width, 0);
+        this.value.forEach((v, i) => {
+            grad.addColorStop(i / this.value.length, v.css());
+        });
+
+        this.ctx.fillStyle = grad;
+        this.ctx.fillRect(0, 0, width, height);
+
     }
 
 }
 </script>
-
-<style>
-.preview-option {
-    width: 100%;
-    height: 1.5rem;
-}
-</style>
