@@ -2,7 +2,7 @@ import { serialize, deserialize, Binary } from "bson";
 import uuidv4 from "uuid/v4";
 import { Texture } from "pixi.js";
 import { ILibraryItem, LibraryItemType } from "./libraryItem";
-import { AudioProcessor } from "../../processing/audioProcessor";
+// import { AudioProcessor } from "../../processing/audioProcessor";
 import WaveformWorker from "worker-loader!./waveformWorker";
 
 interface IWaveformPart {
@@ -35,9 +35,14 @@ export class AudioFile implements ILibraryItem {
     }
 
     public async load() {
-        const sampleRate = AudioProcessor.sampleRate;
+        // const sampleRate = AudioProcessor.sampleRate;
+        const sampleRate = 192000;
         const offlineAudioContext = new OfflineAudioContext(1, 2, sampleRate);
-        this.audioBuffer = await offlineAudioContext.decodeAudioData(this.rawData);
+
+        // create a copy because the array buffer will be transferred when
+        // calling decodeAudioData() and we need the original data when saving
+        const copy = this.rawData.slice(0);
+        this.audioBuffer = await offlineAudioContext.decodeAudioData(copy);
 
         const worker = new WaveformWorker();
         const samples = this.audioBuffer.getChannelData(0);

@@ -39,7 +39,7 @@ export default class Library extends Vue {
     globalState = globalState;
 
     get items() {
-        return this.globalState.library;
+        return this.globalState.library.items;
     }
 
     public openFileDialog() {
@@ -55,7 +55,7 @@ export default class Library extends Vue {
             reader.readAsArrayBuffer(f);
         });
         const item = new AudioFile(f.name, buff);
-        this.globalState.library.push(item);
+        this.globalState.library.addItem(item);
         await item.load();
     }
 
@@ -77,11 +77,11 @@ export default class Library extends Vue {
     }
 
     public addGraph() {
-        this.globalState.library.push(new GraphLibraryItem());
+        this.globalState.library.addItem(new GraphLibraryItem());
     }
 
     public addAutomationClip() {
-        this.globalState.library.push(new AutomationClip());
+        this.globalState.library.addItem(new AutomationClip());
     }
 
 }

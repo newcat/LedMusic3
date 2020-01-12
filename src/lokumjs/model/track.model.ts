@@ -1,5 +1,5 @@
 import uuidv4 from "uuid/v4";
-import { PreventableEvent, StandardEvent } from "../framework";
+import { PreventableEvent, StandardEvent, SequentialHook } from "../framework";
 
 export interface ITrackState {
     id: string;
@@ -29,6 +29,10 @@ export class Track {
         heightChanged: new StandardEvent<number>(),
         beforeRemovableChanged: new PreventableEvent<boolean>(),
         removableChanged: new StandardEvent<boolean>()
+    };
+
+    public hooks = {
+        save: new SequentialHook<ITrackState>()
     };
 
     public _name: string;

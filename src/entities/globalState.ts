@@ -1,5 +1,7 @@
-import { ILibraryItem } from "./library/libraryItem";
+import { observable } from "@nx-js/observer-util";
+import { serialize, deserialize } from "bson";
 import { LokumEditor } from "@/editors/timeline";
+import { LibraryModel } from "./library/libraryModel";
 
 interface IProp {
     type: string;
@@ -12,18 +14,37 @@ interface IScene {
     props: IProp[];
 }
 
-interface IState {
+export interface IState {
     scene: IScene;
-    library: ILibraryItem[];
+    library: LibraryModel;
     timeline: LokumEditor;
     bpm: number;
 }
 
-const globalState: IState = {
-    scene: { props: [] },
-    library: [],
-    timeline: new LokumEditor(),
-    bpm: 130
-};
+class State implements IState {
 
-export default globalState;
+    public scene: IScene = { props: [] };
+    public library = new LibraryModel();
+    public timeline = new LokumEditor();
+    public bpm = 130;
+
+    public save(): Buffer {
+        return serialize({
+            scene: this.scene,
+            timeline: this.timeline.save(),
+            library: this.library.save(),
+            bpm: this.bpm
+        });
+    }
+
+    public load(serialized: Buffer) {
+        const data = deserialize(serialized);
+        this.scene = data.scene;
+        this.library.load(data.library);
+        this.timeline.load(data.timeline);
+        this.bpm = data.bpm;
+    }
+
+}
+
+export default observable(new State());

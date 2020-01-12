@@ -1,5 +1,5 @@
 import uuidv4 from "uuid/v4";
-import { PreventableEvent, StandardEvent } from "../framework";
+import { PreventableEvent, StandardEvent, SequentialHook } from "../framework";
 
 export interface IItemState {
     id: string;
@@ -33,6 +33,10 @@ export class Item {
         resizableChanged: new StandardEvent<boolean>(),
         beforeTemporaryChanged: new PreventableEvent<boolean>(),
         temporaryChanged: new StandardEvent<boolean>()
+    };
+
+    public hooks = {
+        save: new SequentialHook<IItemState>()
     };
 
     private _start: number;
@@ -93,14 +97,14 @@ export class Item {
     }
 
     public save(): IItemState {
-        return {
+        return this.hooks.save.execute({
             id: this.id,
             start: this.start,
             end: this.end,
             trackId: this.trackId,
             resizable: this.resizable,
             data: this.data
-        };
+        });
     }
 
 }

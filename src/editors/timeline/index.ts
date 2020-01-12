@@ -1,5 +1,7 @@
 import { TICKS_PER_BEAT } from "@/constants";
 import { Editor, Track } from "@/lokumjs";
+import { ILibraryItem } from "@/entities/library";
+import globalState from "@/entities/globalState";
 
 export class LokumEditor extends Editor {
 
@@ -10,6 +12,18 @@ export class LokumEditor extends Editor {
         this.addTrack();
         this.labelFunction = (u) => (u / (TICKS_PER_BEAT * 4)).toString();
         this.events.itemAdded.subscribe(this, (i) => {
+
+            if (i.data && i.data.libraryItemId) {
+                const libItem = globalState.library.getItemById(i.data.libraryItemId);
+                if (libItem) {
+                    i.data.libraryItem = libItem;
+                    delete i.data.libraryItemId;
+                } else {
+                    // tslint:disable-next-line: no-console
+                    console.warn(`[Timeline] Could not find library item with id ${i.data.libraryItemId}`);
+                }
+            }
+
             i.events.beforeMoved.subscribe(this, (newPos) => {
                 const startChanged = newPos.start !== i.start;
                 const endChanged = newPos.end !== i.end;
@@ -34,8 +48,21 @@ export class LokumEditor extends Editor {
                     }
                 }
             });
+
+            i.hooks.save.tap(this, (state) => {
+                if (state.data && state.data.libraryItem) {
+                    const libItem = state.data.libraryItem as ILibraryItem;
+                    delete state.data.libraryItem;
+                    state.data.libraryItemId = libItem.id;
+                }
+                return state;
+            });
+
         });
-        this.events.itemRemoved.subscribe(this, (i) => { i.events.beforeMoved.unsubscribe(this); });
+        this.events.itemRemoved.subscribe(this, (i) => {
+            i.events.beforeMoved.unsubscribe(this);
+            i.hooks.save.untap(this);
+        });
     }
 
     public addTrack() {

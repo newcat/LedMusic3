@@ -144,7 +144,7 @@ export default class Timeline extends Vue {
 
     public drop(ev: DragEvent) {
         const id = ev.dataTransfer!.getData("id");
-        const libraryItem = globalState.library.find((i) => i.id === id);
+        const libraryItem = globalState.library.getItemById(id);
         if (!libraryItem) { return; }
 
         let item: Item|undefined;

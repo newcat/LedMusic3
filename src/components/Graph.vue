@@ -21,12 +21,12 @@ export default class Graph extends Vue {
     selectedGraphId = "";
 
     get selectedGraph() {
-        return globalState.library.find((i) => i.id === this.selectedGraphId);
+        return globalState.library.getItemById(this.selectedGraphId);
     }
 
     drop(ev: DragEvent) {
         const id = ev.dataTransfer!.getData("id");
-        const libraryItem = globalState.library.find((i) => i.id === id);
+        const libraryItem = globalState.library.getItemById(id);
         if (libraryItem && libraryItem.type === LibraryItemType.GRAPH) {
             this.selectedGraphId = (libraryItem as GraphLibraryItem).id;
         }
