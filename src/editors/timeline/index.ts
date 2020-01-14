@@ -9,7 +9,7 @@ export class LokumEditor extends Editor {
 
     constructor() {
         super();
-        this.addTrack();
+        this.addDefaultTrack();
         this.labelFunction = (u) => (u / (TICKS_PER_BEAT * 4)).toString();
         this.events.itemAdded.subscribe(this, (i) => {
 
@@ -65,7 +65,7 @@ export class LokumEditor extends Editor {
         });
     }
 
-    public addTrack() {
+    public addDefaultTrack() {
         const t = new Track(`Track ${this.tracks.length + 1}`);
         super.addTrack(t);
         return t;

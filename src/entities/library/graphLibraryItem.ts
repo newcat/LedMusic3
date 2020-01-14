@@ -27,8 +27,7 @@ export class GraphLibraryItem implements ILibraryItem {
     public serialize() {
         return serialize({
             id: this.id,
-            type: this.type,
-            state: this.editor.save(),
+            state: this.editor.save()
         });
     }
 

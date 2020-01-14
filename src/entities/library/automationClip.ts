@@ -83,7 +83,6 @@ export class AutomationClip implements ILibraryItem {
     public serialize() {
         return serialize({
             id: this.id,
-            type: this.type,
             name: this.name,
             points: this.points,
         });

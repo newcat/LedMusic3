@@ -34,6 +34,12 @@ export class TimelineProcessor {
         const libraryItem = item.data.libraryItem as ILibraryItem;
         if (libraryItem.type === LibraryItemType.AUDIO_FILE) {
             const af = libraryItem as AudioFile;
+            if (af.loading) {
+                af.events.loaded.subscribe(this, () => {
+                    af.events.loaded.unsubscribe(this);
+                    this.activate(item);
+                });
+            }
             this.audioProcessor.registerBuffer(af.audioBuffer!, item.start);
             item.events.moved.subscribe(this, () => {
                 this.audioProcessor.unregisterBuffer(af.audioBuffer!);

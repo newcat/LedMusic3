@@ -29,7 +29,13 @@ export class Editor {
     public get items() { return this._items as ReadonlyArray<Item>; }
 
     public load(state: IEditorState) {
-        state.tracks.forEach((ts) => this.addTrack(Track.load(ts)));
+        this.items.forEach((i) => this.removeItem(i));
+        this.tracks.forEach((t) => this.removeTrack(t));
+        for (const ts of state.tracks) {
+            const t = Track.load(ts);
+            this.addTrack(t);
+        }
+        // state.tracks.forEach((ts) => this.addTrack(Track.load(ts)));
         state.items.forEach((is) => this.addItem(Item.load(is)));
     }
 

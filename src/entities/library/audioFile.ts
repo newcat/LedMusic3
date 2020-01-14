@@ -4,6 +4,7 @@ import { Texture } from "pixi.js";
 import { ILibraryItem, LibraryItemType } from "./libraryItem";
 // import { AudioProcessor } from "../../processing/audioProcessor";
 import WaveformWorker from "worker-loader!./waveformWorker";
+import { StandardEvent } from "@/lokumjs";
 
 interface IWaveformPart {
     start: number;
@@ -15,7 +16,7 @@ export class AudioFile implements ILibraryItem {
 
     public static deserialize(data: Buffer) {
         const { id, name, rawData } = deserialize(data);
-        const af = new AudioFile(name, rawData as Buffer);
+        const af = new AudioFile(name, (rawData as Binary).buffer.buffer);
         af.id = id;
         return af;
     }
@@ -26,6 +27,10 @@ export class AudioFile implements ILibraryItem {
     public loading = true;
     public audioBuffer: AudioBuffer|null = null;
     public textures: IWaveformPart[] = [];
+
+    public events = {
+        loaded: new StandardEvent()
+    };
 
     private rawData: ArrayBuffer;
 
@@ -64,12 +69,12 @@ export class AudioFile implements ILibraryItem {
         });
 
         this.loading = false;
+        this.events.loaded.emit();
     }
 
     public serialize() {
         return serialize({
             id: this.id,
-            type: this.type,
             name: this.name,
             rawData: new Binary(Buffer.from(this.rawData)),
         });

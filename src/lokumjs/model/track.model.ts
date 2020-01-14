@@ -13,13 +13,13 @@ export class Track {
 
     public static load(state: ITrackState): Track {
         const t = new Track(state.name, state.data);
-        (t as any).id = state.id;
+        t.id = state.id;
         t.height = state.height;
         t.removable = state.removable;
         return t;
     }
 
-    public readonly id = uuidv4();
+    public id = uuidv4();
     public data?: Record<string, any>;
 
     public events = {

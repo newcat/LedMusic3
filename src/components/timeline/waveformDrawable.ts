@@ -15,7 +15,13 @@ export class WaveformDrawable extends Drawable<IItemDrawableProps> {
     public setup() {
 
         const libraryItem = this.props.item.data!.libraryItem as AudioFile;
-        if (libraryItem.loading) { return; }
+        if (libraryItem.loading) {
+            libraryItem.events.loaded.subscribe(this, () => {
+                libraryItem.events.loaded.unsubscribe(this);
+                this.setup();
+            });
+            return;
+        }
 
         const waveformParts = (libraryItem as AudioFile).textures;
         if (this.sprites.length === 0) {
@@ -26,9 +32,14 @@ export class WaveformDrawable extends Drawable<IItemDrawableProps> {
             });
         }
 
+        this.needsRender = true;
+
     }
 
     public render() {
+
+        if (this.sprites.length === 0) { return; }
+
         const totalLength = this.sprites[this.sprites.length - 1].end;
         const factor = this.props.width / totalLength;
         this.sprites.forEach((p) => {
@@ -36,6 +47,7 @@ export class WaveformDrawable extends Drawable<IItemDrawableProps> {
             p.sprite.width = (p.end + 1 - p.start) * factor;
             p.sprite.height = this.props.height;
         });
+
     }
 
 }

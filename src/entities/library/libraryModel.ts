@@ -30,7 +30,9 @@ export class LibraryModel {
             const buffer = data.buffer;
             switch (type) {
                 case LibraryItemType.AUDIO_FILE:
-                    newItems.push(AudioFile.deserialize(buffer));
+                    const af = AudioFile.deserialize(buffer);
+                    af.load();
+                    newItems.push(af);
                     break;
                 case LibraryItemType.AUTOMATION_CLIP:
                     newItems.push(AutomationClip.deserialize(buffer));

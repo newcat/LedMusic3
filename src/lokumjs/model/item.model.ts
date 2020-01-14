@@ -14,12 +14,12 @@ export class Item {
 
     public static load(state: IItemState): Item {
         const i = new Item(state.trackId, state.start, state.end, state.data);
-        (i as any).id = state.id;
+        i.id = state.id;
         i.resizable = state.resizable;
         return i;
     }
 
-    public readonly id = uuidv4();
+    public id = uuidv4();
     public data?: Record<string, any>;
 
     public events = {

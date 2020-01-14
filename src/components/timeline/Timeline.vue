@@ -198,7 +198,7 @@ export default class Timeline extends Vue {
             const trackItems = this.editor.items.filter((i) => i.trackId === t.id);
             return !trackItems.some((i) => i.start < length);
         });
-        if (!track) { track = this.editor.addTrack(); }
+        if (!track) { track = this.editor.addDefaultTrack(); }
 
         const item = new Item(track.id, 0, length, { libraryItem });
         return item;

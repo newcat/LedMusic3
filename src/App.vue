@@ -20,7 +20,7 @@ v-app
                                 c-graph.fill-height
                     template(slot="paneR")
                         c-timeline
-    input(ref="fileinput", type="file", @change="load", style="display: none;")
+    input(ref="fileinput", type="file", accept=".lmp" @change="load", style="display: none;")
 </template>
 
 <script lang="ts">
