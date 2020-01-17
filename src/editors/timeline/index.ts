@@ -1,16 +1,18 @@
 import { TICKS_PER_BEAT } from "@/constants";
 import { Editor, Track } from "@/lokumjs";
-import { ILibraryItem } from "@/entities/library";
+import { ILibraryItem, LibraryItemType, AudioFile } from "@/entities/library";
 import globalState from "@/entities/globalState";
 
 export class LokumEditor extends Editor {
 
     snapUnits = TICKS_PER_BEAT / 2;
+    ignoreSnap = false;
 
     constructor() {
         super();
         this.addDefaultTrack();
         this.labelFunction = (u) => (u / (TICKS_PER_BEAT * 4)).toString();
+
         this.events.itemAdded.subscribe(this, (i) => {
 
             if (i.data && i.data.libraryItemId) {
@@ -59,10 +61,14 @@ export class LokumEditor extends Editor {
             });
 
         });
+
         this.events.itemRemoved.subscribe(this, (i) => {
             i.events.beforeMoved.unsubscribe(this);
             i.hooks.save.untap(this);
         });
+
+        globalState.events.bpmChanged.subscribe(this, () => this.updateAudioItemLengths());
+
     }
 
     public addDefaultTrack() {
@@ -72,8 +78,24 @@ export class LokumEditor extends Editor {
     }
 
     public snap(unit: number) {
+        if (this.ignoreSnap) { return unit; }
         const mod = unit % this.snapUnits;
         return mod <= (this.snapUnits / 2) ? unit - mod : unit + this.snapUnits - mod;
+    }
+
+    /** This function is called whenever the BPM is changed */
+    private updateAudioItemLengths() {
+        const bpm = globalState.bpm;
+        this.ignoreSnap = true;
+        this.items.forEach((i) => {
+            const libItem = i.data!.libraryItem as ILibraryItem;
+            if (libItem.type === LibraryItemType.AUDIO_FILE) {
+                const af = libItem as AudioFile;
+                const length = af.audioBuffer!.duration * (bpm / 60) * TICKS_PER_BEAT;
+                i.move(i.start, i.start + length);
+            }
+        });
+        this.ignoreSnap = false;
     }
 
 }

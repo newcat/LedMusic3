@@ -1,7 +1,7 @@
-import { observable } from "@nx-js/observer-util";
 import { serialize, deserialize } from "bson";
 import { LokumEditor } from "@/editors/timeline";
 import { LibraryModel } from "./library/libraryModel";
+import { StandardEvent } from "@/lokumjs";
 
 interface IProp {
     type: string;
@@ -25,10 +25,27 @@ export interface IState {
 class State implements IState {
 
     public scene: IScene = { props: [] };
-    public library = new LibraryModel();
-    public timeline = new LokumEditor();
-    public bpm = 130;
-    public fps = 30;
+    public library!: LibraryModel;
+    public timeline!: LokumEditor;
+
+    public events = {
+        bpmChanged: new StandardEvent<number>(),
+        fpsChanged: new StandardEvent<number>()
+    };
+
+    private $bpm = 130;
+    private $fps = 30;
+
+    public get bpm() { return this.$bpm; }
+    public set bpm(v: number) { this.$bpm = v; this.events.bpmChanged.emit(v); }
+
+    public get fps() { return this.$fps; }
+    public set fps(v: number) { this.$fps = v; this.events.fpsChanged.emit(v); }
+
+    public initialize() {
+        this.library = new LibraryModel();
+        this.timeline = new LokumEditor();
+    }
 
     public save(): Buffer {
         return serialize({
@@ -49,4 +66,4 @@ class State implements IState {
 
 }
 
-export default observable(new State());
+export default new State();

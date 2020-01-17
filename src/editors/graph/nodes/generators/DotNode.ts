@@ -1,6 +1,5 @@
 import { Node } from "@baklavajs/core";
 import chroma, { Color } from "chroma-js";
-import GlobalProperties from "@/GlobalProperties";
 
 export class DotNode extends Node {
 
@@ -21,7 +20,7 @@ export class DotNode extends Node {
 
     public calculate() {
 
-        const resolution = GlobalProperties.resolution;
+        const resolution = 60; // TODO
 
         const centerPosition = this.clamp(this.getInterface("Center Position").value, 0, 1);
         const alpha = this.clamp(this.getInterface("Alpha").value, 0, 1);

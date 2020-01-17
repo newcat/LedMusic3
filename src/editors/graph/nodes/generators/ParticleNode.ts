@@ -1,6 +1,6 @@
 import { Node } from "@baklavajs/core";
 import chroma, { Color } from "chroma-js";
-import GlobalProperties from "@/GlobalProperties";
+import globalState from "@/entities/globalState";
 
 interface IParticle {
     currentLifetime: number;
@@ -40,7 +40,7 @@ export class ParticleNode extends Node {
 
     public calculate() {
 
-        const resolution = GlobalProperties.resolution;
+        const resolution = 60; // TODO
 
         this.particles.forEach((p) => p.currentLifetime++);
         this.particles = this.particles.filter((p) =>
@@ -53,7 +53,7 @@ export class ParticleNode extends Node {
 
         if (this.getInterface("Emit").value) {
 
-            const fps = GlobalProperties.fps;
+            const fps = globalState.fps;
             const rate = this.getInterface("Rate").value / fps;
             const startVelocity = this.getInterface("Start Velocity").value / fps;
             const endVelocity = this.getInterface("End Velocity").value / fps;

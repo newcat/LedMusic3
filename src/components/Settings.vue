@@ -1,5 +1,5 @@
 <template lang="pug">
-v-dialog(:value="value", max-width="400")
+v-dialog(:value="value", @input="$emit('input', $event)" max-width="400")
     v-card
         v-card-title
             .headline Settings
@@ -37,6 +37,9 @@ export default class Settings extends Vue {
 
     save() {
         this.$emit("input", false);
+        // TODO: Validation
+        globalState.bpm = parseInt(this.vBpm, 10);
+        globalState.fps = parseInt(this.vFps, 10);
     }
 
 }

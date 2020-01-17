@@ -1,3 +1,5 @@
+import globalState from "@/entities/globalState";
+
 // inspired by: https://github.com/katspaugh/wavesurfer.js/blob/master/src/webaudio.js
 
 interface IAudioTrack {
@@ -22,7 +24,6 @@ export class AudioProcessor {
 
     private $position = 0;
     private $isPlaying = false;
-    private $bpm = 130;
 
     public get volume() { return this.gainNode.gain.value; }
     public set volume(value: number) { this.gainNode.gain.setValueAtTime(value, this.audioContext.currentTime); }
@@ -93,11 +94,11 @@ export class AudioProcessor {
     }
 
     public unitToSeconds(units: number) {
-        return (units / 24) * (60 / this.$bpm);
+        return (units / 24) * (60 / globalState.bpm);
     }
 
     public secondsToUnits(seconds: number) {
-        return (seconds / 60) * this.$bpm * 24;
+        return (seconds / 60) * globalState.bpm * 24;
     }
 
     public registerBuffer(buffer: AudioBuffer, startUnit: number) {

@@ -7,7 +7,6 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
-    "@nx-js/observer-util": "^4.2.2",
     "@types/bson": "^4.0.1",
     "@types/chart.js": "^2.9.7",
     "@types/chroma-js": "^1.4.2",

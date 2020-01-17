@@ -35,6 +35,7 @@ import CGraph from "@/components/Graph.vue";
 import CSettings from "@/components/Settings.vue";
 import { BaklavaEditor } from "@/editors/graph";
 import globalState from "@/entities/globalState";
+import { globalProcessor } from "@/processing";
 
 @Component({
     components: { CLibrary, CTimeline, CGraph, CSettings }
@@ -42,6 +43,11 @@ import globalState from "@/entities/globalState";
 export default class App extends Vue {
 
     showSettings = false;
+
+    created() {
+        globalState.initialize();
+        globalProcessor.initialize();
+    }
 
     save() {
         const state = globalState.save();
