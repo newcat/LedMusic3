@@ -5,6 +5,7 @@ module.exports = {
   devServer: {
       hot: false
   },
+  publicPath: "./",
   pluginOptions: {
     webpackBundleAnalyzer: {
         analyzerMode: "static",
