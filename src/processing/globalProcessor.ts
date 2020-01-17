@@ -8,6 +8,8 @@ class GlobalProcessor {
     public audioProcessor!: AudioProcessor;
     public timelineProcessor!: TimelineProcessor;
 
+    public paused = true;
+
     public events = {
         positionChanged: new StandardEvent<number>(),
         tick: new StandardEvent()
@@ -37,10 +39,12 @@ class GlobalProcessor {
     }
 
     public play() {
+        this.paused = false;
         this.audioProcessor.play();
     }
 
     public pause() {
+        this.paused = true;
         this.audioProcessor.pause();
     }
 
@@ -52,6 +56,7 @@ class GlobalProcessor {
     }
 
     private tick() {
+        if (this.paused) { return; }
         this.audioProcessor.updatePosition();
         const oldPosition = this._position;
         this._position = this.audioProcessor.position;

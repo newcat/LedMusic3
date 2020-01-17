@@ -90,8 +90,9 @@ export default class Library extends Vue {
 .library-grid {
     display: grid;
     grid-gap: 10px;
-    grid-template: repeat(3, 1fr) / repeat(3, 1fr);
     grid-auto-flow: row;
+    grid-auto-rows: 1fr;
+    grid-template-columns: repeat(3, 1fr);
 }
 
 
