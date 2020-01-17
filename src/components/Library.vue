@@ -1,6 +1,6 @@
 <template lang="pug">
 v-card
-    v-toolbar(dense)
+    v-toolbar(dense, flat)
         v-toolbar-title Library
         v-spacer
         v-menu(bottom, left)
@@ -16,14 +16,13 @@ v-card
                     v-list-item-title Automation Clip
 
     v-container(fluid, style="height: calc(100% - 48px); overflow-y: auto;", grid-list-md)
-        v-layout(row, wrap)
-            v-flex(v-for="(item, i) in items", :key="i", xs4)
-                v-card.pa-3(outlined, draggable, @dragstart="dragstart($event, item.id)")
-                    div.d-flex.flex-column.justify-space-around.text-center
-                        div
-                            v-progress-circular(v-if="item.loading", indeterminate, color="primary")
-                            v-icon(v-else) {{ getIconByType(item.type) }}
-                        .caption {{ item.name }}
+        .library-grid
+            v-card.pa-3(v-for="(item, i) in items", :key="i", outlined, draggable, @dragstart="dragstart($event, item.id)", color="#424250")
+                .library-item
+                    div.mb-2
+                        v-progress-circular(v-if="item.loading", indeterminate, color="primary")
+                        v-icon(v-else) {{ getIconByType(item.type) }}
+                    | {{ item.name }}
 
     input(ref="fileinput", type="file", @change="loadAudio", style="display: none;")
 </template>
@@ -86,3 +85,23 @@ export default class Library extends Vue {
 
 }
 </script>
+
+<style scoped>
+.library-grid {
+    display: grid;
+    grid-gap: 10px;
+    grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+    grid-auto-flow: row;
+}
+
+
+.library-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    text-align: center;
+    height: 100%;
+    min-height: 4em;
+}
+</style>

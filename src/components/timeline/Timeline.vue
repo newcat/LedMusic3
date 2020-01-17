@@ -1,9 +1,11 @@
 <template lang="pug">
 .fill-height
-    .d-flex.px-3.align-items-center.elevation-4(style="height:48px")
-        v-btn(text, @click="() => editor.addTrack()") Add Track
-        c-slider.ml-3(:value="volume", @input="setVolume", name="Volume", :option="{ min: 0, max: 1 }")
-        c-select.ml-3(:value="snapUnits", @input="setSnap", label="Snap", :items="snapItems", style="width: 10em;")
+    .d-flex.px-3.align-items-center(style="height:48px")
+        v-btn(text, @click="() => editor.addDefaultTrack()") Add Track
+        v-divider.mx-2(vertical)
+        v-slider(:value="volume * 100", @input="setVolume", :min="0", :max="100", prepend-icon="volume_up", dense, style="max-width: 10em;", hide-details)
+        v-divider.mx-2(vertical)
+        v-select(:value="snapUnits", @input="setSnap", :items="snapItems", style="max-width: 12em;", dense, flat, solo, hide-details, prepend-icon="straighten")
     div#wrapper(ref="wrapper" @drop="drop" @dragover="$event.preventDefault()")
 </template>
 
@@ -37,13 +39,13 @@ enum LabelMode {
 }
 
 const customColors = {
-    accent: 0x5379B5,
-    header: 0x353535,
-    timeline: 0x424242,
+    accent: 0x1eb980,
+    header: 0x33333d,
+    timeline: 0x373740,
     labelsMajor: 0xbbbbbb,
-    labelsMinor: 0x555555,
+    labelsMinor: 0x504f5c,
     text: 0xffffff,
-    markerLine: 0x555555,
+    markerLine: 0x504f5c,
     secondary: 0x888888
 } as IColorDefinitions;
 
@@ -74,6 +76,8 @@ export default class Timeline extends Vue {
     private labelMode: LabelMode = LabelMode.BEATS;
     private resizeObserver!: ResizeObserver;
 
+    private viewInstance: View = (null as any);
+
     public get snapUnits() {
         return this.editor.snapUnits.toString();
     }
@@ -81,6 +85,7 @@ export default class Timeline extends Vue {
     public async mounted() {
 
         const view = await View.mount(this.editor, this.$refs.wrapper as HTMLElement);
+        this.viewInstance = view;
 
         this.fpsText.position.set(10, 10);
         view.app.stage.addChild(this.fpsText);
@@ -116,21 +121,8 @@ export default class Timeline extends Vue {
         });
 
         view.positionCalculator.unitWidth = 2.5;
-        view.positionCalculator.markerSpace = TICKS_PER_BEAT * 4;
-        view.positionCalculator.markerMajorMultiplier = 4;
-        view.positionCalculator.events.zoomed.subscribe(this, () => {
-            const pc = view.positionCalculator;
-            if (pc.unitWidth < 0.25) {
-                pc.markerSpace = TICKS_PER_BEAT * 16;
-                pc.markerMajorMultiplier = 1;
-            } else if (pc.unitWidth > 2) {
-                pc.markerSpace = TICKS_PER_BEAT;
-                pc.markerMajorMultiplier = 4;
-            } else {
-                pc.markerSpace = TICKS_PER_BEAT * 4;
-                pc.markerMajorMultiplier = 4;
-            }
-        });
+        view.positionCalculator.events.zoomed.subscribe(this, () => this.updateMarkerSpacing());
+        this.updateMarkerSpacing();
 
         view.colors = { ...view.colors, ...customColors };
         view.itemDrawableFunction = (item) => this.getItemDrawable(item);
@@ -166,7 +158,7 @@ export default class Timeline extends Vue {
     }
 
     public setVolume(v: number) {
-        globalProcessor.audioProcessor.volume = Math.max(0, Math.min(1, v));
+        globalProcessor.audioProcessor.volume = Math.max(0, Math.min(1, v / 100));
         this.volume = globalProcessor.audioProcessor.volume;
     }
 
@@ -213,6 +205,20 @@ export default class Timeline extends Vue {
                 return AutomationClipDrawable;
             default:
                 return null;
+        }
+    }
+
+    private updateMarkerSpacing() {
+        const pc = this.viewInstance.positionCalculator;
+        if (pc.unitWidth < 0.25) {
+            pc.markerSpace = TICKS_PER_BEAT * 16;
+            pc.markerMajorMultiplier = 1;
+        } else if (pc.unitWidth > 2) {
+            pc.markerSpace = TICKS_PER_BEAT;
+            pc.markerMajorMultiplier = 4;
+        } else {
+            pc.markerSpace = TICKS_PER_BEAT * 4;
+            pc.markerMajorMultiplier = 4;
         }
     }
 

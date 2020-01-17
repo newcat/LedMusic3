@@ -16,7 +16,7 @@ export class PositionCalculator {
     };
 
     private _offset = 0;
-    private _unitWidth = 0;
+    private _unitWidth = 1;
     private _markerSpace = 5;
     private _markerMajorMultiplier = 3;
     private _markers: IMarker[] = [];
@@ -63,6 +63,7 @@ export class PositionCalculator {
     }
 
     private calculateMarkers() {
+        if (this.unitWidth <= 0) { return; }
         const markers: IMarker[] = [];
         let n = 0;
         let unit = 0;

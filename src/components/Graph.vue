@@ -1,6 +1,6 @@
 <template lang="pug">
 v-card.d-flex.flex-column(@drop="drop" @dragover="$event.preventDefault()")
-    div.d-flex.align-items-center.px-3.elevation-4(style="height:48px")
+    v-toolbar(dense, flat, style="max-height: 48px;")
         v-toolbar-title
             | Graph Editor
             small(v-if="selectedGraph") &nbsp; ({{ selectedGraph.name }})

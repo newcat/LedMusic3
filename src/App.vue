@@ -3,9 +3,11 @@ v-app
     v-content
         #app-container
             .mb-2.flex-shrink-1
-                v-toolbar(dense)
+                v-toolbar(dense, color="surface")
                     v-toolbar-title LedMusic
                     v-spacer
+                    v-btn(icon, @click="showSettings = true")
+                        v-icon settings_applications
                     v-btn(icon, @click="save")
                         v-icon save
                     v-btn(icon, @click="openLoadDialog")
@@ -21,6 +23,7 @@ v-app
                     template(slot="paneR")
                         c-timeline
     input(ref="fileinput", type="file", accept=".lmp" @change="load", style="display: none;")
+    c-settings(v-model="showSettings")
 </template>
 
 <script lang="ts">
@@ -29,13 +32,16 @@ import { Component, Prop, Vue } from "vue-property-decorator";
 import CLibrary from "@/components/Library.vue";
 import CTimeline from "@/components/timeline/Timeline.vue";
 import CGraph from "@/components/Graph.vue";
+import CSettings from "@/components/Settings.vue";
 import { BaklavaEditor } from "@/editors/graph";
 import globalState from "@/entities/globalState";
 
 @Component({
-    components: { CLibrary, CTimeline, CGraph }
+    components: { CLibrary, CTimeline, CGraph, CSettings }
 })
 export default class App extends Vue {
+
+    showSettings = false;
 
     save() {
         const state = globalState.save();

@@ -19,6 +19,7 @@ export interface IState {
     library: LibraryModel;
     timeline: LokumEditor;
     bpm: number;
+    fps: number;
 }
 
 class State implements IState {
@@ -27,6 +28,7 @@ class State implements IState {
     public library = new LibraryModel();
     public timeline = new LokumEditor();
     public bpm = 130;
+    public fps = 30;
 
     public save(): Buffer {
         return serialize({
