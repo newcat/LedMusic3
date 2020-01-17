@@ -4,5 +4,11 @@ module.exports = {
   ],
   devServer: {
       hot: false
+  },
+  pluginOptions: {
+    webpackBundleAnalyzer: {
+        analyzerMode: "static",
+        openAnalyzer: false
+    }
   }
 }
