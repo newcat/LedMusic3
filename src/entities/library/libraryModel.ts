@@ -3,8 +3,14 @@ import { serialize, deserialize, Binary } from "bson";
 import { AudioFile } from "./audioFile";
 import { AutomationClip } from "./automationClip";
 import { GraphLibraryItem } from "./graphLibraryItem";
+import { StandardEvent } from "@/lokumjs";
 
 export class LibraryModel {
+
+    public events = {
+        itemAdded: new StandardEvent<ILibraryItem>(),
+        itemRemoved: new StandardEvent<ILibraryItem>()
+    };
 
     private _items: ILibraryItem[] = [];
 
@@ -56,6 +62,15 @@ export class LibraryModel {
 
     public addItem(item: ILibraryItem) {
         this._items.push(item);
+        this.events.itemAdded.emit(item);
+    }
+
+    public removeItem(item: ILibraryItem) {
+        const i = this._items.indexOf(item);
+        if (i >= 0) {
+            this._items.splice(i, 1);
+            this.events.itemRemoved.emit(item);
+        }
     }
 
 }

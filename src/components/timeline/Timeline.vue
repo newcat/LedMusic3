@@ -2,10 +2,12 @@
 .fill-height
     .d-flex.px-3.align-items-center(style="height:48px")
         v-btn(text, @click="() => editor.addDefaultTrack()") Add Track
-        v-divider.mx-2(vertical)
+        v-divider.mx-4(vertical)
         v-slider(:value="volume * 100", @input="setVolume", :min="0", :max="100", prepend-icon="volume_up", dense, style="max-width: 10em;", hide-details)
-        v-divider.mx-2(vertical)
+        v-divider.mx-4(vertical)
         v-select(:value="snapUnits", @input="setSnap", :items="snapItems", style="max-width: 12em;", dense, flat, solo, hide-details, prepend-icon="straighten")
+        v-divider.mx-4(vertical)
+        v-text-field(:value="bpm", @input="setBpm", label="BPM", style="max-width: 6em;", dense, flat, solo, hide-details, prepend-icon="speed")
     div#wrapper(ref="wrapper" @drop="drop" @dragover="$event.preventDefault()")
 </template>
 
@@ -82,6 +84,10 @@ export default class Timeline extends Vue {
         return this.editor.snapUnits.toString();
     }
 
+    public get bpm() {
+        return globalState.bpm.toString();
+    }
+
     public async mounted() {
 
         const view = await View.mount(this.editor, this.$refs.wrapper as HTMLElement);
@@ -111,7 +117,7 @@ export default class Timeline extends Vue {
         });
 
         view.eventBus.events.keydown.subscribe(this, (ev) => {
-            if (ev.key === " ") {
+            if (ev.key === " " && document.activeElement?.nodeName !== "INPUT") {
                 if (globalProcessor.isPlaying) {
                     globalProcessor.pause();
                 } else {
@@ -153,6 +159,19 @@ export default class Timeline extends Vue {
         }
 
         if (item) {
+            const x = ev.clientX - this.viewInstance.timelineDrawable.props.trackHeaderWidth;
+            const unit = this.editor.snap(this.viewInstance.positionCalculator.getUnit(x));
+            item.move(unit, unit + (item.end - item.start));
+
+            // find a free track, if no one exists, create a new one
+            const isOverlapping = (i1: Item, i2: Item) => Math.max(i1.start, i2.start) <= Math.min(i1.end, i2.end);
+            let track = this.editor.tracks.find((t) => {
+                const trackItems = this.editor.items.filter((i) => i.trackId === t.id);
+                return !trackItems.some((i) => isOverlapping(i, item!));
+            });
+            if (!track) { track = this.editor.addDefaultTrack(); }
+
+            item.trackId = track.id;
             this.editor.addItem(item);
         }
     }
@@ -160,6 +179,10 @@ export default class Timeline extends Vue {
     public setVolume(v: number) {
         globalProcessor.audioProcessor.volume = Math.max(0, Math.min(1, v / 100));
         this.volume = globalProcessor.audioProcessor.volume;
+    }
+
+    public setBpm(v: string) {
+        globalState.bpm = parseInt(v, 10);
     }
 
     public setSnap(value: string) {
@@ -185,14 +208,8 @@ export default class Timeline extends Vue {
     }
 
     private createItem(length: number, libraryItem: ILibraryItem) {
-        // find a free track, if no one exists, create a new one
-        let track = this.editor.tracks.find((t) => {
-            const trackItems = this.editor.items.filter((i) => i.trackId === t.id);
-            return !trackItems.some((i) => i.start < length);
-        });
-        if (!track) { track = this.editor.addDefaultTrack(); }
-
-        const item = new Item(track.id, 0, length, { libraryItem });
+        // set the track id to "" temporarily, we will determine the track later
+        const item = new Item("", 0, length, { libraryItem });
         return item;
     }
 

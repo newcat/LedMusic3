@@ -17,7 +17,12 @@ v-card(flat)
 
     v-container(fluid, style="height: calc(100% - 48px); overflow-y: auto;", grid-list-md)
         .library-grid
-            v-card.pa-3(v-for="(item, i) in items", :key="i", outlined, draggable, @dragstart="dragstart($event, item.id)", color="#424250")
+            v-card.pa-3(
+                v-for="(item, i) in items", :key="i",
+                outlined, draggable, color="#424250",
+                @dragstart="dragstart($event, item.id)",
+                @dblclick="openItemSettings(item)"
+            )
                 .library-item
                     div.mb-2
                         v-progress-circular(v-if="item.loading", indeterminate, color="primary")
@@ -25,17 +30,23 @@ v-card(flat)
                     | {{ item.name }}
 
     input(ref="fileinput", type="file", @change="loadAudio", style="display: none;")
+    item-settings(v-model="settingsOpen", :item="settingsItem")
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
-import { AudioFile, AutomationClip, GraphLibraryItem, LibraryItemType } from "@/entities/library";
+import { AudioFile, AutomationClip, GraphLibraryItem, LibraryItemType, ILibraryItem } from "@/entities/library";
 import globalState from "@/entities/globalState";
+import ItemSettings from "./LibraryItemSettings.vue";
 
-@Component
+@Component({
+    components: { ItemSettings }
+})
 export default class Library extends Vue {
 
     globalState = globalState;
+    settingsOpen = false;
+    settingsItem: ILibraryItem|null = null;
 
     get items() {
         return this.globalState.library.items;
@@ -81,6 +92,11 @@ export default class Library extends Vue {
 
     public addAutomationClip() {
         this.globalState.library.addItem(new AutomationClip());
+    }
+
+    public openItemSettings(item: ILibraryItem) {
+        this.settingsItem = item;
+        this.settingsOpen = true;
     }
 
 }

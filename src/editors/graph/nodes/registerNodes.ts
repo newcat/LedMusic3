@@ -20,5 +20,5 @@ export function registerNodes(editor: Editor) {
     registerCategory(editor, ConverterNodes, "Converters");
     registerCategory(editor, GeneratorNodes, "Generators");
     registerCategory(editor, OutputNodes, "Outputs");
-    editor.registerNodeType("Automation Node", AutomationNode);
+    editor.registerNodeType("AutomationNode", AutomationNode);
 }
