@@ -1,5 +1,5 @@
 <template lang="pug">
-v-card.d-flex.flex-column(@drop="drop" @dragover="$event.preventDefault()")
+v-card.d-flex.flex-column(flat, @drop="drop" @dragover="$event.preventDefault()")
     v-toolbar(dense, flat, style="max-height: 48px;")
         v-toolbar-title
             | Graph Editor

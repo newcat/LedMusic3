@@ -1,5 +1,5 @@
 <template lang="pug">
-v-card
+v-card(flat)
     v-toolbar(dense, flat)
         v-toolbar-title Library
         v-spacer
