@@ -52,7 +52,8 @@ class State implements IState {
             scene: this.scene,
             timeline: this.timeline.save(),
             library: this.library.save(),
-            bpm: this.bpm
+            bpm: this.bpm,
+            fps: this.fps
         });
     }
 
@@ -62,6 +63,7 @@ class State implements IState {
         this.library.load(data.library);
         this.timeline.load(data.timeline);
         this.bpm = data.bpm;
+        this.fps = data.fps;
     }
 
 }
