@@ -91,7 +91,8 @@ export class LokumEditor extends Editor {
             const libItem = i.data!.libraryItem as ILibraryItem;
             if (libItem.type === LibraryItemType.AUDIO_FILE) {
                 const af = libItem as AudioFile;
-                const length = af.audioBuffer!.duration * (bpm / 60) * TICKS_PER_BEAT;
+                if (!af.audioBuffer) { return; }
+                const length = af.audioBuffer.duration * (bpm / 60) * TICKS_PER_BEAT;
                 i.move(i.start, i.start + length);
             }
         });

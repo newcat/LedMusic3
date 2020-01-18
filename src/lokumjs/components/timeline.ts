@@ -70,8 +70,8 @@ export class TimelineView extends Drawable<ITimelineViewProps> {
         this.tracks.onNewItem = (newTrack) => this.createView(TrackView, { track: newTrack, headerWidth: this.props.trackHeaderWidth });
         this.tracks.onRender = (trackView, t, i) => { trackView.graphics.y = this.trackOffsets[i]; };
         this.tracks.bind(this.props.editor.tracks, [
-            this.props.editor.events.itemAdded,
-            this.props.editor.events.itemRemoved
+            this.props.editor.events.trackAdded,
+            this.props.editor.events.trackRemoved
         ]);
 
         this.yScroll = this.header.props.headerHeight;

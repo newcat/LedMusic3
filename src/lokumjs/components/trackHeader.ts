@@ -23,6 +23,8 @@ export default class TrackHeaderView extends Drawable<ITrackHeaderViewProps> {
 
     public setup() {
 
+        this.graphics.interactive = true; // To prevent items underneath being clicked
+
         this.graphics.addChild(this.text);
         this.graphics.addChild(this.btnCloseSprite);
 
