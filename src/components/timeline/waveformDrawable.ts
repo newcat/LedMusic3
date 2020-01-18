@@ -48,8 +48,6 @@ export class WaveformDrawable extends Drawable<IItemDrawableProps> {
             p.sprite.height = this.props.height;
         });
 
-        console.log("Rendered waveform");
-
     }
 
 }

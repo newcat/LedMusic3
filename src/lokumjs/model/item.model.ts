@@ -103,7 +103,7 @@ export class Item {
             end: this.end,
             trackId: this.trackId,
             resizable: this.resizable,
-            data: this.data
+            data: { ...this.data }
         });
     }
 

@@ -74,7 +74,7 @@ export class Track {
             name: this.name,
             height: this.height,
             removable: this.removable,
-            data: this.data
+            data: { ...this.data }
         };
     }
 
