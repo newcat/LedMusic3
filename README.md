@@ -1,34 +1,7 @@
-# ledmusic3
+# LedMusic3
 
-## Project setup
-```
-yarn install
-```
+![demo](demo.png)
 
-### Compiles and hot-reloads for development
-```
-yarn run serve
-```
+This is a WIP music visualization editor. It is fully browser-based, no installation required. Try it out: https://newcat.github.io/LedMusic3/
 
-### Compiles and minifies for production
-```
-yarn run build
-```
-
-### Run your tests
-```
-yarn run test
-```
-
-### Lints and fixes files
-```
-yarn run lint
-```
-
-### Run your unit tests
-```
-yarn run test:unit
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+> Due to the use of `OffscreenCanvas`, Chrome is required as it is not yet implemented in Firefox)
