@@ -26,7 +26,7 @@ import { AutomationClipDrawable } from "./automationClipDrawable";
 import { WaveformDrawable } from "./waveformDrawable";
 import { PositionIndicator } from "./positionIndicator";
 import { PluginOptionsVue } from "baklavajs";
-import { IColorDefinitions } from "@/lokumjs/colors";
+import customColors from "@/colors";
 import CSelect from "@/components/elements/Select.vue";
 
 interface IWaveformPart {
@@ -39,17 +39,6 @@ enum LabelMode {
     BEATS,
     BARS
 }
-
-const customColors = {
-    accent: 0x1eb980,
-    header: 0x33333d,
-    timeline: 0x373740,
-    labelsMajor: 0xbbbbbb,
-    labelsMinor: 0x504f5c,
-    text: 0xffffff,
-    markerLine: 0x504f5c,
-    secondary: 0x888888
-} as IColorDefinitions;
 
 @Component({
     components: { CSlider: PluginOptionsVue.SliderOption, CSelect }

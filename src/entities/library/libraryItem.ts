@@ -9,5 +9,6 @@ export interface ILibraryItem {
     type: LibraryItemType;
     name: string;
     loading: boolean;
+    error?: boolean;
     serialize(): Buffer;
 }

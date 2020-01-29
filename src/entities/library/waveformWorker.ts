@@ -1,3 +1,5 @@
+import colors from "@/colors";
+
 const ctx: Worker = self as any;
 
 function calculatePeaks(samples: Float32Array, sampleRate: number, resolution: number) {
@@ -22,19 +24,23 @@ function calculatePeaks(samples: Float32Array, sampleRate: number, resolution: n
 }
 
 function getWaveformSprites(peaks: Uint8Array) {
-    for (let i = 0; i < peaks.length; i += 1024) {
-        const end = Math.min(i + 1024, peaks.length);
-        const image = createPartWaveformTexture(peaks, i, end);
-        ctx.postMessage({ type: "progress", start: i, end, total: peaks.length, image }, [image]);
+    try {
+        for (let i = 0; i < peaks.length; i += 1024) {
+            const end = Math.min(i + 1024, peaks.length);
+            const image = createPartWaveformTexture(peaks, i, end);
+            ctx.postMessage({ type: "progress", start: i, end, total: peaks.length, image }, [image]);
+        }
+        ctx.postMessage({ type: "finished" });
+    } catch (err) {
+        ctx.postMessage({ type: "error", error: err });
     }
-    ctx.postMessage({ type: "finished" });
 }
 
 function createPartWaveformTexture(peaks: Uint8Array, start: number, end: number) {
     const canvas = new OffscreenCanvas(end - start, 300);
     const cvCtx = canvas.getContext("2d")!;
     const center = 300 / 2;
-    cvCtx.fillStyle = "#FFFFFF";
+    cvCtx.fillStyle = `#${colors.waveform.toString(16)}`;
     cvCtx.beginPath();
     cvCtx.moveTo(0, center);
     for (let i = start; i < end; i++) {

@@ -25,6 +25,7 @@ export class AudioFile implements ILibraryItem {
     public type = LibraryItemType.AUDIO_FILE;
     public name: string;
     public loading = true;
+    public error = false;
     public audioBuffer: AudioBuffer|null = null;
     public textures: IWaveformPart[] = [];
 
@@ -53,7 +54,7 @@ export class AudioFile implements ILibraryItem {
         const samples = this.audioBuffer.getChannelData(0);
         worker.postMessage({ samples, sampleRate, resolution: 256 }, [samples.buffer]);
 
-        await new Promise((res) => {
+        await new Promise((res, rej) => {
             worker.addEventListener("message", (ev) => {
                 const { type } = ev.data;
                 if (type === "progress") {
@@ -62,10 +63,14 @@ export class AudioFile implements ILibraryItem {
                     this.textures.push({ start, end, texture });
                 } else if (type === "finished") {
                     res();
+                } else if (type === "error") {
+                    rej(ev.data.error);
                 } else {
-                    throw new Error("Invalid message type");
+                    rej(new Error("Invalid message type"));
                 }
             });
+        }).catch((err) => {
+            this.error = true;
         });
 
         this.loading = false;

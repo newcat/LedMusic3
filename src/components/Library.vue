@@ -26,7 +26,7 @@ v-card(flat)
                 .library-item
                     div.mb-2
                         v-progress-circular(v-if="item.loading", indeterminate, color="primary")
-                        v-icon(v-else) {{ getIconByType(item.type) }}
+                        v-icon(v-else) {{ getIcon(item) }}
                     | {{ item.name }}
 
     input(ref="fileinput", type="file", @change="loadAudio", style="display: none;")
@@ -73,8 +73,9 @@ export default class Library extends Vue {
         ev.dataTransfer!.setData("id", id);
     }
 
-    public getIconByType(type: LibraryItemType) {
-        switch (type) {
+    public getIcon(item: ILibraryItem) {
+        if (item.error) { return "warning"; }
+        switch (item.type) {
             case LibraryItemType.AUDIO_FILE:
                 return "library_music";
             case LibraryItemType.GRAPH:
