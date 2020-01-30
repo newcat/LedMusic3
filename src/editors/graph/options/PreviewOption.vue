@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
-import { Color } from "chroma-js";
+import { Color, toChroma } from "../colors";
 
 @Component
 export default class PreviewOption extends Vue {
@@ -35,7 +35,7 @@ export default class PreviewOption extends Vue {
 
         const grad = this.ctx.createLinearGradient(0, 0, width, 0);
         this.value.forEach((v, i) => {
-            grad.addColorStop(i / this.value.length, v.css());
+            grad.addColorStop(i / this.value.length, toChroma(v).css());
         });
 
         this.ctx.fillStyle = grad;

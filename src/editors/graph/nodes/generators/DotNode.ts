@@ -1,5 +1,5 @@
 import { Node } from "@baklavajs/core";
-import chroma, { Color } from "chroma-js";
+import { Color, toChroma, fromChroma, chroma } from "../../colors";
 
 export class DotNode extends Node {
 
@@ -10,7 +10,7 @@ export class DotNode extends Node {
         super();
         this.addInputInterface("Center Position", "SliderOption", 0, { type: "number", min: 0, max: 1 });
         this.addInputInterface("Alpha", "SliderOption", 1, { type: "number", min: 0, max: 1 });
-        this.addInputInterface("Color", "ColorOption", chroma("lightblue"), { type: "color_single" });
+        this.addInputInterface("Color", "ColorOption", [173, 216, 230], { type: "color_single" });
         this.addInputInterface("Glow", "NumberOption", 0.1, { type: "number" });
         this.addInputInterface("Symmetric", "CheckboxOption", false, { type: "boolean" });
         this.addOption("Glow Type", "SelectOption", "Linear", undefined,
@@ -46,8 +46,8 @@ export class DotNode extends Node {
 
         for (let i = 0; i < resolution; i++) {
             const position = i / resolution;
-            const luminance = this.clamp(alpha * intensity(centerPosition, position, glow) * color.get("hsv.v"), 0, 1);
-            result[i] = color.set("hsv.v", luminance);
+            const luminance = this.clamp(alpha * intensity(centerPosition, position, glow) * toChroma(color).get("hsv.v"), 0, 1);
+            result[i] = fromChroma(toChroma(color).set("hsv.v", luminance));
         }
 
         if (symmetric) {
@@ -56,7 +56,7 @@ export class DotNode extends Node {
                 reverseColors[resolution - i - 1] = result[i];
             }
             for (let i = 0; i < resolution; i++) {
-                result[i] = chroma.blend(result[i], reverseColors[i], "lighten");
+                result[i] = fromChroma(chroma.blend(toChroma(result[i]), toChroma(reverseColors[i]), "lighten"));
             }
         }
 

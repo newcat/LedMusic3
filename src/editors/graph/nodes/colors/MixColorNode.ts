@@ -1,5 +1,5 @@
 import { Node } from "@baklavajs/core";
-import chroma, { Color } from "chroma-js";
+import { Color, mix } from "../../colors";
 
 export class MixColorNode extends Node {
 
@@ -8,8 +8,8 @@ export class MixColorNode extends Node {
 
     public constructor() {
         super();
-        this.addInputInterface("Color 1", undefined, () => [chroma("black")], { type: "color_array" });
-        this.addInputInterface("Color 2", undefined, () => [chroma("black")], { type: "color_array" });
+        this.addInputInterface("Color 1", undefined, () => [[0, 0, 0]], { type: "color_array" });
+        this.addInputInterface("Color 2", undefined, () => [[0, 0, 0]], { type: "color_array" });
         this.addInputInterface("Factor", "SliderOption", 0.5, { type: "number", min: 0, max: 1 });
         this.addOption("Color Space", "SelectOption", { selected: "RGB", items: ["RGB", "HSL", "LAB", "LCH", "LRGB"] });
         this.addOutputInterface("Output", { type: "color_array" });
@@ -28,7 +28,7 @@ export class MixColorNode extends Node {
         for (let i = 0; i < length; i++) {
             const a = length < colorsA.length ? colorsA[i] : colorsA[colorsA.length - 1];
             const b = length < colorsB.length ? colorsB[i] : colorsB[colorsB.length - 1];
-            result[i] = chroma.mix(a, b, factor, cspace);
+            result[i] = mix(a, b, factor, cspace);
         }
 
         this.getInterface("Output").value = result;

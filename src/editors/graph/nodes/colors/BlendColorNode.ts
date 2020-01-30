@@ -1,5 +1,5 @@
 import { Node } from "@baklavajs/core";
-import chroma, { Color } from "chroma-js";
+import { Color, blend } from "../../colors";
 
 export class BlendColorNode extends Node {
 
@@ -8,8 +8,8 @@ export class BlendColorNode extends Node {
 
     public constructor() {
         super();
-        this.addInputInterface("Color 1", undefined, () => [chroma("black")], { type: "color_array" });
-        this.addInputInterface("Color 2", undefined, () => [chroma("black")], { type: "color_array" });
+        this.addInputInterface("Color 1", undefined, () => [[0, 0, 0]], { type: "color_array" });
+        this.addInputInterface("Color 2", undefined, () => [[0, 0, 0]], { type: "color_array" });
         this.addOption("Mode", "SelectOption", "Multiply", undefined,
             { items: ["Multiply", "Darken", "Lighten", "Screen", "Overlay", "Burn", "Dodge"] });
         this.addOutputInterface("Output", { type: "color_array" });
@@ -27,7 +27,7 @@ export class BlendColorNode extends Node {
         for (let i = 0; i < length; i++) {
             const a = length < colorsA.length ? colorsA[i] : colorsA[colorsA.length - 1];
             const b = length < colorsB.length ? colorsB[i] : colorsB[colorsB.length - 1];
-            result[i] = chroma.blend(a, b, mode);
+            result[i] = blend(a, b, mode);
         }
 
         this.getInterface("Output").value = result;

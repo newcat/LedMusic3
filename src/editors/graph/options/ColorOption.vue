@@ -8,7 +8,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
 import ColorPicker from "@/components/ColorPicker.vue";
-import chroma, { Color } from "chroma-js";
+import { fromChroma, Color, chroma, toChroma } from "../colors";
 
 @Component({
     components: {
@@ -27,12 +27,12 @@ export default class ColorOption extends Vue {
         if (!this.value) {
             return "#000000";
         } else {
-            return this.value.css();
+            return toChroma(this.value).css();
         }
     }
 
     setColor(color: string) {
-        this.$emit("input", chroma(color));
+        this.$emit("input", fromChroma(chroma(color)));
     }
 
 }
