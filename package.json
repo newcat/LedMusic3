@@ -18,6 +18,7 @@
     "chroma-js": "^2.0.6",
     "lodash": "^4.17.15",
     "lokumjs": "^0.2.5",
+    "open-simplex-noise": "^2.2.0",
     "pixi.js": "^5.2.0",
     "uuid": "^3.3.3",
     "v-click-outside": "^2.1.3",
