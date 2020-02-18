@@ -25,8 +25,8 @@ export class BlendColorNode extends Node {
         const result: Color[] = new Array(length);
 
         for (let i = 0; i < length; i++) {
-            const a = length < colorsA.length ? colorsA[i] : colorsA[colorsA.length - 1];
-            const b = length < colorsB.length ? colorsB[i] : colorsB[colorsB.length - 1];
+            const a = i < colorsA.length ? colorsA[i] : colorsA[colorsA.length - 1];
+            const b = i < colorsB.length ? colorsB[i] : colorsB[colorsB.length - 1];
             result[i] = blend(a, b, mode);
         }
 

@@ -11,7 +11,7 @@ export class MixColorNode extends Node {
         this.addInputInterface("Color 1", undefined, () => [[0, 0, 0]], { type: "color_array" });
         this.addInputInterface("Color 2", undefined, () => [[0, 0, 0]], { type: "color_array" });
         this.addInputInterface("Factor", "SliderOption", 0.5, { type: "number", min: 0, max: 1 });
-        this.addOption("Color Space", "SelectOption", { selected: "RGB", items: ["RGB", "HSL", "LAB", "LCH", "LRGB"] });
+        this.addOption("Color Space", "SelectOption", "RGB", undefined, { items: ["RGB", "HSL", "LAB", "LCH", "LRGB"] });
         this.addOutputInterface("Output", { type: "color_array" });
     }
 
@@ -26,8 +26,8 @@ export class MixColorNode extends Node {
         const result: Color[] = new Array(length);
 
         for (let i = 0; i < length; i++) {
-            const a = length < colorsA.length ? colorsA[i] : colorsA[colorsA.length - 1];
-            const b = length < colorsB.length ? colorsB[i] : colorsB[colorsB.length - 1];
+            const a = i < colorsA.length ? colorsA[i] : colorsA[colorsA.length - 1];
+            const b = i < colorsB.length ? colorsB[i] : colorsB[colorsB.length - 1];
             result[i] = mix(a, b, factor, cspace);
         }
 
