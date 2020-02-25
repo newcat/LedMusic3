@@ -4,6 +4,7 @@ import * as InputNodes from "./input";
 import * as ColorNodes from "./colors";
 import * as ConverterNodes from "./converters";
 import * as GeneratorNodes from "./generators";
+import * as EffectNodes from "./effects";
 import * as OutputNodes from "./output";
 
 function registerCategory(editor: Editor, nodes: any, category?: string) {
@@ -17,5 +18,6 @@ export function registerNodes(editor: Editor) {
     registerCategory(editor, ColorNodes, "Colors");
     registerCategory(editor, ConverterNodes, "Converters");
     registerCategory(editor, GeneratorNodes, "Generators");
+    registerCategory(editor, EffectNodes, "Effects");
     registerCategory(editor, OutputNodes, "Outputs");
 }
