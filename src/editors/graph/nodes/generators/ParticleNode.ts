@@ -24,15 +24,15 @@ export class ParticleNode extends Node {
     constructor() {
         super();
 
-        this.addInputInterface("Emit", "CheckboxOption", false, { type: "boolean" });
+        this.addInputInterface("Emit", "CheckboxOption", true, { type: "boolean" });
         this.addInputInterface("Rate", "NumberOption", 10, { type: "number" });
-        this.addInputInterface("Start Velocity", "NumberOption", 0.1, { type: "number" });
+        this.addInputInterface("Start Velocity", "NumberOption", 0.3, { type: "number" });
         this.addInputInterface("End Velocity", "NumberOption", 0.05, { type: "number" });
         this.addInputInterface("Randomness", "NumberOption", 0.01, { type: "number" });
         this.addInputInterface("Emitter Position", "SliderOption", 0.5, { type: "number", min: 0, max: 1 });
         this.addInputInterface("Symmetric", "CheckboxOption", true, { type: "boolean" });
-        this.addInputInterface("Lifetime", "NumberOption", 30, { type: "number" });
-        this.addInputInterface("Start Color", "ColorOption", [255, 0, 0], { type: "color_single" });
+        this.addInputInterface("Lifetime", "NumberOption", 1, { type: "number" });
+        this.addInputInterface("Start Color", "ColorOption", [173, 216, 230], { type: "color_single" });
         this.addInputInterface("End Color", "ColorOption", [0, 0, 0], { type: "color_single" });
 
         this.addOutputInterface("Output", { type: "color_array" });
