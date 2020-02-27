@@ -2,26 +2,15 @@
 v-app
     v-content
         #app-container
-            .mb-2.flex-shrink-1
-                v-toolbar(dense, color="surface")
-                    v-toolbar-title LedMusic
-                    v-spacer
-                    v-btn(icon, @click="showSettings = true")
-                        v-icon settings_applications
-                    v-btn(icon, @click="save")
-                        v-icon save
-                    v-btn(icon, @click="openLoadDialog")
-                        v-icon unarchive
-            .flex-grow-1
-                split-pane(split="horizontal")
-                    template(slot="paneL")
-                        split-pane(split="vertical")
-                            template(slot="paneL")
-                                c-library.fill-height
-                            template(slot="paneR")
-                                c-graph.fill-height
-                    template(slot="paneR")
-                        c-timeline
+            split-pane(split="horizontal")
+                template(slot="paneL")
+                    split-pane(split="vertical")
+                        template(slot="paneL")
+                            c-library.fill-height
+                        template(slot="paneR")
+                            c-graph.fill-height
+                template(slot="paneR")
+                    c-timeline
     input(ref="fileinput", type="file", accept=".lmp" @change="load", style="display: none;")
     c-settings(v-model="showSettings")
 </template>
@@ -36,6 +25,7 @@ import CSettings from "@/components/Settings.vue";
 import { BaklavaEditor } from "@/editors/graph";
 import globalState from "@/entities/globalState";
 import { globalProcessor } from "@/processing";
+import { ipcRenderer } from "electron";
 
 @Component({
     components: { CLibrary, CTimeline, CGraph, CSettings }
@@ -47,6 +37,12 @@ export default class App extends Vue {
     created() {
         globalState.initialize();
         globalProcessor.initialize();
+
+        ipcRenderer.on("menu:load", () => { this.openLoadDialog(); });
+        ipcRenderer.on("menu:save", () => { this.save(); });
+        ipcRenderer.on("menu:save_as", () => { this.save(); });
+        ipcRenderer.on("menu:settings", () => { this.showSettings = true; });
+
     }
 
     save() {
@@ -80,8 +76,6 @@ export default class App extends Vue {
 #app-container {
     height: 100%;
     width: 100%;
-    display: flex;
-    flex-direction: column;
 }
 
 .content-container {

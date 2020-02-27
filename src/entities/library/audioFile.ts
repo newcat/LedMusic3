@@ -5,6 +5,8 @@ import { ILibraryItem, LibraryItemType } from "./libraryItem";
 // import { AudioProcessor } from "../../processing/audioProcessor";
 import WaveformWorker from "worker-loader!./waveformWorker";
 import { StandardEvent } from "@/lokumjs";
+import { readFile } from "fs";
+import { promisify } from "util";
 
 interface IWaveformPart {
     start: number;
@@ -15,8 +17,8 @@ interface IWaveformPart {
 export class AudioFile implements ILibraryItem {
 
     public static deserialize(data: Buffer) {
-        const { id, name, rawData } = deserialize(data);
-        const af = new AudioFile(name, (rawData as Binary).buffer.buffer);
+        const { id, name, path } = deserialize(data);
+        const af = new AudioFile(name, path);
         af.id = id;
         return af;
     }
@@ -24,6 +26,7 @@ export class AudioFile implements ILibraryItem {
     public id = uuidv4();
     public type = LibraryItemType.AUDIO_FILE;
     public name: string;
+    public path: string;
     public loading = true;
     public error = false;
     public audioBuffer: AudioBuffer|null = null;
@@ -33,22 +36,19 @@ export class AudioFile implements ILibraryItem {
         loaded: new StandardEvent()
     };
 
-    private rawData: ArrayBuffer;
-
-    public constructor(name: string, arrayBuffer: ArrayBuffer) {
+    public constructor(name: string, path: string) {
         this.name = name;
-        this.rawData = arrayBuffer;
+        this.path = path;
     }
 
     public async load() {
+
+        const rawData = await (promisify(readFile)(this.path));
+
         // const sampleRate = AudioProcessor.sampleRate;
         const sampleRate = 192000;
         const offlineAudioContext = new OfflineAudioContext(1, 2, sampleRate);
-
-        // create a copy because the array buffer will be transferred when
-        // calling decodeAudioData() and we need the original data when saving
-        const copy = this.rawData.slice(0);
-        this.audioBuffer = await offlineAudioContext.decodeAudioData(copy);
+        this.audioBuffer = await offlineAudioContext.decodeAudioData(rawData.buffer);
 
         const worker = new WaveformWorker();
         const samples = this.audioBuffer.getChannelData(0);
@@ -81,7 +81,7 @@ export class AudioFile implements ILibraryItem {
         return serialize({
             id: this.id,
             name: this.name,
-            rawData: new Binary(Buffer.from(this.rawData)),
+            path: this.path,
         });
     }
 

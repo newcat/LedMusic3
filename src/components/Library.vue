@@ -59,12 +59,7 @@ export default class Library extends Vue {
     public async loadAudio(ev: any) {
         const f = ev.target.files[0] as File;
         if (!f) { return; }
-        const reader = new FileReader();
-        const buff = await new Promise<ArrayBuffer>((res) => {
-            reader.onload = (e) => res(e.target!.result as ArrayBuffer);
-            reader.readAsArrayBuffer(f);
-        });
-        const item = new AudioFile(f.name, buff);
+        const item = new AudioFile(f.name, f.path);
         this.globalState.library.addItem(item);
         await item.load();
     }
