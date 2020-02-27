@@ -25,3 +25,5 @@ yarn-error.log*
 /pkg
 
 /public/beat.mp3
+#Electron-builder output
+/dist_electron
