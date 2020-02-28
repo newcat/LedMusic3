@@ -22,32 +22,23 @@ export class AudioProcessor {
     private startTime = 0;
     private startPosition = 0;
 
-    private $position = 0;
-    private $isPlaying = false;
-
-    public get volume() { return this.gainNode.gain.value; }
-    public set volume(value: number) { this.gainNode.gain.setValueAtTime(value, this.audioContext.currentTime); }
-
-    public get isPlaying() { return this.$isPlaying; }
-
-    public get position() { return this.$position; }
-    public set position(value: number) {
-        let wasPlaying = false;
-        if (this.isPlaying) {
-            this.pause();
-            wasPlaying = true;
-        }
-        this.$position = value;
-        if (wasPlaying) {
-            this.play();
-        }
-    }
-
     public constructor() {
         this.gainNode.connect(this.audioContext.destination);
         this.analyserNode.connect(this.gainNode);
         this.analyserNode.fftSize = 8192;
         AudioProcessor.sampleRate = this.audioContext.sampleRate;
+
+        globalState.events.volumeChanged.subscribe(this, (v) => {
+            this.gainNode.gain.setValueAtTime(v, this.audioContext.currentTime);
+        });
+
+        globalState.events.positionChanged.subscribe(this, (v) => {
+            if (globalState.isPlaying) {
+                this.pause();
+                this.play();
+            }
+        });
+
     }
 
     public supportsWebAudio() {
@@ -62,13 +53,13 @@ export class AudioProcessor {
             t.source = this.createSource(t.buffer, t.startUnit);
         }
         this.startTime = this.audioContext.currentTime;
-        this.startPosition = this.position;
+        this.startPosition = globalState.position;
 
         if (this.audioContext.state === "suspended" && this.audioContext.resume) {
             this.audioContext.resume();
         }
 
-        this.$isPlaying = true;
+        globalState.isPlaying = true;
 
     }
 
@@ -78,19 +69,19 @@ export class AudioProcessor {
             t.source = null;
         }
         this.updatePosition();
-        this.$isPlaying = false;
+        globalState.isPlaying = false;
     }
 
     public destroy() {
-        if (!this.isPlaying) { this.pause(); }
+        if (!globalState.isPlaying) { this.pause(); }
         this.tracks = [];
         this.gainNode.disconnect();
         this.analyserNode.disconnect();
     }
 
     public updatePosition() {
-        if (!this.isPlaying) { return; }
-        this.$position = this.startPosition + this.secondsToUnits(this.audioContext.currentTime - this.startTime);
+        if (!globalState.isPlaying) { return; }
+        globalState.position = this.startPosition + this.secondsToUnits(this.audioContext.currentTime - this.startTime);
     }
 
     public unitToSeconds(units: number) {
@@ -102,7 +93,7 @@ export class AudioProcessor {
     }
 
     public registerBuffer(buffer: AudioBuffer, startUnit: number) {
-        const source = this.isPlaying ? this.createSource(buffer, startUnit) : null;
+        const source = globalState.isPlaying ? this.createSource(buffer, startUnit) : null;
         this.tracks.push({ buffer, startUnit, source });
     }
 
@@ -118,7 +109,7 @@ export class AudioProcessor {
         const source = this.audioContext.createBufferSource();
         source.buffer = buffer;
         source.connect(this.analyserNode);
-        const offset = this.unitToSeconds(this.position - startUnit);
+        const offset = this.unitToSeconds(globalState.position - startUnit);
         if (offset < 0) {
             // tslint:disable-next-line:no-console
             console.warn("Source offset < 0");

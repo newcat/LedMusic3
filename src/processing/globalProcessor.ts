@@ -15,17 +15,7 @@ class GlobalProcessor {
         tick: new StandardEvent()
     };
 
-    private _position = 0;
     private timer: any = null;
-
-    public get position() { return this._position; }
-    public set position(v: number) {
-        this._position = v;
-        this.audioProcessor.position = v;
-        this.events.positionChanged.emit(v);
-    }
-
-    public get isPlaying() { return this.audioProcessor.isPlaying; }
 
     public constructor() {
         (window as any).globalProcessor = this;
@@ -58,12 +48,7 @@ class GlobalProcessor {
     private tick() {
         if (this.paused) { return; }
         this.audioProcessor.updatePosition();
-        const oldPosition = this._position;
-        this._position = this.audioProcessor.position;
-        if (oldPosition !== this._position) {
-            this.events.positionChanged.emit(this.position);
-        }
-        this.timelineProcessor.process(this.position);
+        this.timelineProcessor.process(globalState.position);
         this.events.tick.emit();
     }
 

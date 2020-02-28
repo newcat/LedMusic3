@@ -46,7 +46,7 @@ enum LabelMode {
 export default class Timeline extends Vue {
 
     public editor = globalState.timeline;
-    public volume = globalProcessor.audioProcessor.volume;
+    public volume = globalState.volume;
 
     public snapItems = [
         { text: "Disabled", value: "1" },
@@ -102,12 +102,12 @@ export default class Timeline extends Vue {
             const x = ev.data.global.x as number;
             let unit = view.positionCalculator.getUnit(x - view.timelineDrawable.props.trackHeaderWidth);
             if (unit < 0) { unit = 0; }
-            globalProcessor.position = unit;
+            globalState.position = unit;
         });
 
         view.eventBus.events.keydown.subscribe(this, (ev) => {
             if (ev.key === " " && document.activeElement?.nodeName !== "INPUT") {
-                if (globalProcessor.isPlaying) {
+                if (globalState.isPlaying) {
                     globalProcessor.pause();
                 } else {
                     globalProcessor.play();
@@ -166,8 +166,8 @@ export default class Timeline extends Vue {
     }
 
     public setVolume(v: number) {
-        globalProcessor.audioProcessor.volume = Math.max(0, Math.min(1, v / 100));
-        this.volume = globalProcessor.audioProcessor.volume;
+        globalState.volume = Math.max(0, Math.min(1, v / 100));
+        this.volume = globalState.volume;
     }
 
     public setBpm(v: string) {

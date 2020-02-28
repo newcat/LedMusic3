@@ -1,6 +1,6 @@
 import { Node } from "@baklavajs/core";
-import { globalProcessor } from "@/processing";
 import { TICKS_PER_BEAT } from "@/constants";
+import globalState from "@/entities/globalState";
 
 export class LfoNode extends Node {
 
@@ -48,7 +48,7 @@ export class LfoNode extends Node {
         const shape = this.getOptionValue("Shape");
 
         const f = this.functions[shape] ?? ((v: number) => v);
-        const x = (globalProcessor.position % rate) / rate;
+        const x = (globalState.position % rate) / rate;
         const rawValue = invert ? -f(x) : f(x);
         const value = min + (rawValue + 1) * 0.5 * (max - min);
         this.getInterface("Value").value = value;

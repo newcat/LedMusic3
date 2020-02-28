@@ -25,7 +25,10 @@ import CSettings from "@/components/Settings.vue";
 import { BaklavaEditor } from "@/editors/graph";
 import globalState from "@/entities/globalState";
 import { globalProcessor } from "@/processing";
-import { ipcRenderer } from "electron";
+
+import { ipcRenderer, remote } from "electron";
+import { readFile, writeFile } from "fs";
+import { promisify } from "util";
 
 @Component({
     components: { CLibrary, CTimeline, CGraph, CSettings }
@@ -33,6 +36,7 @@ import { ipcRenderer } from "electron";
 export default class App extends Vue {
 
     showSettings = false;
+    projectFilePath = "";
 
     created() {
         globalState.initialize();
@@ -40,33 +44,48 @@ export default class App extends Vue {
 
         ipcRenderer.on("menu:load", () => { this.openLoadDialog(); });
         ipcRenderer.on("menu:save", () => { this.save(); });
-        ipcRenderer.on("menu:save_as", () => { this.save(); });
+        ipcRenderer.on("menu:save_as", () => { this.saveAs(); });
         ipcRenderer.on("menu:settings", () => { this.showSettings = true; });
 
     }
 
-    save() {
-        const state = globalState.save();
-        const blob = new Blob([state], { type: "application/octet-stream" });
-        const a = document.createElement("a");
-        a.download = "project.lmp";
-        a.href = window.URL.createObjectURL(blob);
-        a.click();
-    }
-
-    public openLoadDialog() {
-        (this.$refs.fileinput as HTMLElement).click();
-    }
-
     async load(ev: any) {
-        const f = ev.target.files[0] as File;
-        if (!f) { return; }
-        const reader = new FileReader();
-        const buff = await new Promise<ArrayBuffer>((res) => {
-            reader.onload = (e) => res(e.target!.result as ArrayBuffer);
-            reader.readAsArrayBuffer(f);
+        const p = await this.openLoadDialog();
+        if (!p) { return; }
+        const buff = await (promisify(readFile)(p));
+        globalState.load(buff);
+    }
+
+    async save() {
+        if (!this.projectFilePath) {
+            if (!await this.openSaveDialog()) { return; }
+        }
+        const state = globalState.save();
+        await (promisify(writeFile)(this.projectFilePath, state));
+    }
+
+    async saveAs() {
+        if (!await this.openSaveDialog()) { return; }
+        await this.save();
+    }
+
+    private async openLoadDialog(): Promise<string> {
+        const dialogResult = await remote.dialog.showOpenDialog({
+            title: "Open Project",
+            filters: [{ name: "LedMusic Project", extensions: ["lmp"] }]
         });
-        globalState.load(Buffer.from(buff));
+        if (dialogResult.canceled) { return ""; }
+        return dialogResult.filePaths![0];
+    }
+
+    private async openSaveDialog() {
+        const dialogResult = await remote.dialog.showSaveDialog({
+            title: "Save Project",
+            filters: [{ name: "LedMusic Project", extensions: ["lmp"] }]
+        });
+        if (dialogResult.canceled) { return false; }
+        this.projectFilePath = dialogResult.filePath!;
+        return true;
     }
 
 }
