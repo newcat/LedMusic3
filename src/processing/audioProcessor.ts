@@ -1,4 +1,5 @@
-import globalState from "@/entities/globalState";
+import { globalState } from "@/entities/globalState";
+import { observe } from "@nx-js/observer-util";
 
 // inspired by: https://github.com/katspaugh/wavesurfer.js/blob/master/src/webaudio.js
 
@@ -28,17 +29,13 @@ export class AudioProcessor {
         this.analyserNode.fftSize = 8192;
         AudioProcessor.sampleRate = this.audioContext.sampleRate;
 
-        globalState.events.volumeChanged.subscribe(this, (v) => {
-            this.gainNode.gain.setValueAtTime(v, this.audioContext.currentTime);
-        });
-
-        globalState.events.positionChanged.subscribe(this, (v) => {
+        observe(() => this.gainNode.gain.setValueAtTime(globalState.volume, this.audioContext.currentTime));
+        globalState.events.positionSetByUser.subscribe(this, () => {
             if (globalState.isPlaying) {
                 this.pause();
                 this.play();
             }
         });
-
     }
 
     public supportsWebAudio() {
@@ -59,8 +56,6 @@ export class AudioProcessor {
             this.audioContext.resume();
         }
 
-        globalState.isPlaying = true;
-
     }
 
     public pause() {
@@ -69,7 +64,6 @@ export class AudioProcessor {
             t.source = null;
         }
         this.updatePosition();
-        globalState.isPlaying = false;
     }
 
     public destroy() {

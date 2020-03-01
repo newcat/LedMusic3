@@ -1,7 +1,7 @@
 import Vue from "vue";
 import { Node } from "@baklavajs/core";
 import { globalProcessor } from "@/processing";
-import globalState from "@/entities/globalState";
+import { globalState } from "@/entities/globalState";
 
 export class AutomationNode extends Node {
 

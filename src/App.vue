@@ -23,7 +23,7 @@ import CTimeline from "@/components/timeline/Timeline.vue";
 import CGraph from "@/components/Graph.vue";
 import CSettings from "@/components/Settings.vue";
 import { BaklavaEditor } from "@/editors/graph";
-import globalState from "@/entities/globalState";
+import { globalState } from "@/entities/globalState";
 import { globalProcessor } from "@/processing";
 
 import { ipcRenderer, remote } from "electron";

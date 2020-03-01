@@ -1,6 +1,6 @@
 import { Node } from "@baklavajs/core";
 import { TICKS_PER_BEAT } from "@/constants";
-import globalState from "@/entities/globalState";
+import { globalState } from "@/entities/globalState";
 
 export class LfoNode extends Node {
 

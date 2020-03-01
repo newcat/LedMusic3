@@ -9,7 +9,7 @@ v-card.d-flex.flex-column(flat, @drop="drop" @dragover="$event.preventDefault()"
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
-import globalState from "@/entities/globalState";
+import { globalState } from "@/entities/globalState";
 import { LibraryItemType, GraphLibraryItem } from "../entities/library";
 import CSelect from "@/components/elements/Select.vue";
 

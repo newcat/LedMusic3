@@ -14,18 +14,19 @@
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
 import throttle from "lodash/throttle";
+import { observe } from "@nx-js/observer-util";
+import { PluginOptionsVue } from "baklavajs";
+import { Text, TextStyle, Texture, Sprite, Graphics } from "pixi.js";
 
 import { View, Drawable, Track, Item } from "@/lokumjs";
-import { Text, TextStyle, Texture, Sprite, Graphics } from "pixi.js";
 import { TICKS_PER_BEAT } from "@/constants";
 import { LokumEditor } from "@/editors/timeline";
-import globalState from "@/entities/globalState";
+import { globalState } from "@/entities/globalState";
 import { AudioFile, LibraryItemType, GraphLibraryItem, AutomationClip, ILibraryItem } from "@/entities/library";
 import { AudioProcessor, TimelineProcessor, globalProcessor } from "@/processing";
 import { AutomationClipDrawable } from "./automationClipDrawable";
 import { WaveformDrawable } from "./waveformDrawable";
 import { PositionIndicator } from "./positionIndicator";
-import { PluginOptionsVue } from "baklavajs";
 import customColors from "@/colors";
 import CSelect from "@/components/elements/Select.vue";
 
@@ -93,16 +94,14 @@ export default class Timeline extends Vue {
             this.fpsText.text = view.app.ticker.elapsedMS.toFixed(2);
         });
 
-        globalProcessor.events.positionChanged.subscribe(this, (position) => {
-            this.positionIndicator.props.position = position;
-        });
+        observe(() => { this.positionIndicator.props.position = globalState.position; });
 
         view.timelineDrawable.header.graphics.interactive = true;
         view.eventBus.events.pointerdown.subscribe(view.timelineDrawable.header.graphics, (ev) => {
             const x = ev.data.global.x as number;
             let unit = view.positionCalculator.getUnit(x - view.timelineDrawable.props.trackHeaderWidth);
             if (unit < 0) { unit = 0; }
-            globalState.position = unit;
+            globalState.setPositionByUser(unit);
         });
 
         view.eventBus.events.keydown.subscribe(this, (ev) => {

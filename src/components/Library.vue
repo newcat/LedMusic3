@@ -36,7 +36,7 @@ v-card(flat)
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
 import { AudioFile, AutomationClip, GraphLibraryItem, LibraryItemType, ILibraryItem } from "@/entities/library";
-import globalState from "@/entities/globalState";
+import { globalState } from "@/entities/globalState";
 import ItemSettings from "./LibraryItemSettings.vue";
 
 @Component({

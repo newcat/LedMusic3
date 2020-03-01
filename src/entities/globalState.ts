@@ -1,4 +1,5 @@
 import { serialize, deserialize } from "bson";
+import { observable } from "@nx-js/observer-util";
 import { LokumEditor } from "@/editors/timeline";
 import { LibraryModel } from "./library/libraryModel";
 import { StandardEvent } from "@/lokumjs";
@@ -28,34 +29,16 @@ class State implements IState {
     public library!: LibraryModel;
     public timeline!: LokumEditor;
 
+    public bpm = 130;
+    public fps = 30;
+    public volume = 0.5;
+    public position = 0;
+    public isPlaying = false;
+    public resolution = 128;
+
     public events = {
-        bpmChanged: new StandardEvent<number>(),
-        fpsChanged: new StandardEvent<number>(),
-        volumeChanged: new StandardEvent<number>(),
-        positionChanged: new StandardEvent<number>(),
-        isPlayingChanged: new StandardEvent<boolean>()
+        positionSetByUser: new StandardEvent()
     };
-
-    private $bpm = 130;
-    private $fps = 30;
-    private $volume = 0.5;
-    private $position = 0;
-    private $isPlaying = false;
-
-    public get bpm() { return this.$bpm; }
-    public set bpm(v: number) { this.$bpm = v; this.events.bpmChanged.emit(v); }
-
-    public get fps() { return this.$fps; }
-    public set fps(v: number) { this.$fps = v; this.events.fpsChanged.emit(v); }
-
-    public get volume() { return this.$volume; }
-    public set volume(v: number) { this.$volume = v; this.events.volumeChanged.emit(v); }
-
-    public get position() { return this.$position; }
-    public set position(v: number) { this.$position = v; this.events.positionChanged.emit(v); }
-
-    public get isPlaying() { return this.$isPlaying; }
-    public set isPlaying(v: boolean) { this.$isPlaying = v; this.events.isPlayingChanged.emit(v); }
 
     constructor() {
         (window as any).globalState = this;
@@ -85,6 +68,11 @@ class State implements IState {
         this.fps = data.fps;
     }
 
+    public setPositionByUser(newPosition: number) {
+        this.position = newPosition;
+        this.events.positionSetByUser.emit();
+    }
+
 }
 
-export default new State();
+export const globalState = observable(new State());

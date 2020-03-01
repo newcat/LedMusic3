@@ -1,5 +1,5 @@
 import { Node } from "@baklavajs/core";
-import globalState from "@/entities/globalState";
+import { globalState } from "@/entities/globalState";
 import { Color, mix, blend, darken } from "../../colors";
 
 interface IParticle {

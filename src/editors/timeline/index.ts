@@ -1,7 +1,8 @@
+import { observe } from "@nx-js/observer-util";
 import { TICKS_PER_BEAT } from "@/constants";
 import { Editor, Track } from "@/lokumjs";
 import { ILibraryItem, LibraryItemType, AudioFile } from "@/entities/library";
-import globalState from "@/entities/globalState";
+import { globalState } from "@/entities/globalState";
 
 export class LokumEditor extends Editor {
 
@@ -67,7 +68,7 @@ export class LokumEditor extends Editor {
             i.hooks.save.untap(this);
         });
 
-        globalState.events.bpmChanged.subscribe(this, () => this.updateAudioItemLengths());
+        observe(() => { this.updateAudioItemLengths(); });
 
     }
 
