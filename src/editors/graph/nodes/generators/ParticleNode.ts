@@ -41,7 +41,7 @@ export class ParticleNode extends Node {
 
     public calculate() {
 
-        const resolution = 60; // TODO
+        const resolution = globalState.resolution;
 
         this.particles.forEach((p) => p.currentLifetime++);
         this.particles = this.particles.filter((p) =>

@@ -4,7 +4,7 @@ v-dialog(:value="value", @input="$emit('input', $event)" max-width="400")
         v-card-title
             .headline Settings
         v-card-text
-            v-text-field(outlined, label="BPM", v-model="vBpm")
+            v-text-field(outlined, label="Resolution", v-model="vResolution")
             v-text-field(outlined, label="FPS", v-model="vFps")
         v-card-actions
             v-spacer
@@ -22,12 +22,12 @@ export default class Settings extends Vue {
     @Prop()
     value!: boolean;
 
-    vBpm = "0";
+    vResolution = "0";
     vFps = "0";
 
     @Watch("value")
     updateValues() {
-        this.vBpm = globalState.bpm.toString();
+        this.vResolution = globalState.resolution.toString();
         this.vFps = globalState.fps.toString();
     }
 
@@ -38,7 +38,7 @@ export default class Settings extends Vue {
     save() {
         this.$emit("input", false);
         // TODO: Validation
-        globalState.bpm = parseInt(this.vBpm, 10);
+        globalState.resolution = parseInt(this.vResolution, 10);
         globalState.fps = parseInt(this.vFps, 10);
     }
 

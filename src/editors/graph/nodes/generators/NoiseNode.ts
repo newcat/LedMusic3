@@ -1,6 +1,7 @@
 import { Node } from "@baklavajs/core";
 import { makeNoise2D } from "open-simplex-noise";
 import { Color, fromChroma, chroma } from "../../colors";
+import { globalState } from "@/entities/globalState";
 
 export class NoiseNode extends Node {
 
@@ -22,7 +23,7 @@ export class NoiseNode extends Node {
 
     public calculate() {
 
-        const resolution = 60; // TODO
+        const resolution = globalState.resolution;
 
         const spaceFreq = Math.max(this.getInterface("Space Freq").value, 0);
         const timeFreq = Math.max(this.getInterface("Time Freq").value, 0);
