@@ -32,7 +32,7 @@ export class AudioProcessor {
         observe(() => this.gainNode.gain.setValueAtTime(globalState.volume, this.audioContext.currentTime));
         globalState.events.positionSetByUser.subscribe(this, () => {
             if (globalState.isPlaying) {
-                this.pause();
+                this.pause(false);
                 this.play();
             }
         });
@@ -58,12 +58,12 @@ export class AudioProcessor {
 
     }
 
-    public pause() {
+    public pause(updatePosition = true) {
         for (const t of this.tracks) {
             this.destroySource(t.source);
             t.source = null;
         }
-        this.updatePosition();
+        if (updatePosition) { this.updatePosition(); }
     }
 
     public destroy() {

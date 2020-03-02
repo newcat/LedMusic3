@@ -11,7 +11,6 @@ v-app
                             c-graph.fill-height
                 template(slot="paneR")
                     c-timeline
-    input(ref="fileinput", type="file", accept=".lmp" @change="load", style="display: none;")
     c-settings(v-model="showSettings")
 </template>
 
@@ -42,14 +41,14 @@ export default class App extends Vue {
         globalState.initialize();
         globalProcessor.initialize();
 
-        ipcRenderer.on("menu:load", () => { this.openLoadDialog(); });
+        ipcRenderer.on("menu:open", () => { this.load(); });
         ipcRenderer.on("menu:save", () => { this.save(); });
         ipcRenderer.on("menu:save_as", () => { this.saveAs(); });
         ipcRenderer.on("menu:settings", () => { this.showSettings = true; });
 
     }
 
-    async load(ev: any) {
+    async load() {
         const p = await this.openLoadDialog();
         if (!p) { return; }
         const buff = await (promisify(readFile)(p));

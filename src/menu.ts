@@ -4,7 +4,7 @@ const template: MenuItemConstructorOptions[] = [
     {
         label: "File",
         submenu: [
-            { label: "Load", click: () => { webContents.getFocusedWebContents()?.send("menu:load"); } },
+            { label: "Open", click: () => { webContents.getFocusedWebContents()?.send("menu:open"); } },
             { label: "Save", click: () => { webContents.getFocusedWebContents()?.send("menu:save"); } },
             { label: "Save as", click: () => { webContents.getFocusedWebContents()?.send("menu:save_as"); } },
             { type: "separator" },
