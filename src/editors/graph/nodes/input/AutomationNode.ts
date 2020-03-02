@@ -5,7 +5,7 @@ import { globalState } from "@/entities/globalState";
 
 export class AutomationNode extends Node {
 
-    public type = "AutomationNode";
+    public type = "Automation";
     public name = this.type;
 
     public constructor() {

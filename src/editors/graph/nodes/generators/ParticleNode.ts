@@ -15,7 +15,7 @@ interface IParticle {
 
 export class ParticleNode extends Node {
 
-    public type = "ParticleNode";
+    public type = "Particle";
     public name = this.type;
 
     private particles: IParticle[] = [];

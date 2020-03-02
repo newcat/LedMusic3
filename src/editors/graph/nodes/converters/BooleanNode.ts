@@ -4,7 +4,7 @@ const operations = [ "==", ">", "<", ">=", "<=" ];
 
 export class BooleanNode extends Node {
 
-    type = "BooleanNode";
+    type = "Boolean";
     name = this.type;
 
     constructor() {

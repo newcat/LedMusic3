@@ -7,7 +7,7 @@ const operations = [
 
 export class MathNode extends Node {
 
-    type = "MathNode";
+    type = "Math";
     name = this.type;
 
     constructor() {

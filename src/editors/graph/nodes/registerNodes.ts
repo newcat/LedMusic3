@@ -1,4 +1,4 @@
-import { Editor } from "@baklavajs/core";
+import { Editor, Node } from "@baklavajs/core";
 
 import * as InputNodes from "./input";
 import * as ColorNodes from "./colors";
@@ -7,9 +7,12 @@ import * as GeneratorNodes from "./generators";
 import * as EffectNodes from "./effects";
 import * as OutputNodes from "./output";
 
+type NodeConstructor = new () => Node;
+
 function registerCategory(editor: Editor, nodes: any, category?: string) {
     for (const k of Object.keys(nodes)) {
-        editor.registerNodeType(k, nodes[k], category);
+        const nodeInstance = new (nodes[k] as NodeConstructor)();
+        editor.registerNodeType(nodeInstance.type, nodes[k], category);
     }
 }
 

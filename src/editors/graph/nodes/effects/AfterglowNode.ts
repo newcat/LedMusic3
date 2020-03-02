@@ -1,11 +1,11 @@
 import { Node } from "@baklavajs/core";
 import { Color, mix, blend } from "../../colors";
-
-const resolution = 60; // TODO
+import { globalState } from "@/entities/globalState";
+import { observe } from "@nx-js/observer-util";
 
 export class AfterglowNode extends Node {
 
-    public type = "AfterglowNode";
+    public type = "Afterglow";
     public name = this.type;
 
     private buffer!: Color[];
@@ -15,13 +15,14 @@ export class AfterglowNode extends Node {
         this.addInputInterface("Input", undefined, [[0, 0, 0]], { type: "color_array" });
         this.addInputInterface("Strength", "NumberOption", 0.75, { type: "number" });
         this.addOutputInterface("Output", { type: "color_array" });
-        this.initializeBuffer();
+        observe(() => { this.initializeBuffer(globalState.resolution); });
     }
 
     public calculate() {
 
         const input: Color[] = this.getInterface("Input").value;
         const strength: number = this.getInterface("Strength").value;
+        const resolution = globalState.resolution;
 
         const result = [];
         for (let i = 0; i < resolution; i++) {
@@ -37,12 +38,7 @@ export class AfterglowNode extends Node {
 
     }
 
-    private clamp(v: number, min: number, max: number) {
-        if (!Number.isFinite(v)) { return 0; }
-        return Math.min(max, Math.max(min, v));
-    }
-
-    private initializeBuffer() {
+    private initializeBuffer(resolution: number) {
         this.buffer = [];
         for (let i = 0; i < resolution; i++) {
             this.buffer.push([0, 0, 0]);

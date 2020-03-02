@@ -4,7 +4,7 @@ import { globalState } from "@/entities/globalState";
 
 export class LfoNode extends Node {
 
-    public type = "LfoNode";
+    public type = "LFO";
     public name = this.type;
 
     private rates = [

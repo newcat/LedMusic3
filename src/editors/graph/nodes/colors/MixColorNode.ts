@@ -3,7 +3,7 @@ import { Color, mix } from "../../colors";
 
 export class MixColorNode extends Node {
 
-    public type = "MixColorNode";
+    public type = "Mix Color";
     public name = this.type;
 
     public constructor() {

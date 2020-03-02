@@ -3,7 +3,7 @@ import { globalProcessor } from "@/processing";
 
 export class SpectrumNode extends Node {
 
-    public type = "SpectrumNode";
+    public type = "Spectrum";
     public name = this.type;
 
     public constructor() {

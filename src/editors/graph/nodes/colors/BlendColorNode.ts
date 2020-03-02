@@ -3,7 +3,7 @@ import { Color, blend } from "../../colors";
 
 export class BlendColorNode extends Node {
 
-    public type = "BlendColorNode";
+    public type = "Blend Color";
     public name = this.type;
 
     public constructor() {

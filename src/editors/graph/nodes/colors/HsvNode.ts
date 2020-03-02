@@ -3,7 +3,7 @@ import { fromChroma, chroma } from "../../colors";
 
 export class HsvNode extends Node {
 
-    public type = "HsvNode";
+    public type = "HSV";
     public name = this.type;
 
     public constructor() {

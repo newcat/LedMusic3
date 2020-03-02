@@ -3,7 +3,7 @@ import { globalProcessor } from "@/processing";
 
 export class PeakNode extends Node {
 
-    public type = "PeakNode";
+    public type = "Peak";
     public name = this.type;
 
     public constructor() {

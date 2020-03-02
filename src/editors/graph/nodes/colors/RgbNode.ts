@@ -3,7 +3,7 @@ import { fromChroma, chroma } from "../../colors";
 
 export class RgbNode extends Node {
 
-    public type = "RgbNode";
+    public type = "RGB";
     public name = this.type;
 
     public constructor() {

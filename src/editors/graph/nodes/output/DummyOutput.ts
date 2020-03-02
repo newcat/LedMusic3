@@ -1,6 +1,6 @@
 import { NodeBuilder } from "@baklavajs/core";
 
-export const DummyOutput = new NodeBuilder("DummyOutput")
+export const DummyOutput = new NodeBuilder("Dummy")
     .addInputInterface("Colors", undefined, () => [[0, 0, 0]], { type: "color_array" })
     .addOption("Preview", "PreviewOption", () => [[0, 0, 0]])
     .onCalculate((n) => {

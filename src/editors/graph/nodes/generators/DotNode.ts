@@ -3,7 +3,7 @@ import { Color, toChroma, fromChroma, chroma } from "../../colors";
 
 export class DotNode extends Node {
 
-    public type = "DotNode";
+    public type = "Dot";
     public name = this.type;
 
     public constructor() {
@@ -26,7 +26,6 @@ export class DotNode extends Node {
         const alpha = this.clamp(this.getInterface("Alpha").value, 0, 1);
         const glow = Math.max(0, this.getInterface("Glow").value);
         const color: Color = this.getInterface("Color").value;
-        const symmetric: boolean = this.getInterface("Symmetric").value;
 
         const result: Color[] = new Array(resolution);
 
@@ -46,18 +45,8 @@ export class DotNode extends Node {
 
         for (let i = 0; i < resolution; i++) {
             const position = i / resolution;
-            const luminance = this.clamp(alpha * intensity(centerPosition, position, glow) * toChroma(color).get("hsv.v"), 0, 1);
-            result[i] = fromChroma(toChroma(color).set("hsv.v", luminance));
-        }
-
-        if (symmetric) {
-            const reverseColors: Color[] = new Array(resolution);
-            for (let i = 0; i < resolution; i++) {
-                reverseColors[resolution - i - 1] = result[i];
-            }
-            for (let i = 0; i < resolution; i++) {
-                result[i] = fromChroma(chroma.blend(toChroma(result[i]), toChroma(reverseColors[i]), "lighten"));
-            }
+            const luminance = this.clamp(alpha * intensity(centerPosition, position, glow) * toChroma(color).get("hsi.i"), 0, 1);
+            result[i] = fromChroma(toChroma(color).set("hsi.i", luminance));
         }
 
         this.getInterface("Colors").value = result;

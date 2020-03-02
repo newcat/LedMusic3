@@ -4,7 +4,7 @@ import { Color, fromChroma, chroma } from "../../colors";
 
 export class NoiseNode extends Node {
 
-    public type = "NoiseNode";
+    public type = "Noise";
     public name = this.type;
 
     private hueNoise = makeNoise2D(Math.random() * 100000);
