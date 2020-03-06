@@ -6,6 +6,7 @@ interface IParticle {
     currentLifetime: number;
     totalLifetime: number;
     position: number;
+    glow: number;
     startVelocity: number;
     endVelocity: number;
     color: Color;
@@ -29,6 +30,7 @@ export class ParticleNode extends Node {
         this.addInputInterface("Start Velocity", "NumberOption", 0.3, { type: "number" });
         this.addInputInterface("End Velocity", "NumberOption", 0.05, { type: "number" });
         this.addInputInterface("Randomness", "NumberOption", 0.01, { type: "number" });
+        this.addInputInterface("Glow", "NumberOption", 0.05, { type: "number" });
         this.addInputInterface("Emitter Position", "SliderOption", 0.5, { type: "number", min: 0, max: 1 });
         this.addInputInterface("Symmetric", "CheckboxOption", true, { type: "boolean" });
         this.addInputInterface("Lifetime", "NumberOption", 1, { type: "number" });
@@ -57,6 +59,7 @@ export class ParticleNode extends Node {
             const fps = globalState.fps;
             const rate = this.getInterface("Rate").value / fps;
             const randomness = this.getInterface("Randomness").value / fps;
+            const glow = this.getInterface("Glow").value;
             let startVelocity = this.getInterface("Start Velocity").value / fps;
             let endVelocity = this.getInterface("End Velocity").value / fps;
             const emitterPosition = this.getInterface("Emitter Position").value;
@@ -70,10 +73,11 @@ export class ParticleNode extends Node {
 
             this.particlesToSpawn += rate;
             while (this.particlesToSpawn > 1) {
-                const p = {
+                const p: IParticle = {
                     totalLifetime: lifetimeInFrames,
                     currentLifetime: 0,
                     position: emitterPosition,
+                    glow,
                     startVelocity,
                     endVelocity,
                     color: startColor,
@@ -91,22 +95,31 @@ export class ParticleNode extends Node {
 
         const output = new Array<Color>(resolution);
         for (let i = 0; i < output.length; i++) { output[i] = [0, 0, 0]; }
+
         this.particles.forEach((p) => {
-            const left = Math.floor(p.position * resolution);
-            const right = left + 1;
-
-            // position: 22.8, left: 22, right: 23 ->
-            if (left >= 0 && left < resolution) {
-                output[left] = blend(darken(p.color, p.position * resolution - left), output[left], "overlay");
-            }
-
-            if (right >= 0 && right < resolution) {
-                output[right] = blend(darken(p.color, right - p.position * resolution), output[right], "overlay");
+            const start = this.clamp(Math.floor((p.position - p.glow) * resolution), 0, output.length - 1);
+            const end = this.clamp(Math.ceil((p.position + p.glow) * resolution), 0, output.length - 1);
+            for (let i = start; i <= end; i++) {
+                const pos = i / resolution;
+                const intensity = this.clamp(this.linearIntensity(p.position, pos, p.glow), 0, 1);
+                const color = blend(darken(p.color, 1 - intensity), output[i], "overlay");
+                output[i] = color;
             }
         });
 
         this.getInterface("Output").value = output;
 
+    }
+
+    private linearIntensity(center: number, position: number, width: number): number {
+        if (width === 0) { return 0; }
+        const distance = Math.abs(position - center);
+        return 1 - distance / width;
+    }
+
+    private clamp(v: number, min: number, max: number) {
+        if (!Number.isFinite(v)) { return 0; }
+        return Math.min(max, Math.max(min, v));
     }
 
 }
