@@ -52,6 +52,7 @@ export default class App extends Vue {
         const p = await this.openLoadDialog();
         if (!p) { return; }
         const buff = await (promisify(readFile)(p));
+        this.projectFilePath = p;
         globalState.load(buff);
     }
 
