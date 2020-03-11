@@ -45,13 +45,16 @@ export default class App extends Vue {
         ipcRenderer.on("menu:save", () => { this.save(); });
         ipcRenderer.on("menu:save_as", () => { this.saveAs(); });
         ipcRenderer.on("menu:settings", () => { this.showSettings = true; });
-
+        console.log("Everything set up");
     }
 
     async load() {
+        console.log("Load");
         const p = await this.openLoadDialog();
+        console.log(p);
         if (!p) { return; }
         const buff = await (promisify(readFile)(p));
+        console.log(buff);
         this.projectFilePath = p;
         globalState.load(buff);
     }
