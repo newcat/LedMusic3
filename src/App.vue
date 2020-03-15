@@ -2,6 +2,13 @@
 v-app
     v-content
         #app-container
+            c-toolbar(
+                @newProject="newProject",
+                @load="load",
+                @save="save",
+                @saveAs="saveAs",
+                @showSettings="showSettings = true"
+            )
             split-pane(split="horizontal")
                 template(slot="paneL")
                     split-pane(split="vertical")
@@ -21,6 +28,7 @@ import CLibrary from "@/components/Library.vue";
 import CTimeline from "@/components/timeline/Timeline.vue";
 import CGraph from "@/components/Graph.vue";
 import CSettings from "@/components/Settings.vue";
+import CToolbar from "@/components/Toolbar.vue";
 import { BaklavaEditor } from "@/editors/graph";
 import { globalState } from "@/entities/globalState";
 import { globalProcessor } from "@/processing";
@@ -29,42 +37,39 @@ import { ipcRenderer, remote } from "electron";
 import { readFile, writeFile } from "fs";
 import { promisify } from "util";
 
+const readFileP = promisify(readFile);
+const writeFileP = promisify(writeFile);
+
 @Component({
-    components: { CLibrary, CTimeline, CGraph, CSettings }
+    components: { CLibrary, CTimeline, CGraph, CSettings, CToolbar }
 })
 export default class App extends Vue {
 
     showSettings = false;
-    projectFilePath = "";
 
     created() {
         globalState.initialize();
         globalProcessor.initialize();
+    }
 
-        ipcRenderer.on("menu:open", () => { this.load(); });
-        ipcRenderer.on("menu:save", () => { this.save(); });
-        ipcRenderer.on("menu:save_as", () => { this.saveAs(); });
-        ipcRenderer.on("menu:settings", () => { this.showSettings = true; });
-        console.log("Everything set up");
+    newProject() {
+        globalState.reset();
     }
 
     async load() {
-        console.log("Load");
         const p = await this.openLoadDialog();
-        console.log(p);
         if (!p) { return; }
-        const buff = await (promisify(readFile)(p));
-        console.log(buff);
-        this.projectFilePath = p;
+        const buff = await readFileP(p);
+        globalState.projectFilePath = p;
         globalState.load(buff);
     }
 
     async save() {
-        if (!this.projectFilePath) {
+        if (!globalState.projectFilePath) {
             if (!await this.openSaveDialog()) { return; }
         }
         const state = globalState.save();
-        await (promisify(writeFile)(this.projectFilePath, state));
+        await writeFileP(globalState.projectFilePath, state);
     }
 
     async saveAs() {
@@ -87,7 +92,7 @@ export default class App extends Vue {
             filters: [{ name: "LedMusic Project", extensions: ["lmp"] }]
         });
         if (dialogResult.canceled) { return false; }
-        this.projectFilePath = dialogResult.filePath!;
+        globalState.projectFilePath = dialogResult.filePath!;
         return true;
     }
 
@@ -98,6 +103,8 @@ export default class App extends Vue {
 #app-container {
     height: 100%;
     width: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .content-container {

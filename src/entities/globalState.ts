@@ -29,6 +29,7 @@ class State implements IState {
     public library!: LibraryModel;
     public timeline!: LokumEditor;
 
+    public projectFilePath = "";
     public bpm = 130;
     public fps = 30;
     public volume = 0.5;
@@ -47,6 +48,17 @@ class State implements IState {
     public initialize() {
         this.library = new LibraryModel();
         this.timeline = new LokumEditor();
+    }
+
+    public reset() {
+        this.projectFilePath = "";
+        this.bpm = 130;
+        this.fps = 30;
+        this.volume = 0.5;
+        this.position = 0;
+        this.isPlaying = false;
+        this.resolution = 128;
+        this.initialize();
     }
 
     public save(): Buffer {

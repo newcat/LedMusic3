@@ -3,7 +3,6 @@ import {
   createProtocol,
   /* installVueDevtools */
 } from "vue-cli-plugin-electron-builder/lib";
-import menu from "./menu";
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 
@@ -13,8 +12,6 @@ let win: BrowserWindow | null;
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([{scheme: "app", privileges: { secure: true, standard: true } }]);
-
-Menu.setApplicationMenu(menu);
 
 function createWindow() {
   // Create the browser window.
