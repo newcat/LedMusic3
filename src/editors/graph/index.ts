@@ -4,8 +4,6 @@ import { InterfaceTypePlugin } from "@baklavajs/plugin-interface-types";
 import { OptionPlugin } from "@baklavajs/plugin-options-vue";
 import { Engine } from "@baklavajs/plugin-engine";
 
-import chroma from "chroma-js";
-
 import { registerNodes } from "./nodes/registerNodes";
 import { registerOptions } from "./options/registerOptions";
 
@@ -33,8 +31,8 @@ export class BaklavaEditor extends Editor {
         this.intfTypePlugin.addType("positions", "lightblue");
 
         this.intfTypePlugin.addConversion("number", "boolean");
-        this.intfTypePlugin.addConversion("number", "color_single", (v) => chroma(v * 255, v * 255, v * 255));
-        this.intfTypePlugin.addConversion("number", "color_array", (v) => [chroma(v * 255, v * 255, v * 255)]);
+        this.intfTypePlugin.addConversion("number", "color_single", (v) => [v * 255, v * 255, v * 255]);
+        this.intfTypePlugin.addConversion("number", "color_array", (v) => [[v * 255, v * 255, v * 255]]);
         this.intfTypePlugin.addConversion("boolean", "number");
         this.intfTypePlugin.addConversion("color_single", "color_array", (v) => [v]);
 
