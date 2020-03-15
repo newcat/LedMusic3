@@ -93,6 +93,20 @@ export class TimelineView extends Drawable<ITimelineViewProps> {
 
     }
 
+    public destroy() {
+        super.destroy();
+        this.viewInstance.eventBus.events.pointerdown.unsubscribe(this.graphics);
+        this.viewInstance.eventBus.events.pointerup.unsubscribe(this.graphics);
+        this.viewInstance.eventBus.events.pointermove.unsubscribe(this.graphics);
+        this.viewInstance.eventBus.events.pointerout.unsubscribe(this.graphics);
+        this.viewInstance.eventBus.events.keydown.unsubscribe(this);
+        this.viewInstance.eventBus.events.keyup.unsubscribe(this);
+        this.viewInstance.eventBus.events.zoom.unsubscribe(this);
+        this.viewInstance.eventBus.events.resize.unsubscribe(this);
+        this.viewInstance.eventBus.events.itemClicked.unsubscribe(this);
+        this.viewInstance.eventBus.events.removeTrack.unsubscribe(this);
+    }
+
     private getTrackOffsets(tracks: ReadonlyArray<Track>) {
         const offsets = [0];
         let prev = 0;

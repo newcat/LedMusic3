@@ -28,6 +28,8 @@ export class ItemContainer extends Drawable<IItemDrawableProps> {
         this.observeFunction = () => {
             this.updateText();
         };
+        // TODO: this obviously doesn't work, as it doesn't replace the actual item in the library with the proxy.
+        // But we still need a way to check if the text has updated
         observe(this.observeFunction);
 
         const itemDrawableType = this.getItemDrawable(this.libraryItem.type);
@@ -68,6 +70,7 @@ export class ItemContainer extends Drawable<IItemDrawableProps> {
     }
 
     public destroy() {
+        super.destroy();
         unobserve(this.observeFunction);
     }
 

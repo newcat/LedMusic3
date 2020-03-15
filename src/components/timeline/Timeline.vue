@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Prop, Watch, Vue } from "vue-property-decorator";
 import throttle from "lodash/throttle";
 import { observe } from "@nx-js/observer-util";
 import { PluginOptionsVue } from "baklavajs";
@@ -45,9 +45,6 @@ enum LabelMode {
 })
 export default class Timeline extends Vue {
 
-    public editor = globalState.timeline;
-    public volume = globalState.volume;
-
     public snapItems = [
         { text: "Disabled", value: "1" },
         { text: "1/8 Beat", value: (TICKS_PER_BEAT / 8).toString() },
@@ -69,6 +66,16 @@ export default class Timeline extends Vue {
 
     private viewInstance: View = (null as any);
 
+    private globalState = globalState;
+
+    public get editor() {
+        return this.globalState.timeline;
+    }
+
+    public get volume() {
+        return this.globalState.volume;
+    }
+
     public get snapUnits() {
         return this.editor.snapUnits.toString();
     }
@@ -78,6 +85,17 @@ export default class Timeline extends Vue {
     }
 
     public async mounted() {
+        this.resizeObserver = new ResizeObserver(throttle(() => this.onResize(), 200));
+        this.resizeObserver.observe(this.$refs.wrapper as Element);
+        this.initializeView();
+    }
+
+    @Watch("editor")
+    public async initializeView() {
+
+        if (this.viewInstance) {
+            this.viewInstance.unmount();
+        }
 
         const view = await View.mount(this.editor, this.$refs.wrapper as HTMLElement);
         this.viewInstance = view;
@@ -104,7 +122,7 @@ export default class Timeline extends Vue {
         });
 
         view.eventBus.events.keydown.subscribe(this, (ev) => {
-            if (ev.key === " " && document.activeElement?.nodeName !== "INPUT") {
+            if (ev.key === " ") {
                 if (globalState.isPlaying) {
                     globalProcessor.pause();
                 } else {
@@ -122,9 +140,12 @@ export default class Timeline extends Vue {
 
         (window as any).$data = view;
 
-        this.resizeObserver = new ResizeObserver(throttle(view.app.resize, 200));
-        this.resizeObserver.observe(this.$refs.wrapper as Element);
+    }
 
+    public onResize() {
+        if (this.viewInstance) {
+            this.viewInstance.app.resize();
+        }
     }
 
     public drop(ev: DragEvent) {
@@ -165,7 +186,6 @@ export default class Timeline extends Vue {
 
     public setVolume(v: number) {
         globalState.volume = Math.max(0, Math.min(1, v / 100));
-        this.volume = globalState.volume;
     }
 
     public setBpm(v: string) {

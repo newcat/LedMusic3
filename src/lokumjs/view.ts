@@ -18,7 +18,9 @@ export class View {
 
     public static async mount(editor: Editor, wrapperEl: HTMLElement) {
 
-        const canvasEl = wrapperEl.appendChild(document.createElement("canvas"));
+        const canvasEl = document.createElement("canvas");
+        canvasEl.tabIndex = 1;
+        wrapperEl.appendChild(canvasEl);
         const app = new Application({
             view: canvasEl as HTMLCanvasElement,
             resizeTo: wrapperEl,
@@ -26,35 +28,7 @@ export class View {
         });
 
         const textures = await loadTextures();
-        const view = new View(app, editor, textures);
-
-        const timeline = new TimelineView(view, { editor });
-        view.timelineDrawable = timeline;
-
-        timeline.setup();
-        app.stage.addChild(timeline.graphics);
-        app.ticker.add(() => timeline.tick());
-
-        // TODO: Only trigger when the current canvas is focused
-        document.addEventListener("keydown", (ev) => view.eventBus.events.keydown.emit(ev));
-        document.addEventListener("keyup", (ev) => view.eventBus.events.keyup.emit(ev));
-        canvasEl.addEventListener("wheel", (ev) => {
-            ev.preventDefault();
-            let scrollAmount = ev.deltaY;
-            if (ev.deltaMode === 1) {
-                scrollAmount *= 32; // Firefox fix, multiplier is trial & error
-            }
-            view.eventBus.events.zoom.emit({ positionX: ev.offsetX, amount: scrollAmount });
-        });
-
-        const proxy = Observer.observe(app.renderer.screen, true);
-        app.renderer.screen = proxy;
-        proxy._observer.registerWatcher(Symbol(), (changedPath) => {
-            if (changedPath === "width" || changedPath === "height") {
-                const { width, height } = app.renderer.screen;
-                view.eventBus.events.resize.emit({ width, height });
-            }
-        });
+        const view = new View(app, editor, textures, canvasEl);
 
         return view;
 
@@ -70,12 +44,46 @@ export class View {
     public colors: IColorDefinitions = defaultColors;
     public itemDrawableFunction: ItemDrawableFunction|null = null;
 
-    private constructor(app: Application, editor: Editor, textures: ITextures) {
+    private constructor(app: Application, editor: Editor, textures: ITextures, canvasEl: HTMLCanvasElement) {
         this.app = app;
         this.editor = editor;
         this.positionCalculator = new PositionCalculator(app);
         this.eventBus = new EventBus(app.renderer.plugins.interaction);
         this.textures = textures;
+
+        const timeline = new TimelineView(this, { editor });
+        this.timelineDrawable = timeline;
+
+        timeline.setup();
+        app.stage.addChild(timeline.graphics);
+        app.ticker.add(() => timeline.tick());
+
+        canvasEl.addEventListener("keydown", (ev) => this.eventBus.events.keydown.emit(ev));
+        canvasEl.addEventListener("keyup", (ev) => this.eventBus.events.keyup.emit(ev));
+        canvasEl.addEventListener("wheel", (ev) => {
+            ev.preventDefault();
+            let scrollAmount = ev.deltaY;
+            if (ev.deltaMode === 1) {
+                scrollAmount *= 32; // Firefox fix, multiplier is trial & error
+            }
+            this.eventBus.events.zoom.emit({ positionX: ev.offsetX, amount: scrollAmount });
+        });
+
+        const proxy = Observer.observe(app.renderer.screen, true);
+        app.renderer.screen = proxy;
+        proxy._observer.registerWatcher(Symbol(), (changedPath) => {
+            if (changedPath === "width" || changedPath === "height") {
+                const { width, height } = app.renderer.screen;
+                this.eventBus.events.resize.emit({ width, height });
+            }
+        });
+
+    }
+
+    public unmount() {
+        this.app.destroy(true);
+        this.timelineDrawable.destroy();
+        // TODO document.removeEventListener()
     }
 
 }
