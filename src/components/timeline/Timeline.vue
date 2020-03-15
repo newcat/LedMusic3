@@ -24,8 +24,7 @@ import { LokumEditor } from "@/editors/timeline";
 import { globalState } from "@/entities/globalState";
 import { AudioFile, LibraryItemType, GraphLibraryItem, AutomationClip, ILibraryItem } from "@/entities/library";
 import { AudioProcessor, TimelineProcessor, globalProcessor } from "@/processing";
-import { AutomationClipDrawable } from "./automationClipDrawable";
-import { WaveformDrawable } from "./waveformDrawable";
+import { ItemContainer } from "./itemContainer";
 import { PositionIndicator } from "./positionIndicator";
 import customColors from "@/colors";
 import CSelect from "@/components/elements/Select.vue";
@@ -119,7 +118,7 @@ export default class Timeline extends Vue {
         this.updateMarkerSpacing();
 
         view.colors = { ...view.colors, ...customColors };
-        view.itemDrawableFunction = (item) => this.getItemDrawable(item);
+        view.itemDrawableFunction = (item) => ItemContainer;
 
         (window as any).$data = view;
 
@@ -199,18 +198,6 @@ export default class Timeline extends Vue {
         // set the track id to "" temporarily, we will determine the track later
         const item = new Item("", 0, length, { libraryItem });
         return item;
-    }
-
-    private getItemDrawable(item: Item) {
-        if (!item.data || !item.data.libraryItem) { return null; }
-        switch (item.data.libraryItem.type as LibraryItemType) {
-            case LibraryItemType.AUDIO_FILE:
-                return WaveformDrawable;
-            case LibraryItemType.AUTOMATION_CLIP:
-                return AutomationClipDrawable;
-            default:
-                return null;
-        }
     }
 
     private updateMarkerSpacing() {
