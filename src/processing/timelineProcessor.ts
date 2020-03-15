@@ -1,6 +1,7 @@
 import { AudioProcessor } from "./audioProcessor";
 import { Editor, Item } from "@/lokumjs";
 import { AudioFile, ILibraryItem, LibraryItemType, GraphLibraryItem, AutomationClip } from "@/entities/library";
+import { globalState } from "@/entities/globalState";
 
 export class TimelineProcessor {
 
@@ -45,6 +46,13 @@ export class TimelineProcessor {
                 this.audioProcessor.unregisterBuffer(af.audioBuffer!);
                 this.audioProcessor.registerBuffer(af.audioBuffer!, item.start);
             });
+            item.events.beforeMoved.subscribe(this, () => {
+                // TODO: moving an audio item while playing causes continuos stuttering during playback for whatever reason.
+                // As a workaround, prevent items from being moved while playing
+                if (globalState.isPlaying) {
+                    return false;
+                }
+            });
         }
     }
 
@@ -54,6 +62,7 @@ export class TimelineProcessor {
         if (libraryItem.type === LibraryItemType.AUDIO_FILE) {
             const af = libraryItem as AudioFile;
             item.events.moved.unsubscribe(this);
+            item.events.beforeMoved.unsubscribe(this);
             this.audioProcessor.unregisterBuffer(af.audioBuffer!);
         } else if (libraryItem.type === LibraryItemType.AUTOMATION_CLIP) {
             const ac = libraryItem as AutomationClip;

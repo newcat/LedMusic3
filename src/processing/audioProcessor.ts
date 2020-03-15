@@ -96,6 +96,9 @@ export class AudioProcessor {
         if (i >= 0) {
             this.destroySource(this.tracks[i].source);
             this.tracks.splice(i, 1);
+        } else {
+            // tslint:disable-next-line:no-console
+            console.warn("Buffer not found");
         }
     }
 
