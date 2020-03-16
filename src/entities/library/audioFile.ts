@@ -1,4 +1,4 @@
-import { serialize, deserialize, Binary } from "bson";
+import { serialize, deserialize } from "bson";
 import uuidv4 from "uuid/v4";
 import { Texture } from "pixi.js";
 import { ILibraryItem, LibraryItemType } from "./libraryItem";
@@ -42,7 +42,14 @@ export class AudioFile implements ILibraryItem {
     }
 
     public async load() {
+        this.loading = true;
+        this.error = false;
 
+        if (!this.path) {
+            this.loading = false;
+            this.error = true;
+            return;
+        }
         const rawData = await (promisify(readFile)(this.path));
 
         // const sampleRate = AudioProcessor.sampleRate;

@@ -15,13 +15,8 @@ export class WaveformDrawable extends Drawable<IItemDrawableProps> {
     public setup() {
 
         const libraryItem = this.props.item.data!.libraryItem as AudioFile;
-        if (libraryItem.loading) {
-            libraryItem.events.loaded.subscribe(this, () => {
-                libraryItem.events.loaded.unsubscribe(this);
-                this.setup();
-            });
-            return;
-        }
+        libraryItem.events.loaded.subscribe(this, () => this.setup());
+        if (libraryItem.loading) { return; }
 
         const waveformParts = (libraryItem as AudioFile).textures;
         if (this.sprites.length === 0) {
@@ -48,6 +43,12 @@ export class WaveformDrawable extends Drawable<IItemDrawableProps> {
             p.sprite.height = this.props.height;
         });
 
+    }
+
+    public destroy() {
+        super.destroy();
+        const libraryItem = this.props.item.data!.libraryItem as AudioFile;
+        libraryItem.events.loaded.unsubscribe(this);
     }
 
 }

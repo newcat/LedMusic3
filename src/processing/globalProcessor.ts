@@ -17,9 +17,11 @@ class GlobalProcessor {
 
     public constructor() {
         (window as any).globalProcessor = this;
+        globalState.events.initialized.subscribe(this, () => this.initialize());
     }
 
     public initialize() {
+        if (this.audioProcessor) { this.audioProcessor.destroy(); }
         this.audioProcessor = new AudioProcessor();
         this.timelineProcessor = new TimelineProcessor(this.audioProcessor, globalState.timeline);
         observe(() => this.setTimer());

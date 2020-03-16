@@ -23,6 +23,13 @@ export interface IState {
     fps: number;
 }
 
+const defaults = {
+    bpm: 130,
+    fps: 30,
+    volume: 0.5,
+    resolution: 128
+};
+
 class State implements IState {
 
     public scene: IScene = { props: [] };
@@ -30,14 +37,15 @@ class State implements IState {
     public timeline!: LokumEditor;
 
     public projectFilePath = "";
-    public bpm = 130;
-    public fps = 30;
-    public volume = 0.5;
+    public bpm = defaults.bpm;
+    public fps = defaults.fps;
+    public volume = defaults.volume;
     public position = 0;
     public isPlaying = false;
-    public resolution = 128;
+    public resolution = defaults.resolution;
 
     public events = {
+        initialized: new StandardEvent(),
         positionSetByUser: new StandardEvent()
     };
 
@@ -46,18 +54,31 @@ class State implements IState {
     }
 
     public initialize() {
+
+        if (this.library) {
+            this.library.events.itemRemoved.unsubscribe(this);
+        }
+
         this.library = new LibraryModel();
+        this.library.events.itemRemoved.subscribe(this, (item) => {
+            const itemsToRemove = this.timeline.items.filter((i) => i.data?.libraryItem === item);
+            for (const i of itemsToRemove) {
+                this.timeline.removeItem(i);
+            }
+        });
+
         this.timeline = new LokumEditor();
+        this.events.initialized.emit();
     }
 
     public reset() {
         this.projectFilePath = "";
-        this.bpm = 130;
-        this.fps = 30;
-        this.volume = 0.5;
+        this.bpm = defaults.bpm;
+        this.fps = defaults.fps;
+        this.volume = defaults.volume;
         this.position = 0;
         this.isPlaying = false;
-        this.resolution = 128;
+        this.resolution = defaults.resolution;
         this.initialize();
     }
 
@@ -76,8 +97,8 @@ class State implements IState {
         this.scene = data.scene;
         this.library.load(data.library);
         this.timeline.load(data.timeline);
-        this.bpm = data.bpm;
-        this.fps = data.fps;
+        this.bpm = data.bpm ?? defaults.bpm;
+        this.fps = data.fps ?? defaults.fps;
     }
 
     public setPositionByUser(newPosition: number) {
