@@ -18,6 +18,7 @@ v-app
                             c-graph.fill-height
                 template(slot="paneR")
                     c-timeline
+            c-global-preview
     c-settings(v-model="showSettings")
     c-loading-dialog(v-model="showLoadingDialog")
 </template>
@@ -31,6 +32,7 @@ import CGraph from "@/components/Graph.vue";
 import CSettings from "@/components/Settings.vue";
 import CToolbar from "@/components/Toolbar.vue";
 import CLoadingDialog from "@/components/loading/LoadingDialog.vue";
+import CGlobalPreview from "@/components/GlobalPreview.vue";
 import { BaklavaEditor } from "@/editors/graph";
 import { globalState } from "@/entities/globalState";
 import { globalProcessor } from "@/processing";
@@ -43,7 +45,7 @@ const readFileP = promisify(readFile);
 const writeFileP = promisify(writeFile);
 
 @Component({
-    components: { CLibrary, CTimeline, CGraph, CSettings, CToolbar, CLoadingDialog }
+    components: { CLibrary, CTimeline, CGraph, CSettings, CToolbar, CLoadingDialog, CGlobalPreview }
 })
 export default class App extends Vue {
 
@@ -51,7 +53,7 @@ export default class App extends Vue {
     showLoadingDialog = false;
 
     created() {
-        globalState.reset();
+        this.newProject();
     }
 
     newProject() {

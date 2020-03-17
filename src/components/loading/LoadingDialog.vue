@@ -26,6 +26,7 @@ import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import { remote } from "electron";
 import { globalState } from "../../entities/globalState";
 import { ILibraryItem, LibraryItemType, AudioFile } from "../../entities/library";
+import { StandardEvent } from "../../lokumjs";
 
 @Component
 export default class LoadingDialog extends Vue {
@@ -56,14 +57,30 @@ export default class LoadingDialog extends Vue {
         item.load();
     }
 
+    @Watch("value")
+    subscribeLoadedEvents() {
+        if (this.value) {
+            this.items.forEach((i) => {
+                if ((i as any).events?.loaded) {
+                    ((i as any).events.loaded as StandardEvent).subscribe(this, () => this.checkIfLoadingDone());
+                }
+            });
+        }
+    }
+
     /*@Watch("items", { deep: true })*/
     checkIfLoadingDone() {
         if (this.items.every((i) => !i.loading && !i.error)) {
-            this.$emit("input", false);
+            this.close();
         }
     }
 
     close() {
+        this.items.forEach((i) => {
+            if ((i as any).events?.loaded) {
+                ((i as any).events.loaded as StandardEvent).unsubscribe(this);
+            }
+        });
         this.$emit("input", false);
     }
 

@@ -284,6 +284,13 @@
     "@pixi/math" "^5.2.0"
     "@pixi/utils" "^5.2.0"
 
+"@pixi/filter-advanced-bloom@^3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@pixi/filter-advanced-bloom/-/filter-advanced-bloom-3.1.1.tgz#e45b8fa8bd17a98e6242fa8a96c199484a82ca22"
+  integrity sha512-IkBSOWVk+pFQzher3oJXLl3/ayTEMY92hzL7EOvmOeQYn46nxmNYX9GIqtHSlvXUEIB0GB+HgOB/9n6EJYv9kA==
+  dependencies:
+    "@pixi/filter-kawase-blur" "3.1.1"
+
 "@pixi/filter-alpha@^5.2.0":
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/@pixi/filter-alpha/-/filter-alpha-5.2.0.tgz#a0b028655ee95a9d76963a85d7e78c6742113b3c"
@@ -320,6 +327,11 @@
   integrity sha512-rlhC65BALzQAVBEXYzr8bKqyhZIWLco+VWJ7Fs8D3bJCutyu6xX6d7XDAqQW5SmJCNrIdaKvl/B6Xzer/+z8DA==
   dependencies:
     "@pixi/core" "^5.2.0"
+
+"@pixi/filter-kawase-blur@3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@pixi/filter-kawase-blur/-/filter-kawase-blur-3.1.1.tgz#9e419f17bf17f46dea3230babff9b0449435ee11"
+  integrity sha512-whHyj8bpfbGSUCmHjd6wd3+C4vB2zyBxB+2IoWXxW44b/bDcDypifwDhRShsXcdWRJ5urTvukiqiZStaeK9oeA==
 
 "@pixi/filter-noise@^5.2.0":
   version "5.2.0"

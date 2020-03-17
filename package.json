@@ -13,6 +13,7 @@
   "main": "background.js",
   "dependencies": {
     "@nx-js/observer-util": "^4.2.2",
+    "@pixi/filter-advanced-bloom": "^3.1.1",
     "@types/bson": "^4.0.1",
     "@types/chart.js": "^2.9.7",
     "@types/chroma-js": "^1.4.2",

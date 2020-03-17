@@ -3,14 +3,18 @@ import { AudioProcessor } from "./audioProcessor";
 import { TimelineProcessor } from "./timelineProcessor";
 import { globalState } from "@/entities/globalState";
 import { StandardEvent } from "@/lokumjs";
+import { Color } from "@/editors/graph/colors";
 
 class GlobalProcessor {
 
     public audioProcessor!: AudioProcessor;
     public timelineProcessor!: TimelineProcessor;
 
+    public globalPreview: Color[] = [];
+
     public events = {
-        tick: new StandardEvent()
+        tick: new StandardEvent(),
+        globalPreviewUpdated: new StandardEvent()
     };
 
     private timer: any = null;
