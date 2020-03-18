@@ -3,6 +3,8 @@ import { Color, mix, blend } from "../../colors";
 import { globalState } from "@/entities/globalState";
 import { observe } from "@nx-js/observer-util";
 
+const THRESHOLD = 4;
+
 export class AfterglowNode extends Node {
 
     public type = "Afterglow";
@@ -30,7 +32,7 @@ export class AfterglowNode extends Node {
             let b = i < this.buffer.length ? this.buffer[i] : ([0, 0, 0] as Color);
             b = mix(b, [0, 0, 0], 1 - strength);
             const c = blend(b, a, "lighten");
-            this.buffer[i] = c;
+            this.buffer[i] = Math.max(...c) < THRESHOLD ? a : c;
             result[i] = c;
         }
 
