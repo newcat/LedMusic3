@@ -7,9 +7,10 @@ import { IState } from "@baklavajs/core/dist/types";
 export class GraphLibraryItem implements ILibraryItem {
 
     public static deserialize(data: Buffer) {
-        const { id, state } = deserialize(data);
+        const { id, name, state } = deserialize(data);
         const g = new GraphLibraryItem(state);
         g.id = id;
+        g.name = name;
         return g;
     }
 
@@ -27,6 +28,7 @@ export class GraphLibraryItem implements ILibraryItem {
     public serialize() {
         return serialize({
             id: this.id,
+            name: this.name,
             state: this.editor.save()
         });
     }
