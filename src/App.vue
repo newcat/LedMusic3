@@ -15,7 +15,8 @@ v-app
                         template(slot="paneL")
                             c-library.fill-height
                         template(slot="paneR")
-                            c-graph.fill-height
+                            // c-graph.fill-height
+                            c-pianoroll.fill-height
                 template(slot="paneR")
                     c-timeline
             c-global-preview
@@ -29,6 +30,7 @@ import { Component, Prop, Vue } from "vue-property-decorator";
 import CLibrary from "@/components/Library.vue";
 import CTimeline from "@/components/timeline/Timeline.vue";
 import CGraph from "@/components/Graph.vue";
+import CPianoroll from "@/editors/pianoroll/Pianoroll.vue";
 import CSettings from "@/components/Settings.vue";
 import CToolbar from "@/components/Toolbar.vue";
 import CLoadingDialog from "@/components/loading/LoadingDialog.vue";
@@ -45,7 +47,7 @@ const readFileP = promisify(readFile);
 const writeFileP = promisify(writeFile);
 
 @Component({
-    components: { CLibrary, CTimeline, CGraph, CSettings, CToolbar, CLoadingDialog, CGlobalPreview }
+    components: { CLibrary, CTimeline, CGraph, CPianoroll, CSettings, CToolbar, CLoadingDialog, CGlobalPreview }
 })
 export default class App extends Vue {
 
