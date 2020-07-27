@@ -7,15 +7,31 @@ v-card.d-flex.flex-column(flat)
             .__header
                 div {{ i }}
             .__content
+                .__item(v-for="item in getItemsForTrack(i)", :style="{ left: `${item.start}px`, width: `${item.end - item.start}px` }")
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
 
+interface IItem {
+    value: number;
+    start: number;
+    end: number;
+}
+
 @Component
 export default class Pianoroll extends Vue {
 
-    
+    items: IItem[] = [
+        { value: 5, start: 0, end: 384 },
+        { value: 3, start: 0, end: 47 },
+        { value: 3, start: 96, end: 96 + 47 },
+        { value: 3, start: 2 * 96, end: 2 * 96 + 47 },
+    ];
+
+    getItemsForTrack(track: number) {
+        return this.items.filter((i) => i.value === track);
+    }
 
 }
 </script>
@@ -29,9 +45,9 @@ export default class Pianoroll extends Vue {
     $headerWidth: 50px;
 
     .__row {
-        position: relative;
         height: $rowHeight;
         border-bottom: 1px solid #504f5c;
+        display: flex;
 
         .__header {
             position: sticky;
@@ -46,9 +62,18 @@ export default class Pianoroll extends Vue {
         }
 
         .__content {
-            margin-left: $headerWidth;
+            position: relative;
             width: 1000px;
             height: 100%;
+
+            .__item {
+                position: absolute;
+                height: calc(100% - 2px);
+                top: 1px;
+                background-color: #888;
+                border-radius: 3px;
+            }
+
         }
 
     }
