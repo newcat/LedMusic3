@@ -13,7 +13,11 @@ v-app
                 template(slot="paneL")
                     split-pane(split="vertical")
                         template(slot="paneL")
-                            c-library.fill-height
+                            split-pane(split="horizontal")
+                                template(slot="paneL")
+                                    c-library.fill-height
+                                template(slot="paneR")
+                                    c-graph.fill-height
                         template(slot="paneR")
                             // c-graph.fill-height
                             c-pianoroll.fill-height
