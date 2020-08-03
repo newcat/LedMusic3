@@ -7,51 +7,49 @@ v-card.d-flex.flex-column(flat)
             .__row(v-for="i in 128", :key="i")
                 .__header
                     div {{ i }}
-                .__row_content
-                    .__item(v-for="item in getItemsForTrack(i)", :style="{ left: `${item.start * tickWidth}px`, width: `${(item.end - item.start) * tickWidth}px` }")
+                .__note_container
+                    c-note(v-for="n, ni in getItemsForTrack(i)", :key="ni", :note="n", :tickWidth="tickWidth")
+                    
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
+import { INote } from "./types";
+import CNote from "./Note.vue";
 
-interface IItem {
-    value: number;
-    start: number;
-    end: number;
-}
-
-@Component
+@Component({
+    components: { CNote }
+})
 export default class Pianoroll extends Vue {
 
     tickWidth = 1;
     headerWidth = 50;
     snap = 96;
 
-    items: IItem[] = [
-        { value: 5, start: 0, end: 384 },
-        { value: 3, start: 0, end: 47 },
-        { value: 3, start: 96, end: 96 + 47 },
-        { value: 3, start: 2 * 96, end: 2 * 96 + 47 },
-        { value: 3, start: 7 * 96, end: 12 * 96 + 47 },
+    notes: INote[] = [
+        { value: 5, start: 0, end: 384, selected: false },
+        { value: 3, start: 0, end: 47, selected: false },
+        { value: 3, start: 96, end: 96 + 47, selected: true },
+        { value: 3, start: 2 * 96, end: 2 * 96 + 47, selected: false },
+        { value: 3, start: 7 * 96, end: 12 * 96 + 47, selected: false },
     ];
 
     get contentStyles() {
-        const lastItemEnd = this.items.reduce((p, i) => Math.max(p, i.end), 0);
+        const lastNoteEnd = this.notes.reduce((p, n) => Math.max(p, n.end), 0);
         return {
-            width: `${(lastItemEnd + this.snap) * this.tickWidth + this.headerWidth }px`,
+            width: `${(lastNoteEnd + this.snap) * this.tickWidth + this.headerWidth }px`,
             backgroundSize: `${this.snap * this.tickWidth}px ${this.snap * this.tickWidth}px`
         };
     }
 
     getItemsForTrack(track: number) {
-        return this.items.filter((i) => i.value === track);
+        return this.notes.filter((n) => n.value === track);
     }
 
     mousedown(ev: MouseEvent) {
-        if (ev.button === 0) {
-            this.tickWidth += 0.1;
-        } else {
-            this.tickWidth -= 0.1;
+        const target = ev.target as HTMLElement|null;
+        if (target && !target.matches(".note")) {
+            this.notes.forEach((n) => { n.selected = false; });
         }
     }
 
@@ -71,6 +69,7 @@ export default class Pianoroll extends Vue {
         background-image: linear-gradient(90deg, #504f5c 1px, transparent 1px);
         background-position: ($headerWidth - 1px) -1px;
         background-repeat: repeat;
+        min-width: 100%;
     }
 
     .__row {
@@ -93,29 +92,12 @@ export default class Pianoroll extends Vue {
             z-index: 10;
         }
 
-        .__row_content {
+        .__note_container {
             position: relative;
             width: 1000px;
             height: 100%;
-
-            .__item {
-                position: absolute;
-                height: calc(100% - 2px);
-                top: 1px;
-                background-color: #888;
-                border-radius: 3px;
-            }
-
         }
 
-    }
-
-    .__marker {
-        position: absolute;
-        top: 0;
-        width: 1px;
-        height: 100%;
-        background-color: #504f5c;
     }
 
 }
