@@ -1,5 +1,6 @@
 <template lang="pug">
-.note(:class="{ '--selected': note.selected }", :style="styles", @mousedown="mousedown")
+.note(:class="{ '--selected': note.selected }", :style="styles", @mousedown.self="dragStart")
+    .__resizeHandle(@mousedown.self="resizeStart")
 </template>
 
 <script lang="ts">
@@ -17,13 +18,17 @@ export default class Pianoroll extends Vue {
 
     get styles() {
         return {
-            left: `${this.note.start * this.tickWidth}px`,
+            transform: `translateX(${this.note.start * this.tickWidth}px)`,
             width: `${(this.note.end - this.note.start) * this.tickWidth}px`
         };
     }
 
-    mousedown(ev: MouseEvent) {
-        this.note.selected = true;
+    dragStart(ev: MouseEvent) {
+        this.$emit("dragStart", this.note, ev.offsetX);
+    }
+
+    resizeStart(ev: MouseEvent) {
+        this.$emit("resizeStart", this.note, ev.offsetX);
     }
 
 }
@@ -34,11 +39,22 @@ export default class Pianoroll extends Vue {
     position: absolute;
     height: calc(100% - 2px);
     top: 1px;
-    background-color: #888;
+    background-color: #1eb980;
+    border: 1px solid lighten(#1eb980, 20%);
     border-radius: 3px;
+    transition: border 0.1s;
+    transition: transform 0.05s, width 0.05s;
 
     &.--selected {
-        border: 2px solid #1eb980;
+        border: 2px solid #fff;
+    }
+
+    .__resizeHandle {
+        position: absolute;
+        right: 0;
+        width: 8px;
+        height: 100%;
+        cursor: col-resize;
     }
 }
 </style>
