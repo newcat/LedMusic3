@@ -1,43 +1,40 @@
 <template lang="pug">
-v-card.d-flex.flex-column(flat)
-    v-toolbar(dense, flat, style="max-height: 48px;")
-        v-toolbar-title Piano Roll
-    .pianoroll
-        .__content(
-            tabindex="-1"
-            :style="contentStyles",
-            @mousedown="mousedown",
-            @mouseup="mouseup"
-            @keydown="keydown")
+.note-editor
+    .__content(
+        tabindex="-1"
+        :style="contentStyles",
+        @mousedown="mousedown",
+        @mouseup="mouseup"
+        @keydown="keydown")
 
-            .__row(v-for="i in 128", :key="i", :data-row-value="i")
-                .__header
-                    div {{ i }}
+        .__row(v-for="i in 128", :key="i", :data-row-value="i")
+            .__header
+                div {{ i }}
 
-                .__note_container(
-                    @mouseenter="onRowMouseenter(i, $event)",
-                    @mousemove="onRowMouseMove",
-                    @mousedown.self="createNote(i, $event)")
+            .__note-container(
+                @mouseenter="onRowMouseenter(i, $event)",
+                @mousemove="onRowMouseMove",
+                @mousedown.self="createNote(i, $event)")
 
-                    c-note(
-                        v-for="n, ni in getNotesForTrack(i)",
-                        :key="ni", :note="n",,
-                        :tickWidth="tickWidth",
-                        :style="{ pointerEvents: disableNotePointerEvents ? 'none' : undefined }",
-                        @dragStart="onDragStart",
-                        @resizeStart="onResizeStart")
-                    
+                c-note(
+                    v-for="n, ni in getNotesForTrack(i)",
+                    :key="ni", :note="n",,
+                    :tickWidth="tickWidth",
+                    :style="{ pointerEvents: disableNotePointerEvents ? 'none' : undefined }",
+                    @dragStart="onDragStart",
+                    @resizeStart="onResizeStart")
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import { INote } from "./types";
 import CNote from "./Note.vue";
+import { NotePattern } from "@/entities/library";
 
 @Component({
     components: { CNote }
 })
-export default class Pianoroll extends Vue {
+export default class NoteEditor extends Vue {
 
     tickWidth = 1.5;
     headerWidth = 50;
@@ -50,13 +47,8 @@ export default class Pianoroll extends Vue {
     resizedNote: INote|null = null;
     resizeOffset: number = 0;
 
-    notes: INote[] = [
-        { value: 5, start: 0, end: 384, selected: false },
-        { value: 3, start: 0, end: 47, selected: false },
-        { value: 3, start: 96, end: 96 + 47, selected: true },
-        { value: 3, start: 2 * 96, end: 2 * 96 + 47, selected: false },
-        { value: 3, start: 7 * 96, end: 12 * 96 + 47, selected: false },
-    ];
+    @Prop()
+    notePattern!: NotePattern;
 
     get contentStyles() {
         return {
@@ -70,18 +62,18 @@ export default class Pianoroll extends Vue {
     }
 
     getNotesForTrack(track: number) {
-        return this.notes.filter((n) => n.value === track);
+        return this.notePattern.notes.filter((n) => n.value === track);
     }
 
     unselectAllNotes() {
-        this.notes.forEach((n) => { n.selected = false; });
+        this.notePattern.notes.forEach((n) => { n.selected = false; });
     }
 
-    @Watch("notes", { deep: true, immediate: true })
+    @Watch("notePattern.notes", { deep: true, immediate: true })
     @Watch("draggedNote")
     @Watch("resizedNote")
     updateLastNoteEnd() {
-        const newLastNoteEnd = this.notes.reduce((p, n) => Math.max(p, n.end), 0);
+        const newLastNoteEnd = this.notePattern.notes.reduce((p, n) => Math.max(p, n.end), 0);
         if (newLastNoteEnd < this.lastNoteEnd && (this.draggedNote || this.resizedNote)) {
             // do nothing because shrinking the content while dragging results in strange behaviour
             return;
@@ -92,7 +84,7 @@ export default class Pianoroll extends Vue {
     mousedown(ev: MouseEvent) {
         const target = ev.target as HTMLElement|null;
         if (target && !target.matches(".note")) {
-            this.notes.forEach((n) => { n.selected = false; });
+            this.notePattern.notes.forEach((n) => { n.selected = false; });
         }
     }
 
@@ -103,11 +95,11 @@ export default class Pianoroll extends Vue {
 
     keydown(ev: KeyboardEvent) {
         if (ev.key === "Delete") {
-            const noteIndicesToDelete = this.notes
+            const noteIndicesToDelete = this.notePattern.notes
                 .map((v, i) => v.selected ? i : -1)
                 .filter((i) => i >= 0);
             noteIndicesToDelete.reverse();
-            noteIndicesToDelete.forEach((i) => this.notes.splice(i, 1));
+            noteIndicesToDelete.forEach((i) => this.notePattern.notes.splice(i, 1));
         }
     }
 
@@ -148,10 +140,10 @@ export default class Pianoroll extends Vue {
     }
 
     createNote(value: number, ev: MouseEvent) {
-        if (this.notes.every((n) => !n.selected)) {
+        if (this.notePattern.notes.every((n) => !n.selected)) {
             let start = ev.offsetX / this.tickWidth;
             start = start - (start % this.snap);
-            this.notes.push({
+            this.notePattern.notes.push({
                 start,
                 end: start + this.snap,
                 value,
@@ -169,7 +161,7 @@ export default class Pianoroll extends Vue {
 </script>
 
 <style lang="scss">
-.pianoroll {
+.note-editor {
     overflow-y: scroll;
     width: 100%;
 
@@ -208,7 +200,7 @@ export default class Pianoroll extends Vue {
             z-index: 10;
         }
 
-        .__note_container {
+        .__note-container {
             position: relative;
             width: 100%;
             height: 100%;

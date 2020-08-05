@@ -14,6 +14,8 @@ v-card(flat)
                     v-list-item-title Graph
                 v-list-item(@click="addAutomationClip")
                     v-list-item-title Automation Clip
+                v-list-item(@click="addNotePattern")
+                    v-list-item-title Note Pattern
 
     v-container(fluid, style="height: calc(100% - 48px); overflow-y: auto;", grid-list-md)
         .library-grid
@@ -35,7 +37,7 @@ v-card(flat)
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
-import { AudioFile, AutomationClip, GraphLibraryItem, LibraryItemType, ILibraryItem } from "@/entities/library";
+import { AudioFile, AutomationClip, GraphLibraryItem, LibraryItemType, ILibraryItem, NotePattern } from "@/entities/library";
 import { globalState } from "@/entities/globalState";
 import ItemSettings from "./LibraryItemSettings.vue";
 
@@ -77,6 +79,8 @@ export default class Library extends Vue {
                 return "device_hub";
             case LibraryItemType.AUTOMATION_CLIP:
                 return "timeline";
+            case LibraryItemType.NOTE_PATTERN:
+                return "queue_music";
             default:
                 return "note";
         }
@@ -88,6 +92,10 @@ export default class Library extends Vue {
 
     public addAutomationClip() {
         this.globalState.library.addItem(new AutomationClip());
+    }
+
+    public addNotePattern() {
+        this.globalState.library.addItem(new NotePattern());
     }
 
     public openItemSettings(item: ILibraryItem) {

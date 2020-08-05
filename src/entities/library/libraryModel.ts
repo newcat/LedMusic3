@@ -4,6 +4,7 @@ import { AudioFile } from "./audioFile";
 import { AutomationClip } from "./automationClip";
 import { GraphLibraryItem } from "./graphLibraryItem";
 import { StandardEvent } from "@/lokumjs";
+import { NotePattern } from "./notePattern";
 
 export class LibraryModel {
 
@@ -45,6 +46,9 @@ export class LibraryModel {
                     break;
                 case LibraryItemType.GRAPH:
                     newItems.push(GraphLibraryItem.deserialize(buffer));
+                    break;
+                case LibraryItemType.NOTE_PATTERN:
+                    newItems.push(NotePattern.deserialize(buffer));
                     break;
                 default:
                     // tslint:disable-next-line: no-console
