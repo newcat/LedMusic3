@@ -8,7 +8,6 @@ export interface IEditorState {
 }
 
 export class Editor {
-
     public events = {
         beforeItemAdded: new PreventableEvent<Item>(),
         itemAdded: new StandardEvent<Item>(),
@@ -17,7 +16,7 @@ export class Editor {
         beforeTrackAdded: new PreventableEvent<Track>(),
         trackAdded: new StandardEvent<Track>(),
         beforeTrackRemoved: new PreventableEvent<Track>(),
-        trackRemoved: new StandardEvent<Track>()
+        trackRemoved: new StandardEvent<Track>(),
     };
 
     private _tracks: Track[] = [];
@@ -25,8 +24,12 @@ export class Editor {
 
     public labelFunction: (unit: number) => string = (u) => u.toString();
 
-    public get tracks() { return this._tracks as ReadonlyArray<Track>; }
-    public get items() { return this._items as ReadonlyArray<Item>; }
+    public get tracks() {
+        return this._tracks as ReadonlyArray<Track>;
+    }
+    public get items() {
+        return this._items as ReadonlyArray<Item>;
+    }
 
     public load(state: IEditorState) {
         this.items.forEach((i) => this.removeItem(i));
@@ -42,7 +45,7 @@ export class Editor {
     public save(): IEditorState {
         return {
             tracks: this.tracks.map((t) => t.save()),
-            items: this.items.map((i) => i.save())
+            items: this.items.map((i) => i.save()),
         };
     }
 
@@ -102,5 +105,4 @@ export class Editor {
         // TODO: Rework
         return true;
     }
-
 }

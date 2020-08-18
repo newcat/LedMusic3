@@ -12,11 +12,10 @@ v-toolbar(dense)
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 
 @Component
 export default class Toolbar extends Vue {
-
     items = [
         {
             name: "File",
@@ -25,15 +24,12 @@ export default class Toolbar extends Vue {
                 { name: "Open", event: "load" },
                 { name: "Save", event: "save" },
                 { name: "Save as", event: "saveAs" },
-            ]
+            ],
         },
         {
             name: "Edit",
-            children: [
-                { name: "Settings", event: "showSettings" }
-            ]
-        }
+            children: [{ name: "Settings", event: "showSettings" }],
+        },
     ];
-
 }
 </script>

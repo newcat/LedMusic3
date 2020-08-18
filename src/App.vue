@@ -28,7 +28,7 @@ v-app
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 
 import CLibrary from "@/components/Library.vue";
 import CTimeline from "@/components/timeline/Timeline.vue";
@@ -38,9 +38,7 @@ import CSettings from "@/components/Settings.vue";
 import CToolbar from "@/components/Toolbar.vue";
 import CLoadingDialog from "@/components/loading/LoadingDialog.vue";
 import CGlobalPreview from "@/components/GlobalPreview.vue";
-import { BaklavaEditor } from "@/editors/graph";
 import { globalState } from "@/entities/globalState";
-import { globalProcessor } from "@/processing";
 
 import { remote } from "electron";
 import { readFile, writeFile } from "fs";
@@ -50,24 +48,25 @@ const readFileP = promisify(readFile);
 const writeFileP = promisify(writeFile);
 
 @Component({
-    components: { CLibrary, CTimeline, CGraph, CNoteEditor, CSettings, CToolbar, CLoadingDialog, CGlobalPreview }
+    components: { CLibrary, CTimeline, CGraph, CNoteEditor, CSettings, CToolbar, CLoadingDialog, CGlobalPreview },
 })
 export default class App extends Vue {
-
     showSettings = false;
     showLoadingDialog = false;
 
-    created() {
+    created(): void {
         this.newProject();
     }
 
-    newProject() {
+    newProject(): void {
         globalState.reset();
     }
 
-    async load() {
+    async load(): Promise<void> {
         const p = await this.openLoadDialog();
-        if (!p) { return; }
+        if (!p) {
+            return;
+        }
         const buff = await readFileP(p);
         globalState.reset();
         globalState.projectFilePath = p;
@@ -75,38 +74,45 @@ export default class App extends Vue {
         globalState.load(buff);
     }
 
-    async save() {
+    async save(): Promise<void> {
         if (!globalState.projectFilePath) {
-            if (!await this.openSaveDialog()) { return; }
+            if (!(await this.openSaveDialog())) {
+                return;
+            }
         }
         const state = globalState.save();
         await writeFileP(globalState.projectFilePath, state);
     }
 
-    async saveAs() {
-        if (!await this.openSaveDialog()) { return; }
+    async saveAs(): Promise<void> {
+        if (!(await this.openSaveDialog())) {
+            return;
+        }
         await this.save();
     }
 
     private async openLoadDialog(): Promise<string> {
         const dialogResult = await remote.dialog.showOpenDialog({
             title: "Open Project",
-            filters: [{ name: "LedMusic Project", extensions: ["lmp"] }]
+            filters: [{ name: "LedMusic Project", extensions: ["lmp"] }],
         });
-        if (dialogResult.canceled) { return ""; }
+        if (dialogResult.canceled) {
+            return "";
+        }
         return dialogResult.filePaths![0];
     }
 
-    private async openSaveDialog() {
+    private async openSaveDialog(): Promise<boolean> {
         const dialogResult = await remote.dialog.showSaveDialog({
             title: "Save Project",
-            filters: [{ name: "LedMusic Project", extensions: ["lmp"] }]
+            filters: [{ name: "LedMusic Project", extensions: ["lmp"] }],
         });
-        if (dialogResult.canceled) { return false; }
+        if (dialogResult.canceled) {
+            return false;
+        }
         globalState.projectFilePath = dialogResult.filePath!;
         return true;
     }
-
 }
 </script>
 
@@ -122,7 +128,8 @@ export default class App extends Vue {
     margin: 5px;
 }
 
-html, body {
+html,
+body {
     margin: 0;
     padding: 0;
     width: calc(100vw - (100vw - 100%));

@@ -3,7 +3,6 @@ import { LibraryItem, LibraryItemType } from "./libraryItem";
 import { BaklavaEditor } from "@/editors/graph";
 
 export class GraphLibraryItem extends LibraryItem {
-
     public type = LibraryItemType.GRAPH;
     public name = "Graph";
 
@@ -13,7 +12,7 @@ export class GraphLibraryItem extends LibraryItem {
         return serialize({
             id: this.id,
             name: this.name,
-            state: this.editor.save()
+            state: this.editor.save(),
         });
     }
 
@@ -23,5 +22,4 @@ export class GraphLibraryItem extends LibraryItem {
         this.name = name;
         this.editor.load(state);
     }
-
 }

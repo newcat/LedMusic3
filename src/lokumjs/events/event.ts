@@ -1,4 +1,4 @@
-export type ConsumerFunction<T = any> = (data: T) => void|boolean;
+export type ConsumerFunction<T = any> = (data: T) => void | boolean;
 
 export interface IEvent<T> {
     subscribe(token: any, callback: ConsumerFunction<T>): void;

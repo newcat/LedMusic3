@@ -3,7 +3,6 @@ import { Color } from "../../colors";
 import { ICalculationData } from "../../types";
 
 export class StripNode extends Node {
-
     public type = "Strip";
     public name = this.type;
 
@@ -16,7 +15,6 @@ export class StripNode extends Node {
     }
 
     public calculate(data: ICalculationData) {
-
         const { resolution } = data;
 
         const start = this.getInterface("Start").value;
@@ -31,7 +29,5 @@ export class StripNode extends Node {
         }
 
         this.getInterface("Output").value = result;
-
     }
-
 }

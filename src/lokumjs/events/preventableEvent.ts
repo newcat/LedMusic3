@@ -1,9 +1,8 @@
 import { IEvent } from "./event";
 
-export type PreventableConsumerFunction<T = any> = (data: T) => boolean|void;
+export type PreventableConsumerFunction<T = any> = (data: T) => boolean | void;
 
 export class PreventableEvent<T> implements IEvent<T> {
-
     private subscribers = new Map<any, PreventableConsumerFunction<T>>();
 
     public subscribe(token: any, callback: PreventableConsumerFunction<T>): void {
@@ -22,6 +21,4 @@ export class PreventableEvent<T> implements IEvent<T> {
         }
         return true;
     }
-
-
 }

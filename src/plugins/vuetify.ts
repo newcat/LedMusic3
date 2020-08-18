@@ -3,14 +3,9 @@ import Vue from "vue";
 // @ts-ignore
 import Vuetify from "vuetify/lib";
 
-// @ts-ignore
-import colors from "vuetify/lib/util/colors";
-
-
-
 const vuetify = new Vuetify({
     icons: {
-        iconfont: "md"
+        iconfont: "md",
     },
     theme: {
         dark: true,
@@ -18,10 +13,10 @@ const vuetify = new Vuetify({
             dark: {
                 primary: "#1eb980",
                 secondary: "#045d56",
-                accent: "#ffcf44"
-            }
-        }
-    }
+                accent: "#ffcf44",
+            },
+        },
+    },
 });
 
 Vue.use(Vuetify);

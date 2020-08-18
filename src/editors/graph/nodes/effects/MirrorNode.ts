@@ -2,7 +2,6 @@ import { Node } from "@baklavajs/core";
 import { Color, mix, blend } from "../../colors";
 
 export class MirrorNode extends Node {
-
     public type = "Mirror";
     public name = this.type;
 
@@ -14,7 +13,6 @@ export class MirrorNode extends Node {
     }
 
     public calculate() {
-
         const input: Color[] = this.getInterface("Input").value;
         const strength: number = this.getInterface("Strength").value;
 
@@ -29,7 +27,5 @@ export class MirrorNode extends Node {
         }
 
         this.getInterface("Output").value = result;
-
     }
-
 }

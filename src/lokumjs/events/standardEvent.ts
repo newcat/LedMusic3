@@ -1,7 +1,6 @@
 import { IEvent, ConsumerFunction } from "./event";
 
 export class StandardEvent<T = void> implements IEvent<T> {
-
     private subscribers = new Map<any, ConsumerFunction<T>>();
 
     public subscribe(token: any, callback: ConsumerFunction<T>): void {
@@ -15,6 +14,4 @@ export class StandardEvent<T = void> implements IEvent<T> {
     public emit(data: T): void {
         Array.from(this.subscribers.entries()).forEach(([k, v]) => v.call(k, data));
     }
-
-
 }

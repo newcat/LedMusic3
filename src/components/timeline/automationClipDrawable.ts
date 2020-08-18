@@ -10,12 +10,11 @@ interface IScreenPoint {
 }
 
 export class AutomationClipDrawable extends Drawable<IItemDrawableProps> {
-
     private editor = this.viewInstance.editor as LokumEditor;
     private clipGraphics = new Graphics();
 
     private points: IScreenPoint[] = [];
-    private hoveredPointId: string = "";
+    private hoveredPointId = "";
     private dragging = false;
 
     private lastClickTime = 0; // for detecting double-clicks
@@ -30,17 +29,18 @@ export class AutomationClipDrawable extends Drawable<IItemDrawableProps> {
         this.graphics.interactive = true;
         this.viewInstance.eventBus.events.pointermove.subscribe(this.graphics, (ev) => this.onMouseMove(ev.data));
         this.viewInstance.eventBus.events.pointerdown.subscribe(this.graphics, (ev) => this.onMouseDown(ev.data));
-        this.viewInstance.eventBus.events.pointerup.subscribe(this.graphics, (ev) => this.onMouseUp());
+        this.viewInstance.eventBus.events.pointerup.subscribe(this.graphics, () => this.onMouseUp());
         this.graphics.addListener("pointerout", () => {
             this.dragging = false;
             this.hoveredPointId = "";
             this.needsRender = true;
         });
-        this.libItem.events.pointsUpdated.subscribe(this, () => { this.needsRender = true; });
+        this.libItem.events.pointsUpdated.subscribe(this, () => {
+            this.needsRender = true;
+        });
     }
 
     public render() {
-
         this.clipGraphics.clear().beginFill(0xffffff).drawRect(0, 0, this.props.width, this.props.height).endFill();
         this.graphics.clear().lineStyle(1, 0xffffff);
 
@@ -63,7 +63,6 @@ export class AutomationClipDrawable extends Drawable<IItemDrawableProps> {
             const isHovered = this.hoveredPointId && p.id === this.hoveredPointId;
             this.graphics.drawCircle(p.x, p.y, isHovered ? 6 : 3);
         });
-
     }
 
     public destroy() {
@@ -88,7 +87,9 @@ export class AutomationClipDrawable extends Drawable<IItemDrawableProps> {
         if (this.dragging && this.hoveredPointId) {
             const point = this.libItem.points.find((p) => p.id === this.hoveredPointId);
             const { unit, value } = this.getUnitValue(mousePoint);
-            if (!point) { return; }
+            if (!point) {
+                return;
+            }
             point.unit = this.editor.snap(unit);
             point.value = value;
             this.libItem.sortPoints();
@@ -96,9 +97,13 @@ export class AutomationClipDrawable extends Drawable<IItemDrawableProps> {
             this.needsRender = true;
         } else {
             const oldHoveredPointId = this.hoveredPointId;
-            const hoveredPoint = this.points.find((p) => Math.pow(mousePoint.x - p.x, 2) + Math.pow(mousePoint.y - p.y, 2) < 25);
+            const hoveredPoint = this.points.find(
+                (p) => Math.pow(mousePoint.x - p.x, 2) + Math.pow(mousePoint.y - p.y, 2) < 25
+            );
             this.hoveredPointId = hoveredPoint?.id ?? "";
-            if (this.hoveredPointId !== oldHoveredPointId) { this.needsRender = true; }
+            if (this.hoveredPointId !== oldHoveredPointId) {
+                this.needsRender = true;
+            }
         }
     }
 
@@ -121,5 +126,4 @@ export class AutomationClipDrawable extends Drawable<IItemDrawableProps> {
         this.libItem.addPoint(this.editor.snap(unit), value);
         this.needsRender = true;
     }
-
 }

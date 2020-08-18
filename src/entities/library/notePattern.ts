@@ -4,14 +4,13 @@ import { StandardEvent } from "@/lokumjs";
 import { INote } from "@/editors/note/types";
 
 export class NotePattern extends LibraryItem {
-
     public type = LibraryItemType.NOTE_PATTERN;
-    public name: string = "Note Pattern";
+    public name = "Note Pattern";
 
     public notes: INote[] = [];
 
     public events = {
-        notesUpdated: new StandardEvent()
+        notesUpdated: new StandardEvent(),
     };
 
     public serialize() {
@@ -35,5 +34,4 @@ export class NotePattern extends LibraryItem {
         activeNotes.sort((a, b) => b.start - a.start);
         return activeNotes;
     }
-
 }

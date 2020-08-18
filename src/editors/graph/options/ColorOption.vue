@@ -12,11 +12,10 @@ import { fromChroma, Color, chroma, toChroma } from "../colors";
 
 @Component({
     components: {
-        "d-color-picker": ColorPicker
-    }
+        "d-color-picker": ColorPicker,
+    },
 })
 export default class ColorOption extends Vue {
-
     @Prop()
     name!: any;
 
@@ -34,7 +33,6 @@ export default class ColorOption extends Vue {
     setColor(color: string) {
         this.$emit("input", fromChroma(chroma(color)));
     }
-
 }
 </script>
 
@@ -43,12 +41,11 @@ export default class ColorOption extends Vue {
     display: flex;
 
     & > .__name {
-       flex-grow: 1 
+        flex-grow: 1;
     }
 
     & > .__color {
         width: 60px;
     }
-
 }
 </style>

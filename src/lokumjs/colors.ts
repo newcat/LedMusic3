@@ -21,5 +21,5 @@ export default {
     labelsMinor: 0x3c404e,
     markerLine: 0x2f3442,
     text: 0x95a6d6,
-    itemHeader: 0x626773
+    itemHeader: 0x626773,
 } as IColorDefinitions;

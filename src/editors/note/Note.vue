@@ -9,7 +9,6 @@ import { INote } from "./types";
 
 @Component
 export default class Pianoroll extends Vue {
-
     @Prop()
     note!: INote;
 
@@ -19,18 +18,17 @@ export default class Pianoroll extends Vue {
     get styles() {
         return {
             transform: `translateX(${this.note.start * this.tickWidth}px)`,
-            width: `${(this.note.end - this.note.start) * this.tickWidth}px`
+            width: `${(this.note.end - this.note.start) * this.tickWidth}px`,
         };
     }
 
     dragStart(ev: MouseEvent) {
-        this.$emit("dragStart", this.note, ev.offsetX);
+        this.$emit("drag-start", this.note, ev.offsetX);
     }
 
     resizeStart(ev: MouseEvent) {
-        this.$emit("resizeStart", this.note, ev.offsetX);
+        this.$emit("resize-start", this.note, ev.offsetX);
     }
-
 }
 </script>
 

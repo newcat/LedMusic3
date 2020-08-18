@@ -10,7 +10,6 @@ export interface ITrackViewProps {
 }
 
 export class TrackView extends Drawable<ITrackViewProps> {
-
     public header = this.createView(TrackHeader, { track: this.props.track });
     public itemsView = this.createView<ArrayRenderer<Item, ItemView>>(ArrayRenderer);
     public items: Item[] = [];
@@ -18,14 +17,15 @@ export class TrackView extends Drawable<ITrackViewProps> {
     private subSymbol = Symbol("sub");
 
     public setup() {
-
         this.addChild(this.itemsView);
         this.addChild(this.header);
 
         this.renderOnEvent(this.viewInstance.positionCalculator.events.moved);
         this.renderOnEvent(this.viewInstance.eventBus.events.resize);
 
-        this.viewInstance.editor.items.forEach((item) => item.events.trackChanged.subscribe(this.subSymbol, () => this.updateItems()));
+        this.viewInstance.editor.items.forEach((item) =>
+            item.events.trackChanged.subscribe(this.subSymbol, () => this.updateItems())
+        );
         this.viewInstance.editor.events.itemAdded.subscribe(this.subSymbol, (item) => {
             item.events.trackChanged.subscribe(this.subSymbol, () => this.updateItems());
             this.updateItems();
@@ -40,7 +40,6 @@ export class TrackView extends Drawable<ITrackViewProps> {
 
         this.graphics.interactive = true;
         (this.graphics as any).ignoreClick = true;
-
     }
 
     public destroy() {
@@ -50,10 +49,15 @@ export class TrackView extends Drawable<ITrackViewProps> {
     }
 
     protected render(): void {
-
         // top and bottom borders
         this.drawLine(this.viewInstance.colors.markerLine, 0, 0, this.viewInstance.app.screen.width, 0);
-        this.drawLine(this.viewInstance.colors.markerLine, 0, this.props.track.height, this.viewInstance.app.screen.width, this.props.track.height);
+        this.drawLine(
+            this.viewInstance.colors.markerLine,
+            0,
+            this.props.track.height,
+            this.viewInstance.app.screen.width,
+            this.props.track.height
+        );
         this.graphics.hitArea = new Rectangle(0, 0, this.viewInstance.app.screen.width, this.props.track.height);
 
         // markers
@@ -70,19 +74,14 @@ export class TrackView extends Drawable<ITrackViewProps> {
 
         this.header.props.width = this.props.headerWidth;
         this.header.tick();
-
     }
 
     private drawLine(color: number, x1: number, y1: number, x2: number, y2: number) {
-        this.graphics
-            .lineStyle(1, color)
-            .moveTo(x1, y1)
-            .lineTo(x2, y2);
+        this.graphics.lineStyle(1, color).moveTo(x1, y1).lineTo(x2, y2);
     }
 
     private updateItems() {
         this.items = this.viewInstance.editor.items.filter((i) => i.trackId === this.props.track.id);
         this.needsRender = true;
     }
-
 }

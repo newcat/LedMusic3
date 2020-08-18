@@ -8,13 +8,12 @@ v-card.d-flex.flex-column(flat, @drop="drop" @dragover="$event.preventDefault()"
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 import { globalState } from "@/entities/globalState";
 import { LibraryItemType, GraphLibraryItem } from "../entities/library";
 
 @Component
 export default class Graph extends Vue {
-
     selectedGraphId = "";
 
     get selectedGraph() {
@@ -28,6 +27,5 @@ export default class Graph extends Vue {
             this.selectedGraphId = (libraryItem as GraphLibraryItem).id;
         }
     }
-
 }
 </script>

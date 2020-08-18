@@ -6,13 +6,11 @@ interface IPositionIndicatorProps {
 }
 
 export class PositionIndicator extends Drawable<IPositionIndicatorProps> {
-
     public setup() {
         this.renderOnEvent(this.viewInstance.positionCalculator.events.moved);
     }
 
     public render() {
-
         this.graphics
             .clear()
             .beginFill(this.viewInstance.colors.accent)
@@ -33,5 +31,4 @@ export class PositionIndicator extends Drawable<IPositionIndicatorProps> {
             this.graphics.x = x;
         }
     }
-
 }

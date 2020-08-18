@@ -7,7 +7,6 @@ import { Color } from "@/editors/graph/colors";
 import { Socket, createSocket } from "dgram";
 
 class GlobalProcessor {
-
     public audioProcessor!: AudioProcessor;
     public timelineProcessor!: TimelineProcessor;
 
@@ -15,7 +14,7 @@ class GlobalProcessor {
 
     public events = {
         tick: new StandardEvent(),
-        globalPreviewUpdated: new StandardEvent()
+        globalPreviewUpdated: new StandardEvent(),
     };
 
     private timer: any = null;
@@ -33,7 +32,9 @@ class GlobalProcessor {
     }
 
     public initialize() {
-        if (this.audioProcessor) { this.audioProcessor.destroy(); }
+        if (this.audioProcessor) {
+            this.audioProcessor.destroy();
+        }
         this.audioProcessor = new AudioProcessor();
         this.timelineProcessor = new TimelineProcessor(this.audioProcessor, globalState.timeline);
         observe(() => this.setTimer());
@@ -57,7 +58,9 @@ class GlobalProcessor {
     }
 
     private tick() {
-        if (!globalState.isPlaying) { return; }
+        if (!globalState.isPlaying) {
+            return;
+        }
         const start = performance.now();
         globalState.position = this.audioProcessor.updatePosition();
         this.timelineProcessor.process(globalState.position);
@@ -74,7 +77,6 @@ class GlobalProcessor {
             this.socket.send(arr, this.sendTo);
         }
     }
-
 }
 
 export const globalProcessor = new GlobalProcessor();

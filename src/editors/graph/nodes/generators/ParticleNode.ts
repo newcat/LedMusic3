@@ -15,7 +15,6 @@ interface IParticle {
 }
 
 export class ParticleNode extends Node {
-
     public type = "Particle";
     public name = this.type;
 
@@ -38,16 +37,15 @@ export class ParticleNode extends Node {
         this.addInputInterface("End Color", "ColorOption", [0, 0, 0], { type: "color_single" });
 
         this.addOutputInterface("Output", { type: "color_array" });
-
     }
 
     public calculate(data: ICalculationData) {
-
         const { fps, resolution } = data;
 
         this.particles.forEach((p) => p.currentLifetime++);
-        this.particles = this.particles.filter((p) =>
-            p.currentLifetime < p.totalLifetime && p.position >= 0 && p.position <= 1);
+        this.particles = this.particles.filter(
+            (p) => p.currentLifetime < p.totalLifetime && p.position >= 0 && p.position <= 1
+        );
         this.particles.forEach((p) => {
             const lifeProgress = p.currentLifetime / p.totalLifetime;
             p.color = mix(p.startColor, p.endColor, lifeProgress);
@@ -55,7 +53,6 @@ export class ParticleNode extends Node {
         });
 
         if (this.getInterface("Emit").value) {
-
             const rate = this.getInterface("Rate").value / fps;
             const randomness = this.getInterface("Randomness").value / fps;
             const glow = this.getInterface("Glow").value;
@@ -81,7 +78,7 @@ export class ParticleNode extends Node {
                     endVelocity,
                     color: startColor,
                     startColor,
-                    endColor
+                    endColor,
                 };
                 this.particles.push(p);
                 if (symmetric) {
@@ -93,7 +90,9 @@ export class ParticleNode extends Node {
         }
 
         const output = new Array<Color>(resolution);
-        for (let i = 0; i < output.length; i++) { output[i] = [0, 0, 0]; }
+        for (let i = 0; i < output.length; i++) {
+            output[i] = [0, 0, 0];
+        }
 
         this.particles.forEach((p) => {
             const start = this.clamp(Math.floor((p.position - p.glow) * resolution), 0, output.length - 1);
@@ -107,18 +106,20 @@ export class ParticleNode extends Node {
         });
 
         this.getInterface("Output").value = output;
-
     }
 
     private linearIntensity(center: number, position: number, width: number): number {
-        if (width === 0) { return 0; }
+        if (width === 0) {
+            return 0;
+        }
         const distance = Math.abs(position - center);
         return 1 - distance / width;
     }
 
     private clamp(v: number, min: number, max: number) {
-        if (!Number.isFinite(v)) { return 0; }
+        if (!Number.isFinite(v)) {
+            return 0;
+        }
         return Math.min(max, Math.max(min, v));
     }
-
 }

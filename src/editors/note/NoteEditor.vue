@@ -21,8 +21,8 @@
                     :key="ni", :note="n",,
                     :tickWidth="tickWidth",
                     :style="{ pointerEvents: disableNotePointerEvents ? 'none' : undefined }",
-                    @dragStart="onDragStart",
-                    @resizeStart="onResizeStart")
+                    @drag-start="onDragStart",
+                    @resize-start="onResizeStart")
 </template>
 
 <script lang="ts">
@@ -32,28 +32,27 @@ import CNote from "./Note.vue";
 import { NotePattern } from "@/entities/library";
 
 @Component({
-    components: { CNote }
+    components: { CNote },
 })
 export default class NoteEditor extends Vue {
-
     tickWidth = 1.5;
     headerWidth = 50;
     snap = 96;
     lastNoteEnd = 0;
 
-    draggedNote: INote|null = null;
-    dragOffset: number = 0;
+    draggedNote: INote | null = null;
+    dragOffset = 0;
 
-    resizedNote: INote|null = null;
-    resizeOffset: number = 0;
+    resizedNote: INote | null = null;
+    resizeOffset = 0;
 
     @Prop()
     notePattern!: NotePattern;
 
     get contentStyles() {
         return {
-            width: `${(this.lastNoteEnd + this.snap) * this.tickWidth + this.headerWidth }px`,
-            backgroundSize: `${this.snap * this.tickWidth}px ${this.snap * this.tickWidth}px`
+            width: `${(this.lastNoteEnd + this.snap) * this.tickWidth + this.headerWidth}px`,
+            backgroundSize: `${this.snap * this.tickWidth}px ${this.snap * this.tickWidth}px`,
         };
     }
 
@@ -66,7 +65,9 @@ export default class NoteEditor extends Vue {
     }
 
     unselectAllNotes() {
-        this.notePattern.notes.forEach((n) => { n.selected = false; });
+        this.notePattern.notes.forEach((n) => {
+            n.selected = false;
+        });
     }
 
     @Watch("notePattern.notes", { deep: true, immediate: true })
@@ -82,9 +83,11 @@ export default class NoteEditor extends Vue {
     }
 
     mousedown(ev: MouseEvent) {
-        const target = ev.target as HTMLElement|null;
+        const target = ev.target as HTMLElement | null;
         if (target && !target.matches(".note")) {
-            this.notePattern.notes.forEach((n) => { n.selected = false; });
+            this.notePattern.notes.forEach((n) => {
+                n.selected = false;
+            });
         }
     }
 
@@ -96,14 +99,14 @@ export default class NoteEditor extends Vue {
     keydown(ev: KeyboardEvent) {
         if (ev.key === "Delete") {
             const noteIndicesToDelete = this.notePattern.notes
-                .map((v, i) => v.selected ? i : -1)
+                .map((v, i) => (v.selected ? i : -1))
                 .filter((i) => i >= 0);
             noteIndicesToDelete.reverse();
             noteIndicesToDelete.forEach((i) => this.notePattern.notes.splice(i, 1));
         }
     }
 
-    onRowMouseenter(rowValue: number, ev: MouseEvent) {
+    onRowMouseenter(rowValue: number) {
         if (this.draggedNote && this.draggedNote.value !== rowValue) {
             this.draggedNote.value = rowValue;
         }
@@ -118,7 +121,7 @@ export default class NoteEditor extends Vue {
                 this.draggedNote.end = newEnd;
             }
         } else if (this.resizedNote) {
-            const newEnd = this.performSnap((ev.offsetX) / this.tickWidth);
+            const newEnd = this.performSnap(ev.offsetX / this.tickWidth);
             if (newEnd > this.resizedNote.start) {
                 this.resizedNote.end = newEnd;
             }
@@ -147,16 +150,15 @@ export default class NoteEditor extends Vue {
                 start,
                 end: start + this.snap,
                 value,
-                selected: false
+                selected: false,
             });
         }
     }
 
     performSnap(tick: number) {
         const mod = tick % this.snap;
-        return mod <= (this.snap / 2) ? tick - mod : tick + this.snap - mod;
+        return mod <= this.snap / 2 ? tick - mod : tick + this.snap - mod;
     }
-
 }
 </script>
 
@@ -205,8 +207,6 @@ export default class NoteEditor extends Vue {
             width: 100%;
             height: 100%;
         }
-
     }
-
 }
 </style>

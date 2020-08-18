@@ -7,10 +7,9 @@ import { StandardEvent } from "@/lokumjs";
 import { NotePattern } from "./notePattern";
 
 export class LibraryModel {
-
     public events = {
         itemAdded: new StandardEvent<LibraryItem>(),
-        itemRemoved: new StandardEvent<LibraryItem>()
+        itemRemoved: new StandardEvent<LibraryItem>(),
     };
 
     private _items: LibraryItem[] = [];
@@ -20,51 +19,53 @@ export class LibraryModel {
     }
 
     public save(): Buffer {
-        return serialize(this.items.map((i) => ({
-            type: i.type,
-            data: i.serialize()
-        })));
+        return serialize(
+            this.items.map((i) => ({
+                type: i.type,
+                data: i.serialize(),
+            }))
+        );
     }
 
     public load(serialized: Binary) {
-
         const newItemStates = deserialize(serialized.buffer);
         const newItems: LibraryItem[] = [];
 
         for (const item of newItemStates) {
-            if (!item) { break; }
+            if (!item) {
+                break;
+            }
             const { type, data } = item;
             const buffer = data.buffer;
+            let libItem: LibraryItem | undefined;
             switch (type) {
                 case LibraryItemType.AUDIO_FILE:
-                    const af = new AudioFile();
-                    af.deserialize(buffer);
-                    af.load();
-                    newItems.push(af);
+                    libItem = new AudioFile();
                     break;
                 case LibraryItemType.AUTOMATION_CLIP:
-                    const ac = new AutomationClip();
-                    ac.deserialize(buffer);
-                    newItems.push(ac);
+                    libItem = new AutomationClip();
                     break;
                 case LibraryItemType.GRAPH:
-                    const gr = new GraphLibraryItem();
-                    gr.deserialize(buffer);
-                    newItems.push(gr);
+                    libItem = new GraphLibraryItem();
                     break;
                 case LibraryItemType.NOTE_PATTERN:
-                    const np = new NotePattern();
-                    np.deserialize(buffer);
-                    newItems.push(np);
+                    libItem = new NotePattern();
                     break;
                 default:
                     // tslint:disable-next-line: no-console
                     console.warn(`Unknown library type: ${type}`);
             }
+
+            if (libItem) {
+                libItem.deserialize(buffer);
+                if ((libItem as any).load) {
+                    (libItem as any).load();
+                }
+                newItems.push(libItem);
+            }
         }
 
         this._items = newItems;
-
     }
 
     public getItemById(id: string) {
@@ -83,5 +84,4 @@ export class LibraryModel {
             this.events.itemRemoved.emit(item);
         }
     }
-
 }

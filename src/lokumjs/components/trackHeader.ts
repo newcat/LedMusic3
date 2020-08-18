@@ -8,21 +8,19 @@ interface ITrackHeaderViewProps {
 }
 
 export default class TrackHeaderView extends Drawable<ITrackHeaderViewProps> {
-
     protected defaultPropValues = {
-        width: 200
+        width: 200,
     };
 
     private style = new TextStyle({
         fill: this.viewInstance.colors.text,
-        fontWeight: "bold"
+        fontWeight: "bold",
     });
 
     private text = new Text("Test", this.style);
     private btnCloseSprite = new Sprite(this.viewInstance.textures.close);
 
     public setup() {
-
         this.graphics.interactive = true; // To prevent items underneath being clicked
 
         this.graphics.addChild(this.text);
@@ -36,15 +34,13 @@ export default class TrackHeaderView extends Drawable<ITrackHeaderViewProps> {
         this.viewInstance.eventBus.events.pointerdown.subscribe(this.btnCloseSprite, () => {
             this.viewInstance.eventBus.events.removeTrack.emit(this.props.track);
         });
-
     }
 
     render() {
-
         // fill background
         this.graphics
             .beginFill(this.viewInstance.colors.header)
-                .drawRect(0, 0, this.props.width, this.props.track.height)
+            .drawRect(0, 0, this.props.width, this.props.track.height)
             .endFill();
 
         // draw track name
@@ -61,12 +57,10 @@ export default class TrackHeaderView extends Drawable<ITrackHeaderViewProps> {
         } else {
             this.btnCloseSprite.visible = false;
         }
-
     }
 
     public destroy() {
         this.text.destroy();
         super.destroy();
     }
-
 }

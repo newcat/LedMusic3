@@ -13,14 +13,13 @@ import ClickOutside from "v-click-outside";
 
 @Component({
     components: {
-        "cp-chrome": Chrome
+        "cp-chrome": Chrome,
     },
     directives: {
-        ClickOutside: ClickOutside.directive
-    }
+        ClickOutside: ClickOutside.directive,
+    },
 })
 export default class ColorPicker extends Vue {
-
     @Prop({ type: String, default: "#000000" })
     value!: string;
 
@@ -28,10 +27,9 @@ export default class ColorPicker extends Vue {
 
     get styles() {
         return {
-            "background-color": this.value
+            "background-color": this.value,
         };
     }
-
 }
 </script>
 

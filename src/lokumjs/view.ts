@@ -7,7 +7,9 @@ import { TimelineView } from "./components/timeline";
 import { loadTextures } from "./textureManager";
 import defaultColors, { IColorDefinitions } from "./colors";
 
-export type ItemDrawableFunction = (item: Item) => (ViewConstructor<IItemDrawableProps, Drawable<IItemDrawableProps>>) | null;
+export type ItemDrawableFunction = (
+    item: Item
+) => ViewConstructor<IItemDrawableProps, Drawable<IItemDrawableProps>> | null;
 export interface IItemDrawableProps {
     item: Item;
     width: number;
@@ -15,23 +17,20 @@ export interface IItemDrawableProps {
 }
 
 export class View {
-
     public static async mount(editor: Editor, wrapperEl: HTMLElement) {
-
         const canvasEl = document.createElement("canvas");
         canvasEl.tabIndex = 1;
         wrapperEl.appendChild(canvasEl);
         const app = new Application({
             view: canvasEl as HTMLCanvasElement,
             resizeTo: wrapperEl,
-            antialias: true
+            antialias: true,
         });
 
         const textures = await loadTextures();
         const view = new View(app, editor, textures, canvasEl);
 
         return view;
-
     }
 
     public readonly app: Application;
@@ -42,7 +41,7 @@ export class View {
     public timelineDrawable!: TimelineView;
 
     public colors: IColorDefinitions = defaultColors;
-    public itemDrawableFunction: ItemDrawableFunction|null = null;
+    public itemDrawableFunction: ItemDrawableFunction | null = null;
 
     private constructor(app: Application, editor: Editor, textures: ITextures, canvasEl: HTMLCanvasElement) {
         this.app = app;
@@ -77,7 +76,6 @@ export class View {
                 this.eventBus.events.resize.emit({ width, height });
             }
         });
-
     }
 
     public unmount() {
@@ -85,5 +83,4 @@ export class View {
         this.timelineDrawable.destroy();
         // TODO document.removeEventListener()
     }
-
 }

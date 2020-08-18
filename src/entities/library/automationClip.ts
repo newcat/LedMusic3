@@ -4,7 +4,7 @@ import { LibraryItem, LibraryItemType } from "./libraryItem";
 import { TICKS_PER_BEAT } from "@/constants";
 import { StandardEvent } from "@/lokumjs";
 
-export type AutomationPointType = "linear"|"step";
+export type AutomationPointType = "linear" | "step";
 
 export interface IAutomationPoint {
     id: string;
@@ -14,21 +14,24 @@ export interface IAutomationPoint {
 }
 
 export class AutomationClip extends LibraryItem {
-
     public type = LibraryItemType.AUTOMATION_CLIP;
-    public name: string = "Automation Clip";
+    public name = "Automation Clip";
 
     public points: IAutomationPoint[] = [
         { id: uuidv4(), unit: 0, value: 0.5, type: "linear" },
-        { id: uuidv4(), unit: TICKS_PER_BEAT * 4, value: 0.5, type: "linear" }
+        { id: uuidv4(), unit: TICKS_PER_BEAT * 4, value: 0.5, type: "linear" },
     ];
 
     public events = {
-        pointsUpdated: new StandardEvent()
+        pointsUpdated: new StandardEvent(),
     };
 
-    public get firstValue() { return this.points.length > 0 ? this.points[0].value : 0; }
-    public get lastValue() { return this.points.length > 0 ? this.points[this.points.length - 1].value : 0; }
+    public get firstValue() {
+        return this.points.length > 0 ? this.points[0].value : 0;
+    }
+    public get lastValue() {
+        return this.points.length > 0 ? this.points[this.points.length - 1].value : 0;
+    }
 
     public addPoint(unit: number, value: number, type: AutomationPointType = "linear") {
         this.points.push({ id: uuidv4(), unit, value, type });
@@ -42,9 +45,10 @@ export class AutomationClip extends LibraryItem {
 
     public getValueAt(unit: number) {
         for (let i = this.points.length - 1; i >= 0; i--) {
-
-            const p  = this.points[i];
-            if (p.unit > unit) { continue; }
+            const p = this.points[i];
+            if (p.unit > unit) {
+                continue;
+            }
             const firstPoint = this.points[i];
 
             if (i + 1 >= this.points.length) {
@@ -60,10 +64,8 @@ export class AutomationClip extends LibraryItem {
                 case "step":
                     return firstPoint.value;
             }
-
         }
         return 0;
-
     }
 
     public serialize() {
@@ -83,8 +85,9 @@ export class AutomationClip extends LibraryItem {
 
     private linearInterpolation(unit: number, a: IAutomationPoint, b: IAutomationPoint) {
         const diff = b.unit - a.unit;
-        if (diff === 0) { return b.value; }
+        if (diff === 0) {
+            return b.value;
+        }
         return a.value + (b.value - a.value) * ((unit - a.unit) / diff);
     }
-
 }

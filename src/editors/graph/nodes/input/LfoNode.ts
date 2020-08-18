@@ -3,7 +3,6 @@ import { TICKS_PER_BEAT } from "@/constants";
 import { ICalculationData } from "../../types";
 
 export class LfoNode extends Node {
-
     public type = "LFO";
     public name = this.type;
 
@@ -19,13 +18,13 @@ export class LfoNode extends Node {
         { text: "8 Beats", value: 8 * TICKS_PER_BEAT },
     ];
 
-    private shapes = [ "Sine", "Triangle", "Sawtooth", "Square" ];
+    private shapes = ["Sine", "Triangle", "Sawtooth", "Square"];
 
     private functions: Record<string, (x: number) => number> = {
         Sine: (x: number) => Math.sin(Math.PI * 2 * x),
         Triangle: (x: number) => 4 * Math.abs(x - Math.floor(x + 0.5)) - 1,
         Sawtooth: (x: number) => 2 * x - 1,
-        Square: (x: number) => Math.sign(Math.sin(Math.PI * 2 * x))
+        Square: (x: number) => Math.sign(Math.sin(Math.PI * 2 * x)),
     };
 
     public constructor() {
@@ -40,7 +39,6 @@ export class LfoNode extends Node {
     }
 
     public calculate(data: ICalculationData) {
-
         const min = this.getInterface("Min").value;
         const max = this.getInterface("Max").value;
         const offset = this.getInterface("Offset").value;
@@ -54,7 +52,5 @@ export class LfoNode extends Node {
         const rawValue = invert ? -f(x) : f(x);
         const value = min + (rawValue + 1) * 0.5 * (max - min);
         this.getInterface("Value").value = value;
-
     }
-
 }

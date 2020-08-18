@@ -14,17 +14,16 @@ interface IWaveformPart {
 }
 
 export class AudioFile extends LibraryItem {
-
     public static sampleRate = 192000;
 
     public type = LibraryItemType.AUDIO_FILE;
-    public name: string = "Empty";
-    public path: string = "";
-    public audioBuffer: AudioBuffer|null = null;
+    public name = "Empty";
+    public path = "";
+    public audioBuffer: AudioBuffer | null = null;
     public textures: IWaveformPart[] = [];
 
     public events = {
-        loaded: new StandardEvent()
+        loaded: new StandardEvent(),
     };
 
     public async load() {
@@ -36,7 +35,7 @@ export class AudioFile extends LibraryItem {
             this.error = true;
             return;
         }
-        const rawData = await (promisify(readFile)(this.path));
+        const rawData = await promisify(readFile)(this.path);
 
         // const sampleRate = AudioProcessor.sampleRate;
         // const sampleRate = 192000;
@@ -87,5 +86,4 @@ export class AudioFile extends LibraryItem {
         this.name = name;
         this.path = path;
     }
-
 }

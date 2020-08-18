@@ -2,7 +2,6 @@ import { Node } from "@baklavajs/core";
 import { ICalculationData } from "../../types";
 
 export class SpectrumNode extends Node {
-
     public type = "Spectrum";
     public name = this.type;
 
@@ -21,8 +20,16 @@ export class SpectrumNode extends Node {
         const { frequencyData, sampleRate } = data;
 
         const fftSize = frequencyData.length;
-        const minIndex = this.clamp(this.getBinIndexByFrequency(this.getInterface("Min Freq").value, sampleRate, fftSize), 1, frequencyData.length - 1);
-        const maxIndex = this.clamp(this.getBinIndexByFrequency(this.getInterface("Max Freq").value, sampleRate, fftSize), 1, frequencyData.length - 1);
+        const minIndex = this.clamp(
+            this.getBinIndexByFrequency(this.getInterface("Min Freq").value, sampleRate, fftSize),
+            1,
+            frequencyData.length - 1
+        );
+        const maxIndex = this.clamp(
+            this.getBinIndexByFrequency(this.getInterface("Max Freq").value, sampleRate, fftSize),
+            1,
+            frequencyData.length - 1
+        );
 
         const maxDb = this.clamp(this.getInterface("Max Decibels").value, -200, 0);
         const minDb = this.clamp(this.getInterface("Min Decibels").value, -200, maxDb);
@@ -33,7 +40,9 @@ export class SpectrumNode extends Node {
         for (let i = 0; minIndex + i <= maxIndex; i++) {
             const normalizedValue = this.clamp((frequencyData[minIndex + i] - minDb) / (maxDb - minDb), 0, 1);
             normalizedData[i] = normalizedValue;
-            if (normalizedValue > max) { max = normalizedValue; }
+            if (normalizedValue > max) {
+                max = normalizedValue;
+            }
             sum += normalizedValue;
         }
 
@@ -50,5 +59,4 @@ export class SpectrumNode extends Node {
     private clamp(v: number, min: number, max: number) {
         return Math.max(min, Math.min(max, v));
     }
-
 }

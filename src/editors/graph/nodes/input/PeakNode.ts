@@ -2,7 +2,6 @@ import { Node } from "@baklavajs/core";
 import { ICalculationData } from "../../types";
 
 export class PeakNode extends Node {
-
     public type = "Peak";
     public name = this.type;
 
@@ -32,5 +31,4 @@ export class PeakNode extends Node {
         this.setOptionValue("Peak", v);
         this.getInterface("Peak").value = v;
     }
-
 }

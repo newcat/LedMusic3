@@ -30,14 +30,13 @@ import { StandardEvent } from "../../lokumjs";
 
 @Component
 export default class LoadingDialog extends Vue {
-
     @Prop({ type: Boolean, required: true })
     public value!: boolean;
 
     private gs = globalState;
 
     get items() {
-        return this.gs.library.items.slice().sort((a, b) => a.loading ? 0 : 1);
+        return this.gs.library.items.slice().sort((a) => (a.loading ? 0 : 1));
     }
 
     isAudioItem(item: LibraryItem) {
@@ -49,10 +48,12 @@ export default class LoadingDialog extends Vue {
             title: "Select Audio File",
             filters: [
                 { name: "Audio Files", extensions: ["mp3", "wav", "flac", "ogg"] },
-                { name: "All Files", extensions: ["*"] }
-            ]
+                { name: "All Files", extensions: ["*"] },
+            ],
         });
-        if (dialogResult.canceled) { return ""; }
+        if (dialogResult.canceled) {
+            return "";
+        }
         item.path = dialogResult.filePaths![0];
         item.load();
     }
@@ -83,6 +84,5 @@ export default class LoadingDialog extends Vue {
         });
         this.$emit("input", false);
     }
-
 }
 </script>

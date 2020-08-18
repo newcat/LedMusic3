@@ -36,19 +36,25 @@ v-card(flat)
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
-import { AudioFile, AutomationClip, GraphLibraryItem, LibraryItemType, LibraryItem, NotePattern } from "@/entities/library";
+import { Component, Vue } from "vue-property-decorator";
+import {
+    AudioFile,
+    AutomationClip,
+    GraphLibraryItem,
+    LibraryItemType,
+    LibraryItem,
+    NotePattern,
+} from "@/entities/library";
 import { globalState } from "@/entities/globalState";
 import ItemSettings from "./LibraryItemSettings.vue";
 
 @Component({
-    components: { ItemSettings }
+    components: { ItemSettings },
 })
 export default class Library extends Vue {
-
     globalState = globalState;
     settingsOpen = false;
-    settingsItem: LibraryItem|null = null;
+    settingsItem: LibraryItem | null = null;
 
     get items() {
         return this.globalState.library.items;
@@ -58,12 +64,14 @@ export default class Library extends Vue {
         (this.$refs.fileinput as HTMLElement).click();
     }
 
-    public async loadAudio(ev: any) {
-        const f = ev.target.files[0] as File;
-        if (!f) { return; }
+    public async loadAudio() {
+        const f = (this.$refs.fileinput as HTMLInputElement).files;
+        if (!f || f.length === 0) {
+            return;
+        }
         const item = new AudioFile();
-        item.name = f.name;
-        item.path = f.path;
+        item.name = f[0].name;
+        item.path = f[0].path;
         this.globalState.library.addItem(item);
         await item.load();
     }
@@ -73,7 +81,9 @@ export default class Library extends Vue {
     }
 
     public getIcon(item: LibraryItem) {
-        if (item.error) { return "warning"; }
+        if (item.error) {
+            return "warning";
+        }
         switch (item.type) {
             case LibraryItemType.AUDIO_FILE:
                 return "library_music";
@@ -104,7 +114,6 @@ export default class Library extends Vue {
         this.settingsItem = item;
         this.settingsOpen = true;
     }
-
 }
 </script>
 
@@ -116,7 +125,6 @@ export default class Library extends Vue {
     grid-auto-rows: 1fr;
     grid-template-columns: repeat(3, 1fr);
 }
-
 
 .library-item {
     display: flex;

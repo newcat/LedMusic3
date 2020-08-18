@@ -1,9 +1,8 @@
 import { Node } from "@baklavajs/core";
 
-const operations = [ "==", ">", "<", ">=", "<=" ];
+const operations = ["==", ">", "<", ">=", "<="];
 
 export class BooleanNode extends Node {
-
     type = "Boolean";
     name = this.type;
 
@@ -18,7 +17,6 @@ export class BooleanNode extends Node {
     }
 
     calculate() {
-
         const val1 = this.getInterface("Value 1").value;
         const val2 = this.getInterface("Value 2").value;
         const useInt = this.getInterface("Round Values").value;
@@ -48,7 +46,5 @@ export class BooleanNode extends Node {
         }
 
         this.getInterface("Result").value = result;
-
     }
-
 }

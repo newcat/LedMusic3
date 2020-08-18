@@ -5,7 +5,6 @@ import { ICalculationData } from "../../types";
 const THRESHOLD = 4;
 
 export class AfterglowNode extends Node {
-
     public type = "Afterglow";
     public name = this.type;
 
@@ -19,7 +18,6 @@ export class AfterglowNode extends Node {
     }
 
     public calculate(data: ICalculationData) {
-
         const input: Color[] = this.getInterface("Input").value;
         const strength: number = this.getInterface("Strength").value;
 
@@ -39,7 +37,6 @@ export class AfterglowNode extends Node {
         }
 
         this.getInterface("Output").value = result;
-
     }
 
     private initializeBuffer(resolution: number) {
@@ -48,5 +45,4 @@ export class AfterglowNode extends Node {
             this.buffer.push([0, 0, 0]);
         }
     }
-
 }

@@ -9,14 +9,14 @@ interface ISpriteWaveformPart {
 }
 
 export class WaveformDrawable extends Drawable<IItemDrawableProps> {
-
     private sprites: ISpriteWaveformPart[] = [];
 
     public setup() {
-
         const libraryItem = this.props.item.data!.libraryItem as AudioFile;
         libraryItem.events.loaded.subscribe(this, () => this.setup());
-        if (libraryItem.loading) { return; }
+        if (libraryItem.loading) {
+            return;
+        }
 
         const waveformParts = (libraryItem as AudioFile).textures;
         if (this.sprites.length === 0) {
@@ -28,12 +28,12 @@ export class WaveformDrawable extends Drawable<IItemDrawableProps> {
         }
 
         this.needsRender = true;
-
     }
 
     public render() {
-
-        if (this.sprites.length === 0) { return; }
+        if (this.sprites.length === 0) {
+            return;
+        }
 
         const totalLength = this.sprites[this.sprites.length - 1].end;
         const factor = this.props.width / totalLength;
@@ -42,7 +42,6 @@ export class WaveformDrawable extends Drawable<IItemDrawableProps> {
             p.sprite.width = (p.end + 1 - p.start) * factor;
             p.sprite.height = this.props.height;
         });
-
     }
 
     public destroy() {
@@ -50,5 +49,4 @@ export class WaveformDrawable extends Drawable<IItemDrawableProps> {
         const libraryItem = this.props.item.data!.libraryItem as AudioFile;
         libraryItem.events.loaded.unsubscribe(this);
     }
-
 }

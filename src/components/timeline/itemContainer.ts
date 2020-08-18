@@ -9,7 +9,6 @@ import { WaveformDrawable } from "./waveformDrawable";
 const HEADER_HEIGHT = 15;
 
 export class ItemContainer extends Drawable<IItemDrawableProps> {
-
     private libraryItem!: LibraryItem;
     private observeFunction!: () => void;
 
@@ -19,7 +18,6 @@ export class ItemContainer extends Drawable<IItemDrawableProps> {
     private clipGraphics = new Graphics();
 
     public setup() {
-
         this.graphics.addChild(this.clipGraphics);
         this.graphics.mask = this.clipGraphics;
 
@@ -37,23 +35,21 @@ export class ItemContainer extends Drawable<IItemDrawableProps> {
             this.itemDrawable = this.createView(itemDrawableType, {
                 height: this.props.height - HEADER_HEIGHT,
                 width: this.props.width,
-                item: this.props.item
+                item: this.props.item,
             });
             this.addChild(this.itemDrawable);
         }
 
         this.needsRender = true;
-
     }
 
     public render() {
-
         this.clipGraphics.clear().beginFill(0xffffff).drawRect(0, 0, this.props.width, this.props.height).endFill();
 
         this.graphics.clear();
         this.graphics
             .beginFill(this.viewInstance.colors.itemHeader)
-                .drawRoundedRect(1, 1, this.props.width - 2, HEADER_HEIGHT, 3)
+            .drawRoundedRect(1, 1, this.props.width - 2, HEADER_HEIGHT, 3)
             .endFill();
 
         if (this.text) {
@@ -66,7 +62,6 @@ export class ItemContainer extends Drawable<IItemDrawableProps> {
             this.itemDrawable.props.width = this.props.width;
             this.itemDrawable.tick();
         }
-
     }
 
     public destroy() {
@@ -83,7 +78,9 @@ export class ItemContainer extends Drawable<IItemDrawableProps> {
         this.graphics.addChild(this.text);
     }
 
-    private getItemDrawable(type: LibraryItemType): ViewConstructor<IItemDrawableProps, Drawable<IItemDrawableProps>>|null {
+    private getItemDrawable(
+        type: LibraryItemType
+    ): ViewConstructor<IItemDrawableProps, Drawable<IItemDrawableProps>> | null {
         switch (type) {
             case LibraryItemType.AUDIO_FILE:
                 return WaveformDrawable;
@@ -93,5 +90,4 @@ export class ItemContainer extends Drawable<IItemDrawableProps> {
                 return null;
         }
     }
-
 }

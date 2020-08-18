@@ -7,15 +7,18 @@ export type PropsType = Record<string, any>;
 export type ViewConstructor<P, V extends Drawable<P>> = new (viewInstance: View, propValues?: Partial<P>) => V;
 
 export abstract class Drawable<Props extends PropsType> {
-
-    public static createView<V extends Drawable<P>, P = any>(viewInstance: View, type: ViewConstructor<P, V>, propValues?: Partial<P>): V {
+    public static createView<V extends Drawable<P>, P = any>(
+        viewInstance: View,
+        type: ViewConstructor<P, V>,
+        propValues?: Partial<P>
+    ): V {
         const view = new type(viewInstance, propValues);
         view.setup();
         return view;
     }
 
     public graphics: Graphics = new Graphics();
-    public needsRender: boolean = true;
+    public needsRender = true;
 
     public props: Props = {} as any;
 
@@ -35,8 +38,8 @@ export abstract class Drawable<Props extends PropsType> {
         }
     }
 
-    // tslint:disable-next-line: no-empty
-    public setup() { }
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    public setup() {}
 
     public tick() {
         if (this.doesNeedRender()) {
@@ -61,7 +64,9 @@ export abstract class Drawable<Props extends PropsType> {
 
     public removeChild(child: Drawable<any>) {
         let i = this.children.indexOf(child);
-        if (i >= 0) { this.children.splice(i, 1); }
+        if (i >= 0) {
+            this.children.splice(i, 1);
+        }
         i = this.graphics.getChildIndex(child.graphics);
         this.graphics.removeChildAt(i);
     }
@@ -69,7 +74,9 @@ export abstract class Drawable<Props extends PropsType> {
     protected abstract render(): void;
 
     protected renderOnEvent(ev: IEvent<any>) {
-        ev.subscribe(this, () => { this.needsRender = true; });
+        ev.subscribe(this, () => {
+            this.needsRender = true;
+        });
     }
 
     protected createView<V extends Drawable<P>, P = any>(type: ViewConstructor<P, V>, propValues?: Partial<P>): V {
@@ -96,10 +103,9 @@ export abstract class Drawable<Props extends PropsType> {
                         (this.propValues as any)[key] = v;
                         this.needsRender = true;
                     }
-                }
+                },
             });
         }
         (this.propValues as any)[key] = value;
     }
-
 }

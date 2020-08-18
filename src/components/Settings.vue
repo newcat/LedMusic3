@@ -18,7 +18,6 @@ import { globalState } from "@/entities/globalState";
 
 @Component
 export default class Settings extends Vue {
-
     @Prop()
     value!: boolean;
 
@@ -41,6 +40,5 @@ export default class Settings extends Vue {
         globalState.resolution = parseInt(this.vResolution, 10);
         globalState.fps = parseInt(this.vFps, 10);
     }
-
 }
 </script>

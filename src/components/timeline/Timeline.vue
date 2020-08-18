@@ -12,18 +12,17 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Watch, Vue } from "vue-property-decorator";
+import { Component, Watch, Vue } from "vue-property-decorator";
 import throttle from "lodash/throttle";
 import { observe } from "@nx-js/observer-util";
 import { PluginOptionsVue } from "baklavajs";
-import { Text, TextStyle, Texture, Sprite, Graphics } from "pixi.js";
+import { Text, TextStyle, Sprite } from "pixi.js";
 
-import { View, Drawable, Track, Item } from "@/lokumjs";
+import { View, Drawable, Item } from "@/lokumjs";
 import { TICKS_PER_BEAT } from "@/constants";
-import { LokumEditor } from "@/editors/timeline";
 import { globalState } from "@/entities/globalState";
 import { AudioFile, LibraryItemType, GraphLibraryItem, AutomationClip, LibraryItem } from "@/entities/library";
-import { AudioProcessor, TimelineProcessor, globalProcessor } from "@/processing";
+import { globalProcessor } from "@/processing";
 import { ItemContainer } from "./itemContainer";
 import { PositionIndicator } from "./positionIndicator";
 import customColors from "@/colors";
@@ -37,14 +36,13 @@ interface IWaveformPart {
 
 enum LabelMode {
     BEATS,
-    BARS
+    BARS,
 }
 
 @Component({
-    components: { CSlider: PluginOptionsVue.SliderOption, CSelect }
+    components: { CSlider: PluginOptionsVue.SliderOption, CSelect },
 })
 export default class Timeline extends Vue {
-
     public snapItems = [
         { text: "Disabled", value: "1" },
         { text: "1/8 Beat", value: (TICKS_PER_BEAT / 8).toString() },
@@ -52,7 +50,7 @@ export default class Timeline extends Vue {
         { text: "1/4 Beat", value: (TICKS_PER_BEAT / 4).toString() },
         { text: "1/3 Beat", value: (TICKS_PER_BEAT / 3).toString() },
         { text: "1/2 Beat", value: (TICKS_PER_BEAT / 2).toString() },
-        { text: "1 Beat", value: (TICKS_PER_BEAT).toString() },
+        { text: "1 Beat", value: TICKS_PER_BEAT.toString() },
         { text: "2 Beats", value: (2 * TICKS_PER_BEAT).toString() },
         { text: "4 Beats", value: (4 * TICKS_PER_BEAT).toString() },
         { text: "8 Beats", value: (8 * TICKS_PER_BEAT).toString() },
@@ -64,7 +62,7 @@ export default class Timeline extends Vue {
     private labelMode: LabelMode = LabelMode.BEATS;
     private resizeObserver!: ResizeObserver;
 
-    private viewInstance: View = (null as any);
+    private viewInstance: View = null as any;
 
     private globalState = globalState;
 
@@ -92,7 +90,6 @@ export default class Timeline extends Vue {
 
     @Watch("editor")
     public async initializeView() {
-
         if (this.viewInstance) {
             this.viewInstance.unmount();
         }
@@ -103,7 +100,10 @@ export default class Timeline extends Vue {
         this.fpsText.position.set(10, 10);
         view.app.stage.addChild(this.fpsText);
 
-        this.positionIndicator = Drawable.createView(view, PositionIndicator, { position: 0, trackHeaderWidth: view.timelineDrawable.props.trackHeaderWidth });
+        this.positionIndicator = Drawable.createView(view, PositionIndicator, {
+            position: 0,
+            trackHeaderWidth: view.timelineDrawable.props.trackHeaderWidth,
+        });
         view.app.stage.addChild(this.positionIndicator.graphics);
 
         view.app.ticker.add(() => {
@@ -111,13 +111,17 @@ export default class Timeline extends Vue {
             this.fpsText.text = view.app.ticker.elapsedMS.toFixed(2);
         });
 
-        observe(() => { this.positionIndicator.props.position = globalState.position; });
+        observe(() => {
+            this.positionIndicator.props.position = globalState.position;
+        });
 
         view.timelineDrawable.header.graphics.interactive = true;
         view.eventBus.events.pointerdown.subscribe(view.timelineDrawable.header.graphics, (ev) => {
             const x = ev.data.global.x as number;
             let unit = view.positionCalculator.getUnit(x - view.timelineDrawable.props.trackHeaderWidth);
-            if (unit < 0) { unit = 0; }
+            if (unit < 0) {
+                unit = 0;
+            }
             globalState.setPositionByUser(unit);
         });
 
@@ -136,10 +140,9 @@ export default class Timeline extends Vue {
         this.updateMarkerSpacing();
 
         view.colors = { ...view.colors, ...customColors };
-        view.itemDrawableFunction = (item) => ItemContainer;
+        view.itemDrawableFunction = () => ItemContainer;
 
         (window as any).$data = view;
-
     }
 
     public onResize() {
@@ -151,9 +154,11 @@ export default class Timeline extends Vue {
     public drop(ev: DragEvent) {
         const id = ev.dataTransfer!.getData("id");
         const libraryItem = globalState.library.getItemById(id);
-        if (!libraryItem) { return; }
+        if (!libraryItem) {
+            return;
+        }
 
-        let item: Item|undefined;
+        let item: Item | undefined;
         switch (libraryItem.type) {
             case LibraryItemType.AUDIO_FILE:
                 item = this.addMusicItem(libraryItem as AudioFile);
@@ -177,7 +182,9 @@ export default class Timeline extends Vue {
                 const trackItems = this.editor.items.filter((i) => i.trackId === t.id);
                 return !trackItems.some((i) => isOverlapping(i, item!));
             });
-            if (!track) { track = this.editor.addDefaultTrack(); }
+            if (!track) {
+                track = this.editor.addDefaultTrack();
+            }
 
             item.trackId = track.id;
             this.editor.addItem(item);
@@ -196,8 +203,10 @@ export default class Timeline extends Vue {
         this.editor.snapUnits = parseInt(value, 10);
     }
 
-    private addMusicItem(libraryItem: AudioFile): Item|undefined {
-        if (libraryItem.loading) { return; }
+    private addMusicItem(libraryItem: AudioFile): Item | undefined {
+        if (libraryItem.loading) {
+            return;
+        }
         const length = libraryItem.audioBuffer!.duration * (globalState.bpm / 60) * TICKS_PER_BEAT;
         const item = this.createItem(length, libraryItem);
         item.resizable = false;
@@ -233,7 +242,6 @@ export default class Timeline extends Vue {
             pc.markerMajorMultiplier = 4;
         }
     }
-
 }
 </script>
 

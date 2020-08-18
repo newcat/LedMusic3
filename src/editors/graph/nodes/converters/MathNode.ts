@@ -1,12 +1,26 @@
 import { Node } from "@baklavajs/core";
 
 const operations = [
-    "Add", "Subtract", "Multiply", "Divide", "Sine", "Cosine", "Tangent", "Arcsine", "Arccosine",
-    "Arctangent", "Power", "Logarithm", "Minimum", "Maximum", "Round", "Modulo", "Absolute"
+    "Add",
+    "Subtract",
+    "Multiply",
+    "Divide",
+    "Sine",
+    "Cosine",
+    "Tangent",
+    "Arcsine",
+    "Arccosine",
+    "Arctangent",
+    "Power",
+    "Logarithm",
+    "Minimum",
+    "Maximum",
+    "Round",
+    "Modulo",
+    "Absolute",
 ];
 
 export class MathNode extends Node {
-
     type = "Math";
     name = this.type;
 
@@ -15,13 +29,12 @@ export class MathNode extends Node {
         this.addInputInterface("Value 1", "NumberOption", 0, { type: "number" });
         this.addInputInterface("Value 2", "NumberOption", 0, { type: "number" });
         this.addOption("Operation", "SelectOption", "Add", undefined, {
-            items: operations
+            items: operations,
         });
         this.addOutputInterface("Result", { type: "number" });
     }
 
     calculate() {
-
         const val1 = this.getInterface("Value 1").value;
         const val2 = this.getInterface("Value 2").value;
         const operation = this.getOptionValue("Operation");
@@ -82,7 +95,5 @@ export class MathNode extends Node {
         }
 
         this.getInterface("Result").value = outputVal;
-
     }
-
 }

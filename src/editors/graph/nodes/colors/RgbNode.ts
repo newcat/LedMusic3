@@ -2,7 +2,6 @@ import { Node } from "@baklavajs/core";
 import { fromChroma, chroma } from "../../colors";
 
 export class RgbNode extends Node {
-
     public type = "RGB";
     public name = this.type;
 
@@ -23,5 +22,4 @@ export class RgbNode extends Node {
         this.setOptionValue("Preview", [c]);
         this.getInterface("Color").value = c;
     }
-
 }

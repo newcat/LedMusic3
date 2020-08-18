@@ -19,7 +19,6 @@ import { LibraryItem } from "../entities/library";
 
 @Component
 export default class Settings extends Vue {
-
     @Prop()
     value!: boolean;
 
@@ -46,6 +45,5 @@ export default class Settings extends Vue {
         this.$emit("input", false);
         this.item.name = this.vName;
     }
-
 }
 </script>

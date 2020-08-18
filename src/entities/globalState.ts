@@ -27,11 +27,10 @@ const defaults = {
     bpm: 130,
     fps: 30,
     volume: 0.5,
-    resolution: 128
+    resolution: 128,
 };
 
 class State implements IState {
-
     public scene: IScene = { props: [] };
     public library!: LibraryModel;
     public timeline!: LokumEditor;
@@ -46,7 +45,7 @@ class State implements IState {
 
     public events = {
         initialized: new StandardEvent(),
-        positionSetByUser: new StandardEvent()
+        positionSetByUser: new StandardEvent(),
     };
 
     constructor() {
@@ -54,7 +53,6 @@ class State implements IState {
     }
 
     public initialize() {
-
         if (this.library) {
             this.library.events.itemRemoved.unsubscribe(this);
         }
@@ -88,7 +86,7 @@ class State implements IState {
             timeline: this.timeline.save(),
             library: this.library.save(),
             bpm: this.bpm,
-            fps: this.fps
+            fps: this.fps,
         });
     }
 
@@ -105,7 +103,6 @@ class State implements IState {
         this.position = newPosition;
         this.events.positionSetByUser.emit();
     }
-
 }
 
 export const globalState = observable(new State());

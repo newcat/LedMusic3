@@ -8,7 +8,6 @@ import { registerNodes } from "./nodes/registerNodes";
 import { registerOptions } from "./options/registerOptions";
 
 export class BaklavaEditor extends Editor {
-
     public viewPlugin = new ViewPlugin();
     public intfTypePlugin = new InterfaceTypePlugin();
     public enginePlugin = new Engine(false);
@@ -37,9 +36,9 @@ export class BaklavaEditor extends Editor {
         this.intfTypePlugin.addConversion("color_single", "color_array", (v) => [v]);
 
         this.events.removeNode.addListener(this, (n) => {
-            if ((n as any).destroy) { (n as any).destroy(); }
+            if ((n as any).destroy) {
+                (n as any).destroy();
+            }
         });
-
     }
-
 }

@@ -1,0 +1,22 @@
+.timeline-item {
+    position: absolute;
+    height: calc(100% - 2px);
+    top: 1px;
+    background-color: #1eb980;
+    border: 1px solid lighten(#1eb980, 20%);
+    border-radius: 3px;
+    transition: border 0.1s;
+    transition: transform 0.05s, width 0.05s;
+
+    &.--selected {
+        border: 2px solid #fff;
+    }
+
+    .__resizeHandle {
+        position: absolute;
+        right: 0;
+        width: 8px;
+        height: 100%;
+        cursor: col-resize;
+    }
+}

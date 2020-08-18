@@ -1,5 +1,5 @@
 <template>
-<canvas class="option-canvas" ref="canvas"></canvas>
+    <canvas ref="canvas" class="option-canvas"></canvas>
 </template>
 
 <script lang="ts">
@@ -7,7 +7,6 @@ import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 
 @Component
 export default class SpectrumOption extends Vue {
-
     @Prop()
     public value?: Float32Array;
 
@@ -22,15 +21,18 @@ export default class SpectrumOption extends Vue {
 
     @Watch("value")
     public draw() {
-
-        if (!this.canvas || !this.ctx) { return; }
+        if (!this.canvas || !this.ctx) {
+            return;
+        }
 
         const { width, height } = this.canvas;
 
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, width, height);
 
-        if (!this.value) { return; }
+        if (!this.value) {
+            return;
+        }
 
         const barWidth = width / this.value.length;
 
@@ -40,8 +42,6 @@ export default class SpectrumOption extends Vue {
             this.ctx.fillStyle = `rgb(${b}, ${b}, ${b})`;
             this.ctx.fillRect(i * barWidth, 0, barWidth, height);
         });
-
     }
-
 }
 </script>

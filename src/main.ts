@@ -9,12 +9,12 @@ Vue.use(BaklavaVuePlugin);
 
 // @ts-ignore
 import splitPane from "vue-splitpane";
-Vue.component("split-pane", splitPane);
+Vue.component("SplitPane", splitPane);
 
 import "./styles/all.scss";
 import vuetify from "./plugins/vuetify";
 
 new (Vue as any)({
     vuetify,
-    render: (h: any) => h(App)
+    render: (h: any) => h(App),
 }).$mount("#app");

@@ -3,7 +3,6 @@ import colors from "@/colors";
 const ctx: Worker = self as any;
 
 function calculatePeaks(samples: Float32Array, sampleRate: number, resolution: number) {
-
     const peakSpan = Math.round(sampleRate / resolution);
     const peakCount = Math.ceil(samples.length / peakSpan);
     const peaks = new Uint8Array(peakCount);
@@ -20,7 +19,6 @@ function calculatePeaks(samples: Float32Array, sampleRate: number, resolution: n
     }
 
     return peaks;
-
 }
 
 function getWaveformSprites(peaks: Uint8Array) {

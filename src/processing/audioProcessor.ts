@@ -6,11 +6,10 @@ import { observe } from "@nx-js/observer-util";
 interface IAudioTrack {
     buffer: AudioBuffer;
     startUnit: number;
-    source: AudioBufferSourceNode|null;
+    source: AudioBufferSourceNode | null;
 }
 
 export class AudioProcessor {
-
     public static sampleRate = 44100;
 
     // WebAudio stuff
@@ -43,7 +42,6 @@ export class AudioProcessor {
     }
 
     public play() {
-
         // need to re-create sources on each playback
         for (const t of this.tracks) {
             this.destroySource(t.source);
@@ -55,7 +53,6 @@ export class AudioProcessor {
         if (this.audioContext.state === "suspended" && this.audioContext.resume) {
             this.audioContext.resume();
         }
-
     }
 
     public pause(updatePosition = true) {
@@ -63,18 +60,24 @@ export class AudioProcessor {
             this.destroySource(t.source);
             t.source = null;
         }
-        if (updatePosition) { this.updatePosition(); }
+        if (updatePosition) {
+            this.updatePosition();
+        }
     }
 
     public destroy() {
-        if (!globalState.isPlaying) { this.pause(); }
+        if (!globalState.isPlaying) {
+            this.pause();
+        }
         this.tracks = [];
         this.gainNode.disconnect();
         this.analyserNode.disconnect();
     }
 
     public updatePosition(): number {
-        if (!globalState.isPlaying) { return -1; }
+        if (!globalState.isPlaying) {
+            return -1;
+        }
         return this.startPosition + this.secondsToUnits(this.audioContext.currentTime - this.startTime);
     }
 
@@ -115,11 +118,10 @@ export class AudioProcessor {
         return source;
     }
 
-    private destroySource(source: AudioBufferSourceNode|null) {
+    private destroySource(source: AudioBufferSourceNode | null) {
         if (source) {
             source.stop(0);
             source.disconnect();
         }
     }
-
 }

@@ -1,27 +1,33 @@
 <template>
-<div
-    :class="['dark-select', { '--open': open }]"
-    @click="open = !open"
-    v-click-outside="() => { open = false; }"
->
-    <div class="__selected">
-        <div class="__text">{{ selected ? selected.text : "" }}</div>
-        <div class="__icon">
-            <i-arrow></i-arrow>
+    <div
+        v-click-outside="
+            () => {
+                open = false;
+            }
+        "
+        :class="['dark-select', { '--open': open }]"
+        @click="open = !open"
+    >
+        <div class="__selected">
+            <div class="__text">{{ selected ? selected.text : "" }}</div>
+            <div class="__icon">
+                <i-arrow></i-arrow>
+            </div>
         </div>
+        <transition name="slide-fade">
+            <div v-show="open" class="__dropdown">
+                <div class="item --header">{{ label }}</div>
+                <div
+                    v-for="item in items"
+                    :key="item.value"
+                    :class="['item', { '--active': value === item.value }]"
+                    @click="setSelected(item)"
+                >
+                    {{ item.text }}
+                </div>
+            </div>
+        </transition>
     </div>
-    <transition name="slide-fade">
-        <div class="__dropdown" v-show="open">
-            <div class="item --header">{{ label }}</div>
-            <div
-                v-for="item in items"
-                :key="item.value"
-                :class="['item', { '--active': value === item.value }]"
-                @click="setSelected(item)"
-            >{{ item.text }}</div>
-        </div>
-    </transition>
-</div>
 </template>
 
 <script lang="ts">
@@ -37,14 +43,13 @@ interface IItemType {
 
 @Component({
     components: {
-        "i-arrow": Arrow
+        "i-arrow": Arrow,
     },
     directives: {
-        ClickOutside: ClickOutside.directive
-    }
+        ClickOutside: ClickOutside.directive,
+    },
 })
 export default class SelectOption extends Vue {
-
     open = false;
 
     @Prop({ type: String })
@@ -63,6 +68,5 @@ export default class SelectOption extends Vue {
     setSelected(item: IItemType) {
         this.$emit("input", item.value);
     }
-
 }
 </script>

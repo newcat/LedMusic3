@@ -2,7 +2,6 @@ import { Node } from "@baklavajs/core";
 import { Color, blend } from "../../colors";
 
 export class BlendColorNode extends Node {
-
     public type = "Blend Color";
     public name = this.type;
 
@@ -10,13 +9,13 @@ export class BlendColorNode extends Node {
         super();
         this.addInputInterface("Color 1", undefined, () => [[0, 0, 0]], { type: "color_array" });
         this.addInputInterface("Color 2", undefined, () => [[0, 0, 0]], { type: "color_array" });
-        this.addOption("Mode", "SelectOption", "Multiply", undefined,
-            { items: ["Multiply", "Darken", "Lighten", "Screen", "Overlay", "Burn", "Dodge"] });
+        this.addOption("Mode", "SelectOption", "Multiply", undefined, {
+            items: ["Multiply", "Darken", "Lighten", "Screen", "Overlay", "Burn", "Dodge"],
+        });
         this.addOutputInterface("Output", { type: "color_array" });
     }
 
     public calculate() {
-
         const colorsA: Color[] = this.getInterface("Color 1").value;
         const colorsB: Color[] = this.getInterface("Color 2").value;
         const mode = this.getOptionValue("Mode").toLowerCase();
@@ -31,7 +30,5 @@ export class BlendColorNode extends Node {
         }
 
         this.getInterface("Output").value = result;
-
     }
-
 }

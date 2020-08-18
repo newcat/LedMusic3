@@ -5,7 +5,6 @@ import { LibraryItem, LibraryItemType, AudioFile } from "@/entities/library";
 import { globalState } from "@/entities/globalState";
 
 export class LokumEditor extends Editor {
-
     snapUnits = TICKS_PER_BEAT / 2;
     ignoreSnap = false;
 
@@ -15,7 +14,6 @@ export class LokumEditor extends Editor {
         this.labelFunction = (u) => (u / (TICKS_PER_BEAT * 4)).toString();
 
         this.events.itemAdded.subscribe(this, (i) => {
-
             if (i.data && i.data.libraryItemId) {
                 const libItem = globalState.library.getItemById(i.data.libraryItemId);
                 if (libItem) {
@@ -60,7 +58,6 @@ export class LokumEditor extends Editor {
                 }
                 return state;
             });
-
         });
 
         this.events.itemRemoved.subscribe(this, (i) => {
@@ -68,8 +65,9 @@ export class LokumEditor extends Editor {
             i.hooks.save.untap(this);
         });
 
-        observe(() => { this.updateAudioItemLengths(); });
-
+        observe(() => {
+            this.updateAudioItemLengths();
+        });
     }
 
     public addDefaultTrack() {
@@ -79,9 +77,11 @@ export class LokumEditor extends Editor {
     }
 
     public snap(unit: number) {
-        if (this.ignoreSnap) { return unit; }
+        if (this.ignoreSnap) {
+            return unit;
+        }
         const mod = unit % this.snapUnits;
-        return mod <= (this.snapUnits / 2) ? unit - mod : unit + this.snapUnits - mod;
+        return mod <= this.snapUnits / 2 ? unit - mod : unit + this.snapUnits - mod;
     }
 
     /** This function is called whenever the BPM is changed */
@@ -92,12 +92,13 @@ export class LokumEditor extends Editor {
             const libItem = i.data!.libraryItem as LibraryItem;
             if (libItem.type === LibraryItemType.AUDIO_FILE) {
                 const af = libItem as AudioFile;
-                if (!af.audioBuffer) { return; }
+                if (!af.audioBuffer) {
+                    return;
+                }
                 const length = af.audioBuffer.duration * (bpm / 60) * TICKS_PER_BEAT;
                 i.move(i.start, i.start + length);
             }
         });
         this.ignoreSnap = false;
     }
-
 }

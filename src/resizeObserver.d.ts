@@ -164,10 +164,7 @@ interface ResizeObserverObserveOptions {
  *
  * resizeObserver.observe(divElem);
  */
-type ResizeObserverCallback = (
-    entries: ResizeObserverEntry[],
-    observer: ResizeObserver,
-) => void;
+type ResizeObserverCallback = (entries: ResizeObserverEntry[], observer: ResizeObserver) => void;
 
 /**
  * The **ResizeObserverEntry** interface represents the object passed to the

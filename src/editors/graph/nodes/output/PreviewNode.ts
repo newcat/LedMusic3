@@ -2,7 +2,6 @@ import { Node } from "@baklavajs/core";
 import { globalProcessor } from "@/processing";
 
 export class PreviewNode extends Node {
-
     public type = "Preview";
     public name = this.type;
 
@@ -14,21 +13,20 @@ export class PreviewNode extends Node {
     }
 
     public calculate() {
-
         const input = this.getInterface("Colors").value;
-        const ledCount = this.getOptionValue("Led Count");
 
-        const buff = new Array(ledCount);
+        // TODO: Resize input to output size
+        //const ledCount = this.getOptionValue("Led Count");
+
+        /* const buff = new Array(ledCount);
 
         for (let i = 0; i < ledCount; i++) {
             // | | | | | | | | | | | | | | | |
             // |    |    |    |    |    |    |
-        }
+        } */
 
         this.setOptionValue("Preview", input);
         globalProcessor.globalPreview = input;
         globalProcessor.events.globalPreviewUpdated.emit();
-
     }
-
 }

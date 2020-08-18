@@ -7,5 +7,5 @@ export default {
     text: 0xffffff,
     markerLine: 0x504f5c,
     secondary: 0x888888,
-    waveform: 0xbbbbbb
+    waveform: 0xbbbbbb,
 };

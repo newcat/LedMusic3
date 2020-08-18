@@ -2,7 +2,6 @@ import { Node } from "@baklavajs/core";
 import { Color, mix } from "../../colors";
 
 export class MixColorNode extends Node {
-
     public type = "Mix Color";
     public name = this.type;
 
@@ -11,12 +10,13 @@ export class MixColorNode extends Node {
         this.addInputInterface("Color 1", undefined, () => [[0, 0, 0]], { type: "color_array" });
         this.addInputInterface("Color 2", undefined, () => [[0, 0, 0]], { type: "color_array" });
         this.addInputInterface("Factor", "SliderOption", 0.5, { type: "number", min: 0, max: 1 });
-        this.addOption("Color Space", "SelectOption", "RGB", undefined, { items: ["RGB", "HSL", "LAB", "LCH", "LRGB"] });
+        this.addOption("Color Space", "SelectOption", "RGB", undefined, {
+            items: ["RGB", "HSL", "LAB", "LCH", "LRGB"],
+        });
         this.addOutputInterface("Output", { type: "color_array" });
     }
 
     public calculate() {
-
         const colorsA: Color[] = this.getInterface("Color 1").value;
         const colorsB: Color[] = this.getInterface("Color 2").value;
         const factor: number = this.getInterface("Factor").value;
@@ -32,7 +32,5 @@ export class MixColorNode extends Node {
         }
 
         this.getInterface("Output").value = result;
-
     }
-
 }

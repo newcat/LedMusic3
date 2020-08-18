@@ -1,5 +1,5 @@
 <template>
-<canvas class="option-canvas" ref="canvas"></canvas>
+    <canvas ref="canvas" class="option-canvas"></canvas>
 </template>
 
 <script lang="ts">
@@ -8,7 +8,6 @@ import { Color, toChroma } from "../colors";
 
 @Component
 export default class PreviewOption extends Vue {
-
     @Prop({})
     public value!: Color[];
 
@@ -23,15 +22,18 @@ export default class PreviewOption extends Vue {
 
     @Watch("value")
     public draw() {
-
-        if (!this.canvas || !this.ctx) { return; }
+        if (!this.canvas || !this.ctx) {
+            return;
+        }
 
         const { width, height } = this.canvas;
 
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, width, height);
 
-        if (!this.value || this.value.length === 0) { return; }
+        if (!this.value || this.value.length === 0) {
+            return;
+        }
 
         const grad = this.ctx.createLinearGradient(0, 0, width, 0);
         this.value.forEach((v, i) => {
@@ -40,8 +42,6 @@ export default class PreviewOption extends Vue {
 
         this.ctx.fillStyle = grad;
         this.ctx.fillRect(0, 0, width, height);
-
     }
-
 }
 </script>

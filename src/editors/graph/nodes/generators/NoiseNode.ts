@@ -4,7 +4,6 @@ import { Color, fromChroma, chroma } from "../../colors";
 import { ICalculationData } from "../../types";
 
 export class NoiseNode extends Node {
-
     public type = "Noise";
     public name = this.type;
 
@@ -22,7 +21,6 @@ export class NoiseNode extends Node {
     }
 
     public calculate(data: ICalculationData) {
-
         const { resolution } = data;
 
         const spaceFreq = Math.max(this.getInterface("Space Freq").value, 0);
@@ -42,12 +40,12 @@ export class NoiseNode extends Node {
 
         this.getInterface("Colors").value = result;
         this.timer++;
-
     }
 
     private clamp(v: number, min: number, max: number) {
-        if (!Number.isFinite(v)) { return 0; }
+        if (!Number.isFinite(v)) {
+            return 0;
+        }
         return Math.min(max, Math.max(min, v));
     }
-
 }

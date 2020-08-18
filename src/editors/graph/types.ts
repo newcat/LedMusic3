@@ -7,5 +7,5 @@ export interface ICalculationData {
     sampleRate: number;
     timeDomainData: Float32Array;
     frequencyData: Float32Array;
-    trackValues: Map<string, number|INote[]>;
+    trackValues: Map<string, number | INote[]>;
 }

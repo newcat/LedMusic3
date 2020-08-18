@@ -8,16 +8,15 @@ v-card.d-flex.flex-column(flat, @drop="drop" @dragover="$event.preventDefault()"
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 import { globalState } from "@/entities/globalState";
 import { LibraryItemType, NotePattern } from "../entities/library";
 import CNoteEditor from "@/editors/note/NoteEditor.vue";
 
 @Component({
-    components: { CNoteEditor }
+    components: { CNoteEditor },
 })
 export default class NoteEditor extends Vue {
-
     selectedNotePatternId = "";
 
     get selectedNotePattern() {
@@ -31,6 +30,5 @@ export default class NoteEditor extends Vue {
             this.selectedNotePatternId = (libraryItem as NotePattern).id;
         }
     }
-
 }
 </script>
