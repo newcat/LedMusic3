@@ -32,7 +32,7 @@ export default class PreviewOption extends Vue {
             }),
         ];
         this.app.stage.addChild(this.graphics);
-        globalProcessor.events.globalPreviewUpdated.subscribe(this, () => this.draw());
+        globalProcessor.events.globalPreviewUpdated.addListener(this, () => this.draw());
     }
 
     public draw() {

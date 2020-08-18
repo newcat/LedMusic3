@@ -7,28 +7,29 @@
         @mouseup="mouseup"
         @keydown="keydown")
 
-        .__row(v-for="i in 128", :key="i", :data-row-value="i")
+        .__row(v-for="t in tracks", :key="t.id")
             .__header
-                div {{ i }}
+                div {{ t.name }}
 
             .__item-container(
-                @mouseenter="onRowMouseenter(i, $event)",
-                @mousemove="onRowMouseMove",
-                @mousedown.self="createNote(i, $event)")
+                @mouseenter="onTrackMouseenter(t)",
+                @mouseleave="onTrackMouseleave()")
 
                 timeline-item(
-                    v-for="n, ni in getNotesForTrack(i)",
-                    :key="ni", :note="n",,
+                    v-for="item in getItemsForTrack(t)",
+                    :key="item.id", :item="i",,
                     :unitWidth="unitWidth",
                     :style="{ pointerEvents: disableItemPointerEvents ? 'none' : undefined }",
                     @drag-start="onDragStart")
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+import { Component, Vue, Watch } from "vue-property-decorator";
 import { ItemArea } from "../types";
 import { Editor, Item, Track, IItemState } from "../model";
 import TimelineItem from "./TimelineItem.vue";
+import "../styles/all.scss";
+import { globalState } from "@/entities/globalState";
 
 @Component({
     components: { TimelineItem },
@@ -38,16 +39,17 @@ export default class Timeline extends Vue {
     headerWidth = 50;
     snap = 96;
     lastItemEnd = 0;
-
-    @Prop()
-    editor!: Editor;
-
     isDragging = false;
     dragArea: ItemArea | "" = "";
     dragItem?: Item;
     dragStartPosition = { x: 0, y: 0 };
     dragStartTrack?: Track;
     dragStartStates: Array<{ item: IItemState; trackIndex: number }> = [];
+    hoveredTrack: Track | null = null;
+
+    get editor(): Editor {
+        return globalState.timeline;
+    }
 
     get contentStyles() {
         return {
@@ -60,8 +62,13 @@ export default class Timeline extends Vue {
         return this.isDragging;
     }
 
+    get tracks() {
+        console.log(this.editor);
+        return this.editor?.tracks ?? [];
+    }
+
     getItemsForTrack(trackId: string) {
-        return this.editor.items.filter((i) => i.trackId === trackId);
+        return this.editor ? this.editor.items.filter((i) => i.trackId === trackId) : [];
     }
 
     unselectAllItems() {
@@ -70,12 +77,12 @@ export default class Timeline extends Vue {
         });
     }
 
-    @Watch("editor.items", { deep: true, immediate: true })
+    @Watch("editor.items", { deep: true })
     @Watch("draggedItem")
     @Watch("resizedItem")
     updateLastNoteEnd() {
         const newLastItemEnd = this.editor.items.reduce((p, i) => Math.max(p, i.end), 0);
-        if (newLastItemEnd < this.lastItemEnd && (this.draggedItem || this.resizedItem)) {
+        if (this.dragItem && newLastItemEnd < this.lastItemEnd) {
             // do nothing because shrinking the content while dragging results in strange behaviour
             return;
         }
@@ -88,7 +95,7 @@ export default class Timeline extends Vue {
             this.unselectAllItems();
         }
         this.isDragging = true;
-        this.dragStartPosition = [ev.clientX, ev.clientY];
+        this.dragStartPosition = { x: ev.clientX, y: ev.clientY };
     }
 
     mouseup() {
@@ -102,29 +109,22 @@ export default class Timeline extends Vue {
         }
     }
 
-    onTrackMouseenter(trackId: string, ev: MouseEvent) {
-        if (this.isDragging && this.dragItem && this.dragArea === "center" && this.dragItem.trackId !== trackId) {
-            this.dragItem.trackId = trackId;
-        }
-    }
-
     onRowMouseMove(ev: MouseEvent) {
         const x = ev.clientX;
         if (this.isDragging && this.dragItem) {
             if (this.dragArea === "leftHandle" || this.dragArea === "rightHandle") {
-                const unit = this.viewInstance.positionCalculator.getUnit(x - this.props.trackHeaderWidth);
+                const unit = this.pixelToUnit(x);
                 const newStart = this.dragArea === "leftHandle" ? unit : this.dragItem.start;
                 const newEnd = this.dragArea === "rightHandle" ? unit : this.dragItem.end;
-                if (this.props.editor.validateItem()) {
+                if (this.editor.validateItem()) {
                     this.dragItem.move(newStart, newEnd);
                 }
             } else if (this.dragArea === "center") {
                 const diffUnits = Math.floor((x - this.dragStartPosition.x) / this.unitWidth);
                 let diffTracks = 0;
-                const hoveredTrack = this.findTrackByPoint(ev.data.global);
-                if (this.dragStartTrack && hoveredTrack) {
-                    const startTrackIndex = this.props.editor.tracks.indexOf(this.dragStartTrack);
-                    const endTrackIndex = this.props.editor.tracks.indexOf(hoveredTrack);
+                if (this.dragStartTrack && this.hoveredTrack) {
+                    const startTrackIndex = this.editor.tracks.indexOf(this.dragStartTrack);
+                    const endTrackIndex = this.editor.tracks.indexOf(this.hoveredTrack);
                     if (startTrackIndex >= 0 && endTrackIndex >= 0) {
                         diffTracks = endTrackIndex - startTrackIndex;
                     }
@@ -136,8 +136,8 @@ export default class Timeline extends Vue {
                     const newTrackIndex = trackIndex + diffTracks;
                     if (newTrackIndex < 0) {
                         diffTracks = -trackIndex;
-                    } else if (newTrackIndex >= this.props.editor.tracks.length) {
-                        diffTracks = this.props.editor.tracks.length - trackIndex;
+                    } else if (newTrackIndex >= this.editor.tracks.length) {
+                        diffTracks = this.editor.tracks.length - trackIndex;
                     }
                 });
 
@@ -145,19 +145,19 @@ export default class Timeline extends Vue {
                 // TODO: Dont validate items one after another!
                 let valid = true;
                 this.dragStartStates.forEach((state) => {
-                    const item = this.props.editor.items.find((j) => j.id === state.item.id)!;
+                    const item = this.editor.items.find((j) => j.id === state.item.id)!;
                     const newTrackIndex = state.trackIndex + diffTracks;
-                    const newTrack = this.props.editor.tracks[newTrackIndex];
-                    if (!this.props.editor.validateItem()) {
+                    const newTrack = this.editor.tracks[newTrackIndex];
+                    if (!this.editor.validateItem()) {
                         valid = false;
                     }
                 });
 
                 if (valid) {
                     this.dragStartStates.forEach((state) => {
-                        const item = this.props.editor.items.find((j) => j.id === state.item.id)!;
+                        const item = this.editor.items.find((j) => j.id === state.item.id)!;
                         const newTrackIndex = state.trackIndex + diffTracks;
-                        const newTrack = this.props.editor.tracks[newTrackIndex];
+                        const newTrack = this.editor.tracks[newTrackIndex];
                         item.trackId = newTrack.id;
                         item.move(state.item.start + diffUnits, state.item.end + diffUnits);
                     });
@@ -172,13 +172,25 @@ export default class Timeline extends Vue {
         this.dragArea = dragArea;
     }
 
-    performSnap(unit: number) {
+    onTrackMouseenter(track: Track): void {
+        this.hoveredTrack = track;
+    }
+
+    onTrackMouseleave(): void {
+        this.hoveredTrack = null;
+    }
+
+    performSnap(unit: number): number {
         const mod = unit % this.snap;
         return mod <= this.snap / 2 ? unit - mod : unit + this.snap - mod;
     }
 
-    unitToPixel(unit: number) {}
+    unitToPixel(unit: number): number {
+        return unit * this.unitWidth;
+    }
 
-    pixelToUnit(pixel: number) {}
+    pixelToUnit(pixel: number): number {
+        return Math.floor(pixel / this.unitWidth);
+    }
 }
 </script>

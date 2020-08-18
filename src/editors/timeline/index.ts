@@ -1,10 +1,12 @@
 import { observe } from "@nx-js/observer-util";
 import { TICKS_PER_BEAT } from "@/constants";
-import { Editor, Track } from "@/lokumjs";
+import { Editor, Track } from "./model";
 import { LibraryItem, LibraryItemType, AudioFile } from "@/entities/library";
 import { globalState } from "@/entities/globalState";
 
-export class LokumEditor extends Editor {
+export * from "./model";
+
+export class TimelineEditor extends Editor {
     snapUnits = TICKS_PER_BEAT / 2;
     ignoreSnap = false;
 
@@ -13,7 +15,7 @@ export class LokumEditor extends Editor {
         this.addDefaultTrack();
         this.labelFunction = (u) => (u / (TICKS_PER_BEAT * 4)).toString();
 
-        this.events.itemAdded.subscribe(this, (i) => {
+        this.events.itemAdded.addListener(this, (i) => {
             if (i.data && i.data.libraryItemId) {
                 const libItem = globalState.library.getItemById(i.data.libraryItemId);
                 if (libItem) {
@@ -25,7 +27,7 @@ export class LokumEditor extends Editor {
                 }
             }
 
-            i.events.beforeMoved.subscribe(this, (newPos) => {
+            i.events.beforeMoved.addListener(this, (newPos) => {
                 const startChanged = newPos.start !== i.start;
                 const endChanged = newPos.end !== i.end;
                 if (startChanged && endChanged) {
@@ -60,8 +62,8 @@ export class LokumEditor extends Editor {
             });
         });
 
-        this.events.itemRemoved.subscribe(this, (i) => {
-            i.events.beforeMoved.unsubscribe(this);
+        this.events.itemRemoved.addListener(this, (i) => {
+            i.events.beforeMoved.removeListener(this);
             i.hooks.save.untap(this);
         });
 

@@ -3,7 +3,7 @@ import { Texture } from "pixi.js";
 import { LibraryItem, LibraryItemType } from "./libraryItem";
 // import { AudioProcessor } from "../../processing/audioProcessor";
 import WaveformWorker from "worker-loader!./waveformWorker";
-import { StandardEvent } from "@/lokumjs";
+import { BaklavaEvent } from "@baklavajs/events";
 import { readFile } from "fs";
 import { promisify } from "util";
 
@@ -23,7 +23,7 @@ export class AudioFile extends LibraryItem {
     public textures: IWaveformPart[] = [];
 
     public events = {
-        loaded: new StandardEvent(),
+        loaded: new BaklavaEvent<void>(),
     };
 
     public async load() {

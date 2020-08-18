@@ -50,7 +50,7 @@ export class Editor {
     }
 
     public addTrack(track: Track, index = -1) {
-        if (this.events.beforeTrackAdded.emit(track)) {
+        if (!this.events.beforeTrackAdded.emit(track)) {
             if (index >= 0) {
                 this._tracks.splice(index, 0, track);
             } else {
@@ -65,7 +65,7 @@ export class Editor {
     }
 
     public removeTrack(track: Track) {
-        if (this.events.beforeTrackRemoved.emit(track)) {
+        if (!this.events.beforeTrackRemoved.emit(track)) {
             const i = this.tracks.indexOf(track);
             if (i >= 0) {
                 this._tracks.splice(i, 1);
@@ -75,7 +75,7 @@ export class Editor {
     }
 
     public addItem(item: Item) {
-        if (this.events.beforeItemAdded.emit(item)) {
+        if (!this.events.beforeItemAdded.emit(item)) {
             if (this.validateItem()) {
                 this._items.push(item);
                 this.events.itemAdded.emit(item);
@@ -84,7 +84,7 @@ export class Editor {
     }
 
     public removeItem(item: Item) {
-        if (this.events.beforeItemRemoved.emit(item)) {
+        if (!this.events.beforeItemRemoved.emit(item)) {
             const i = this.items.indexOf(item);
             if (i >= 0) {
                 this._items.splice(i, 1);

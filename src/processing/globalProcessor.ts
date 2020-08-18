@@ -2,7 +2,7 @@ import { observe } from "@nx-js/observer-util";
 import { AudioProcessor } from "./audioProcessor";
 import { TimelineProcessor } from "./timelineProcessor";
 import { globalState } from "@/entities/globalState";
-import { StandardEvent } from "@/lokumjs";
+import { BaklavaEvent } from "@baklavajs/events";
 import { Color } from "@/editors/graph/colors";
 import { Socket, createSocket } from "dgram";
 
@@ -13,8 +13,8 @@ class GlobalProcessor {
     public globalPreview: Color[] = [];
 
     public events = {
-        tick: new StandardEvent(),
-        globalPreviewUpdated: new StandardEvent(),
+        tick: new BaklavaEvent<void>(),
+        globalPreviewUpdated: new BaklavaEvent<void>(),
     };
 
     private timer: any = null;
@@ -23,7 +23,7 @@ class GlobalProcessor {
 
     public constructor() {
         (window as any).globalProcessor = this;
-        globalState.events.initialized.subscribe(this, () => this.initialize());
+        globalState.events.initialized.addListener(this, () => this.initialize());
         this.socket = createSocket("udp4");
         this.socket.on("message", (msg, info) => {
             this.sendTo = info.port;

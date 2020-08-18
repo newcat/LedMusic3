@@ -1,5 +1,5 @@
 import uuidv4 from "uuid/v4";
-import { PreventableEvent, StandardEvent, SequentialHook } from "../framework";
+import { PreventableBaklavaEvent, BaklavaEvent, SequentialHook } from "@baklavajs/events";
 
 export interface ITrackState {
     id: string;
@@ -22,12 +22,12 @@ export class Track {
     public data?: Record<string, any>;
 
     public events = {
-        beforeNameChanged: new PreventableEvent<string>(),
-        nameChanged: new StandardEvent<string>(),
-        beforeHeightChanged: new PreventableEvent<number>(),
-        heightChanged: new StandardEvent<number>(),
-        beforeRemovableChanged: new PreventableEvent<boolean>(),
-        removableChanged: new StandardEvent<boolean>(),
+        beforeNameChanged: new PreventableBaklavaEvent<string>(),
+        nameChanged: new BaklavaEvent<string>(),
+        beforeHeightChanged: new PreventableBaklavaEvent<number>(),
+        heightChanged: new BaklavaEvent<number>(),
+        beforeRemovableChanged: new PreventableBaklavaEvent<boolean>(),
+        removableChanged: new BaklavaEvent<boolean>(),
     };
 
     public hooks = {

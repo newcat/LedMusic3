@@ -8,25 +8,19 @@
         v-select(:value="snapUnits", @input="setSnap", :items="snapItems", style="max-width: 12em;", dense, flat, solo, hide-details, prepend-icon="straighten")
         v-divider.mx-4(vertical)
         v-text-field(:value="bpm", @input="setBpm", label="BPM", style="max-width: 6em;", dense, flat, solo, hide-details, prepend-icon="speed")
-    div#wrapper(ref="wrapper" @drop="drop" @dragover="$event.preventDefault()")
+    #wrapper
+        timeline-base(@drop="drop" @dragover="$event.preventDefault()")
 </template>
 
 <script lang="ts">
-import { Component, Watch, Vue } from "vue-property-decorator";
-import throttle from "lodash/throttle";
-import { observe } from "@nx-js/observer-util";
-import { PluginOptionsVue } from "baklavajs";
-import { Text, TextStyle, Sprite } from "pixi.js";
+import { Component, Vue } from "vue-property-decorator";
+import { Sprite } from "pixi.js";
 
-import { View, Drawable, Item } from "@/lokumjs";
 import { TICKS_PER_BEAT } from "@/constants";
 import { globalState } from "@/entities/globalState";
 import { AudioFile, LibraryItemType, GraphLibraryItem, AutomationClip, LibraryItem } from "@/entities/library";
-import { globalProcessor } from "@/processing";
-import { ItemContainer } from "./itemContainer";
-import { PositionIndicator } from "./positionIndicator";
-import customColors from "@/colors";
-import CSelect from "@/components/elements/Select.vue";
+import { Item } from "@/editors/timeline";
+import TimelineBase from "@/editors/timeline/components/Timeline.vue";
 
 interface IWaveformPart {
     start: number;
@@ -40,7 +34,7 @@ enum LabelMode {
 }
 
 @Component({
-    components: { CSlider: PluginOptionsVue.SliderOption, CSelect },
+    components: { TimelineBase },
 })
 export default class Timeline extends Vue {
     public snapItems = [
@@ -56,13 +50,7 @@ export default class Timeline extends Vue {
         { text: "8 Beats", value: (8 * TICKS_PER_BEAT).toString() },
     ];
 
-    private positionIndicator!: PositionIndicator;
-    private fpsText = new Text("FPS", new TextStyle({ fontSize: 10, fill: 0xffffff }));
-
     private labelMode: LabelMode = LabelMode.BEATS;
-    private resizeObserver!: ResizeObserver;
-
-    private viewInstance: View = null as any;
 
     private globalState = globalState;
 
@@ -80,75 +68,6 @@ export default class Timeline extends Vue {
 
     public get bpm() {
         return globalState.bpm.toString();
-    }
-
-    public async mounted() {
-        this.resizeObserver = new ResizeObserver(throttle(() => this.onResize(), 200));
-        this.resizeObserver.observe(this.$refs.wrapper as Element);
-        this.initializeView();
-    }
-
-    @Watch("editor")
-    public async initializeView() {
-        if (this.viewInstance) {
-            this.viewInstance.unmount();
-        }
-
-        const view = await View.mount(this.editor, this.$refs.wrapper as HTMLElement);
-        this.viewInstance = view;
-
-        this.fpsText.position.set(10, 10);
-        view.app.stage.addChild(this.fpsText);
-
-        this.positionIndicator = Drawable.createView(view, PositionIndicator, {
-            position: 0,
-            trackHeaderWidth: view.timelineDrawable.props.trackHeaderWidth,
-        });
-        view.app.stage.addChild(this.positionIndicator.graphics);
-
-        view.app.ticker.add(() => {
-            this.positionIndicator.tick();
-            this.fpsText.text = view.app.ticker.elapsedMS.toFixed(2);
-        });
-
-        observe(() => {
-            this.positionIndicator.props.position = globalState.position;
-        });
-
-        view.timelineDrawable.header.graphics.interactive = true;
-        view.eventBus.events.pointerdown.subscribe(view.timelineDrawable.header.graphics, (ev) => {
-            const x = ev.data.global.x as number;
-            let unit = view.positionCalculator.getUnit(x - view.timelineDrawable.props.trackHeaderWidth);
-            if (unit < 0) {
-                unit = 0;
-            }
-            globalState.setPositionByUser(unit);
-        });
-
-        view.eventBus.events.keydown.subscribe(this, (ev) => {
-            if (ev.key === " ") {
-                if (globalState.isPlaying) {
-                    globalProcessor.pause();
-                } else {
-                    globalProcessor.play();
-                }
-            }
-        });
-
-        view.positionCalculator.unitWidth = 2.5;
-        view.positionCalculator.events.zoomed.subscribe(this, () => this.updateMarkerSpacing());
-        this.updateMarkerSpacing();
-
-        view.colors = { ...view.colors, ...customColors };
-        view.itemDrawableFunction = () => ItemContainer;
-
-        (window as any).$data = view;
-    }
-
-    public onResize() {
-        if (this.viewInstance) {
-            this.viewInstance.app.resize();
-        }
     }
 
     public drop(ev: DragEvent) {
@@ -172,8 +91,9 @@ export default class Timeline extends Vue {
         }
 
         if (item) {
-            const x = ev.clientX - this.viewInstance.timelineDrawable.props.trackHeaderWidth;
-            const unit = this.editor.snap(this.viewInstance.positionCalculator.getUnit(x));
+            // const x = ev.clientX;
+            // TODO: const unit = this.editor.snap(this.viewInstance.positionCalculator.getUnit(x));
+            const unit = 0;
             item.move(unit, unit + (item.end - item.start));
 
             // find a free track, if no one exists, create a new one
@@ -230,7 +150,7 @@ export default class Timeline extends Vue {
     }
 
     private updateMarkerSpacing() {
-        const pc = this.viewInstance.positionCalculator;
+        /* TODO: const pc = this.viewInstance.positionCalculator;
         if (pc.unitWidth < 0.25) {
             pc.markerSpace = TICKS_PER_BEAT * 16;
             pc.markerMajorMultiplier = 1;
@@ -240,7 +160,7 @@ export default class Timeline extends Vue {
         } else {
             pc.markerSpace = TICKS_PER_BEAT * 4;
             pc.markerMajorMultiplier = 4;
-        }
+        } */
     }
 }
 </script>

@@ -29,7 +29,7 @@ export class AudioProcessor {
         AudioProcessor.sampleRate = this.audioContext.sampleRate;
 
         observe(() => this.gainNode.gain.setValueAtTime(globalState.volume, this.audioContext.currentTime));
-        globalState.events.positionSetByUser.subscribe(this, () => {
+        globalState.events.positionSetByUser.addListener(this, () => {
             if (globalState.isPlaying) {
                 this.pause(false);
                 this.play();

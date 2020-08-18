@@ -2,7 +2,7 @@ import { deserialize, serialize } from "bson";
 import uuidv4 from "uuid/v4";
 import { LibraryItem, LibraryItemType } from "./libraryItem";
 import { TICKS_PER_BEAT } from "@/constants";
-import { StandardEvent } from "@/lokumjs";
+import { BaklavaEvent } from "@baklavajs/events";
 
 export type AutomationPointType = "linear" | "step";
 
@@ -23,7 +23,7 @@ export class AutomationClip extends LibraryItem {
     ];
 
     public events = {
-        pointsUpdated: new StandardEvent(),
+        pointsUpdated: new BaklavaEvent<void>(),
     };
 
     public get firstValue() {

@@ -1,6 +1,6 @@
 import { serialize, deserialize } from "bson";
 import { LibraryItem, LibraryItemType } from "./libraryItem";
-import { StandardEvent } from "@/lokumjs";
+import { BaklavaEvent } from "@baklavajs/events";
 import { INote } from "@/editors/note/types";
 
 export class NotePattern extends LibraryItem {
@@ -10,7 +10,7 @@ export class NotePattern extends LibraryItem {
     public notes: INote[] = [];
 
     public events = {
-        notesUpdated: new StandardEvent(),
+        notesUpdated: new BaklavaEvent<void>(),
     };
 
     public serialize() {

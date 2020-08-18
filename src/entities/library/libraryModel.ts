@@ -3,13 +3,13 @@ import { serialize, deserialize, Binary } from "bson";
 import { AudioFile } from "./audioFile";
 import { AutomationClip } from "./automationClip";
 import { GraphLibraryItem } from "./graphLibraryItem";
-import { StandardEvent } from "@/lokumjs";
+import { BaklavaEvent } from "@baklavajs/events";
 import { NotePattern } from "./notePattern";
 
 export class LibraryModel {
     public events = {
-        itemAdded: new StandardEvent<LibraryItem>(),
-        itemRemoved: new StandardEvent<LibraryItem>(),
+        itemAdded: new BaklavaEvent<LibraryItem>(),
+        itemRemoved: new BaklavaEvent<LibraryItem>(),
     };
 
     private _items: LibraryItem[] = [];

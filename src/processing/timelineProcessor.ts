@@ -1,5 +1,5 @@
 import { AudioProcessor } from "./audioProcessor";
-import { Editor, Item } from "@/lokumjs";
+import { TimelineEditor, Item } from "@/editors/timeline";
 import {
     AudioFile,
     LibraryItem,
@@ -16,7 +16,7 @@ export class TimelineProcessor {
     public trackValues = new Map<string, number | INote[]>(); // maps trackId -> value
     private activeItems: Item[] = [];
 
-    public constructor(private audioProcessor: AudioProcessor, private lokumEditor: Editor) {}
+    public constructor(private audioProcessor: AudioProcessor, private lokumEditor: TimelineEditor) {}
 
     public process(unit: number) {
         const currentActiveItems = this.lokumEditor.items.filter((i) => i.start <= unit && i.end >= unit);
@@ -64,17 +64,17 @@ export class TimelineProcessor {
         if (libraryItem.type === LibraryItemType.AUDIO_FILE) {
             const af = libraryItem as AudioFile;
             if (af.loading) {
-                af.events.loaded.subscribe(this, () => {
-                    af.events.loaded.unsubscribe(this);
+                af.events.loaded.addListener(this, () => {
+                    af.events.loaded.removeListener(this);
                     this.activate(item);
                 });
             }
             this.audioProcessor.registerBuffer(af.audioBuffer!, item.start);
-            item.events.moved.subscribe(this, () => {
+            item.events.moved.addListener(this, () => {
                 this.audioProcessor.unregisterBuffer(af.audioBuffer!);
                 this.audioProcessor.registerBuffer(af.audioBuffer!, item.start);
             });
-            item.events.beforeMoved.subscribe(this, () => {
+            item.events.beforeMoved.addListener(this, () => {
                 // TODO: moving an audio item while playing causes continuos stuttering during playback for whatever reason.
                 // As a workaround, prevent items from being moved while playing
                 if (globalState.isPlaying) {
@@ -91,8 +91,8 @@ export class TimelineProcessor {
         const libraryItem = item.data.libraryItem as LibraryItem;
         if (libraryItem.type === LibraryItemType.AUDIO_FILE) {
             const af = libraryItem as AudioFile;
-            item.events.moved.unsubscribe(this);
-            item.events.beforeMoved.unsubscribe(this);
+            item.events.moved.removeListener(this);
+            item.events.beforeMoved.removeListener(this);
             this.audioProcessor.unregisterBuffer(af.audioBuffer!);
         }
     }

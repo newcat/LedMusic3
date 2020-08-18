@@ -1,8 +1,8 @@
 import { serialize, deserialize } from "bson";
 import { observable } from "@nx-js/observer-util";
-import { LokumEditor } from "@/editors/timeline";
+import { TimelineEditor } from "@/editors/timeline";
 import { LibraryModel } from "./library/libraryModel";
-import { StandardEvent } from "@/lokumjs";
+import { BaklavaEvent } from "@baklavajs/events";
 
 interface IProp {
     type: string;
@@ -18,7 +18,7 @@ interface IScene {
 export interface IState {
     scene: IScene;
     library: LibraryModel;
-    timeline: LokumEditor;
+    timeline: TimelineEditor;
     bpm: number;
     fps: number;
 }
@@ -33,7 +33,7 @@ const defaults = {
 class State implements IState {
     public scene: IScene = { props: [] };
     public library!: LibraryModel;
-    public timeline!: LokumEditor;
+    public timeline!: TimelineEditor;
 
     public projectFilePath = "";
     public bpm = defaults.bpm;
@@ -44,8 +44,8 @@ class State implements IState {
     public resolution = defaults.resolution;
 
     public events = {
-        initialized: new StandardEvent(),
-        positionSetByUser: new StandardEvent(),
+        initialized: new BaklavaEvent<void>(),
+        positionSetByUser: new BaklavaEvent<void>(),
     };
 
     constructor() {
@@ -54,18 +54,18 @@ class State implements IState {
 
     public initialize() {
         if (this.library) {
-            this.library.events.itemRemoved.unsubscribe(this);
+            this.library.events.itemRemoved.removeListener(this);
         }
 
         this.library = new LibraryModel();
-        this.library.events.itemRemoved.subscribe(this, (item) => {
+        this.library.events.itemRemoved.addListener(this, (item) => {
             const itemsToRemove = this.timeline.items.filter((i) => i.data?.libraryItem === item);
             for (const i of itemsToRemove) {
                 this.timeline.removeItem(i);
             }
         });
 
-        this.timeline = new LokumEditor();
+        this.timeline = new TimelineEditor();
         this.events.initialized.emit();
     }
 

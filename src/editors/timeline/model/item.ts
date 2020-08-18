@@ -1,5 +1,5 @@
 import uuidv4 from "uuid/v4";
-import { PreventableEvent, StandardEvent, SequentialHook } from "../framework";
+import { PreventableBaklavaEvent, BaklavaEvent, SequentialHook } from "@baklavajs/events";
 
 export interface IItemState {
     id: string;
@@ -22,16 +22,16 @@ export class Item {
     public data?: Record<string, any>;
 
     public events = {
-        beforeMoved: new PreventableEvent<{ start: number; end: number }>(),
-        moved: new StandardEvent<{ start: number; end: number }>(),
-        beforeSelectedChanged: new PreventableEvent<boolean>(),
-        selectedChanged: new StandardEvent<boolean>(),
-        beforeTrackChanged: new PreventableEvent<string>(),
-        trackChanged: new StandardEvent<string>(),
-        beforeResizableChanged: new PreventableEvent<boolean>(),
-        resizableChanged: new StandardEvent<boolean>(),
-        beforeTemporaryChanged: new PreventableEvent<boolean>(),
-        temporaryChanged: new StandardEvent<boolean>(),
+        beforeMoved: new PreventableBaklavaEvent<{ start: number; end: number }>(),
+        moved: new BaklavaEvent<{ start: number; end: number }>(),
+        beforeSelectedChanged: new PreventableBaklavaEvent<boolean>(),
+        selectedChanged: new BaklavaEvent<boolean>(),
+        beforeTrackChanged: new PreventableBaklavaEvent<string>(),
+        trackChanged: new BaklavaEvent<string>(),
+        beforeResizableChanged: new PreventableBaklavaEvent<boolean>(),
+        resizableChanged: new BaklavaEvent<boolean>(),
+        beforeTemporaryChanged: new PreventableBaklavaEvent<boolean>(),
+        temporaryChanged: new BaklavaEvent<boolean>(),
     };
 
     public hooks = {

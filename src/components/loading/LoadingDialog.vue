@@ -26,7 +26,7 @@ import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import { remote } from "electron";
 import { globalState } from "../../entities/globalState";
 import { LibraryItem, LibraryItemType, AudioFile } from "../../entities/library";
-import { StandardEvent } from "../../lokumjs";
+import { BaklavaEvent } from "@baklavajs/events";
 
 @Component
 export default class LoadingDialog extends Vue {
@@ -63,7 +63,7 @@ export default class LoadingDialog extends Vue {
         if (this.value) {
             this.items.forEach((i) => {
                 if ((i as any).events?.loaded) {
-                    ((i as any).events.loaded as StandardEvent).subscribe(this, () => this.checkIfLoadingDone());
+                    ((i as any).events.loaded as BaklavaEvent<void>).addListener(this, () => this.checkIfLoadingDone());
                 }
             });
         }
@@ -79,7 +79,7 @@ export default class LoadingDialog extends Vue {
     close() {
         this.items.forEach((i) => {
             if ((i as any).events?.loaded) {
-                ((i as any).events.loaded as StandardEvent).unsubscribe(this);
+                ((i as any).events.loaded as BaklavaEvent<void>).removeListener(this);
             }
         });
         this.$emit("input", false);

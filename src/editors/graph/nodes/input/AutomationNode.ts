@@ -14,8 +14,8 @@ export class AutomationNode extends Node {
         this.addOption("Track", "SelectOption", "", undefined, { items: [] });
         this.addOutputInterface("Value", { type: "number" });
         this.updateAvailableTracks();
-        globalState.timeline.events.trackAdded.subscribe(this, () => this.updateAvailableTracks());
-        globalState.timeline.events.trackRemoved.subscribe(this, () => this.updateAvailableTracks());
+        globalState.timeline.events.trackAdded.addListener(this, () => this.updateAvailableTracks());
+        globalState.timeline.events.trackRemoved.addListener(this, () => this.updateAvailableTracks());
     }
 
     public calculate(data: ICalculationData) {
@@ -37,8 +37,8 @@ export class AutomationNode extends Node {
     }
 
     public destroy() {
-        globalState.timeline.events.trackAdded.unsubscribe(this);
-        globalState.timeline.events.trackRemoved.unsubscribe(this);
+        globalState.timeline.events.trackAdded.removeListener(this);
+        globalState.timeline.events.trackRemoved.removeListener(this);
     }
 
     private updateAvailableTracks() {
