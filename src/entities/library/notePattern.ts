@@ -1,33 +1,18 @@
 import { serialize, deserialize } from "bson";
-import { ILibraryItem, LibraryItemType } from "./libraryItem";
-import uuidv4 from "uuid/v4";
+import { LibraryItem, LibraryItemType } from "./libraryItem";
 import { StandardEvent } from "@/lokumjs";
 import { INote } from "@/editors/note/types";
 
-export class NotePattern implements ILibraryItem {
+export class NotePattern extends LibraryItem {
 
-    public static deserialize(data: Buffer) {
-        const { id, name, notes } = deserialize(data);
-        const np = new NotePattern(name, notes);
-        np.id = id;
-        return np;
-    }
-
-    public id = uuidv4();
     public type = LibraryItemType.NOTE_PATTERN;
-    public name: string;
-    public loading = false;
+    public name: string = "Note Pattern";
 
-    public notes: INote[];
+    public notes: INote[] = [];
 
     public events = {
         notesUpdated: new StandardEvent()
     };
-
-    public constructor(name = "Note Pattern", notes?: INote[]) {
-        this.name = name;
-        this.notes = notes || [];
-    }
 
     public serialize() {
         return serialize({
@@ -35,6 +20,20 @@ export class NotePattern implements ILibraryItem {
             name: this.name,
             notes: this.notes,
         });
+    }
+
+    public deserialize(buffer: Buffer): void {
+        const { id, name, notes } = deserialize(buffer);
+        this.id = id;
+        this.name = name;
+        this.notes = notes;
+    }
+
+    public getNotesAt(tick: number) {
+        const activeNotes = this.notes.filter((n) => n.start <= tick && n.end >= tick);
+        // sort so that the last activated note is at the beginning of the array
+        activeNotes.sort((a, b) => b.start - a.start);
+        return activeNotes;
     }
 
 }

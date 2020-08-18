@@ -1,6 +1,6 @@
-import { serialize, deserialize } from "bson";
-import { ILibraryItem, LibraryItemType } from "./libraryItem";
+import { deserialize, serialize } from "bson";
 import uuidv4 from "uuid/v4";
+import { LibraryItem, LibraryItemType } from "./libraryItem";
 import { TICKS_PER_BEAT } from "@/constants";
 import { StandardEvent } from "@/lokumjs";
 
@@ -13,21 +13,15 @@ export interface IAutomationPoint {
     type: AutomationPointType;
 }
 
-export class AutomationClip implements ILibraryItem {
+export class AutomationClip extends LibraryItem {
 
-    public static deserialize(data: Buffer) {
-        const { id, name, points } = deserialize(data);
-        const ac = new AutomationClip(name, points);
-        ac.id = id;
-        return ac;
-    }
-
-    public id = uuidv4();
     public type = LibraryItemType.AUTOMATION_CLIP;
-    public name: string;
-    public loading = false;
+    public name: string = "Automation Clip";
 
-    public points: IAutomationPoint[];
+    public points: IAutomationPoint[] = [
+        { id: uuidv4(), unit: 0, value: 0.5, type: "linear" },
+        { id: uuidv4(), unit: TICKS_PER_BEAT * 4, value: 0.5, type: "linear" }
+    ];
 
     public events = {
         pointsUpdated: new StandardEvent()
@@ -35,14 +29,6 @@ export class AutomationClip implements ILibraryItem {
 
     public get firstValue() { return this.points.length > 0 ? this.points[0].value : 0; }
     public get lastValue() { return this.points.length > 0 ? this.points[this.points.length - 1].value : 0; }
-
-    public constructor(name = "Automation Clip", points?: IAutomationPoint[]) {
-        this.name = name;
-        this.points = points || [
-            { id: uuidv4(), unit: 0, value: 0.5, type: "linear" },
-            { id: uuidv4(), unit: TICKS_PER_BEAT * 4, value: 0.5, type: "linear" }
-        ];
-    }
 
     public addPoint(unit: number, value: number, type: AutomationPointType = "linear") {
         this.points.push({ id: uuidv4(), unit, value, type });
@@ -86,6 +72,13 @@ export class AutomationClip implements ILibraryItem {
             name: this.name,
             points: this.points,
         });
+    }
+
+    public deserialize(buffer: Buffer): void {
+        const { id, name, points } = deserialize(buffer);
+        this.id = id;
+        this.name = name;
+        this.points = points;
     }
 
     private linearInterpolation(unit: number, a: IAutomationPoint, b: IAutomationPoint) {

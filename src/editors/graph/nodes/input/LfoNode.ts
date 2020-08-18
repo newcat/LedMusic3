@@ -1,6 +1,6 @@
 import { Node } from "@baklavajs/core";
 import { TICKS_PER_BEAT } from "@/constants";
-import { globalState } from "@/entities/globalState";
+import { ICalculationData } from "../../types";
 
 export class LfoNode extends Node {
 
@@ -39,7 +39,7 @@ export class LfoNode extends Node {
         this.addOutputInterface("Value", { type: "number" });
     }
 
-    public calculate() {
+    public calculate(data: ICalculationData) {
 
         const min = this.getInterface("Min").value;
         const max = this.getInterface("Max").value;
@@ -50,7 +50,7 @@ export class LfoNode extends Node {
         const shape = this.getOptionValue("Shape");
 
         const f = this.functions[shape] ?? ((v: number) => v);
-        const x = (globalState.position % rate) / rate + offset;
+        const x = (data.position % rate) / rate + offset;
         const rawValue = invert ? -f(x) : f(x);
         const value = min + (rawValue + 1) * 0.5 * (max - min);
         this.getInterface("Value").value = value;

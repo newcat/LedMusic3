@@ -1,12 +1,13 @@
 import { AudioProcessor } from "./audioProcessor";
 import { Editor, Item } from "@/lokumjs";
-import { AudioFile, ILibraryItem, LibraryItemType, GraphLibraryItem, AutomationClip } from "@/entities/library";
+import { AudioFile, LibraryItem, LibraryItemType, GraphLibraryItem, AutomationClip, NotePattern } from "@/entities/library";
 import { globalState } from "@/entities/globalState";
+import { INote } from "@/editors/note/types";
+import { ICalculationData } from "@/editors/graph/types";
 
 export class TimelineProcessor {
 
-    public automationClipValues = new Map<string, number>(); // maps trackId -> value
-
+    public trackValues = new Map<string, number|INote[]>(); // maps trackId -> value
     private activeItems: Item[] = [];
 
     public constructor(
@@ -24,15 +25,33 @@ export class TimelineProcessor {
         const newInactiveItems = this.activeItems.filter((i) => !currentActiveItems.includes(i));
         newInactiveItems.forEach((i) => this.deactivate(i));
 
-        currentActiveItems.filter((i) => this.isType(i, LibraryItemType.AUTOMATION_CLIP)).forEach((i) => this.processAutomationClip(unit, i));
-        currentActiveItems.filter((i) => this.isType(i, LibraryItemType.GRAPH)).forEach((i) => this.processGraph(i));
         this.activeItems = currentActiveItems;
+
+        currentActiveItems.filter((i) => this.isType(i, LibraryItemType.AUTOMATION_CLIP)).forEach((i) => this.processAutomationClip(unit, i));
+        currentActiveItems.filter((i) => this.isType(i, LibraryItemType.NOTE_PATTERN)).forEach((i) => this.processNotePattern(unit, i));
+
+        const fftSize = this.audioProcessor.analyserNode.fftSize;
+        const timeDomainData = new Float32Array(fftSize);
+        this.audioProcessor.analyserNode.getFloatTimeDomainData(timeDomainData);
+        const frequencyData = new Float32Array(fftSize);
+        this.audioProcessor.analyserNode.getFloatFrequencyData(frequencyData);
+
+        const calculationData: ICalculationData = {
+            resolution: globalState.resolution,
+            fps: globalState.fps,
+            position: unit,
+            sampleRate: this.audioProcessor.audioContext.sampleRate,
+            timeDomainData,
+            frequencyData,
+            trackValues: this.trackValues
+        };
+        currentActiveItems.filter((i) => this.isType(i, LibraryItemType.GRAPH)).forEach((i) => this.processGraph(i, calculationData));
 
     }
 
     private activate(item: Item) {
         if (!item.data || !item.data.libraryItem) { return; }
-        const libraryItem = item.data.libraryItem as ILibraryItem;
+        const libraryItem = item.data.libraryItem as LibraryItem;
         if (libraryItem.type === LibraryItemType.AUDIO_FILE) {
             const af = libraryItem as AudioFile;
             if (af.loading) {
@@ -58,34 +77,36 @@ export class TimelineProcessor {
 
     private deactivate(item: Item) {
         if (!item.data || !item.data.libraryItem) { return; }
-        const libraryItem = item.data.libraryItem as ILibraryItem;
+        const libraryItem = item.data.libraryItem as LibraryItem;
         if (libraryItem.type === LibraryItemType.AUDIO_FILE) {
             const af = libraryItem as AudioFile;
             item.events.moved.unsubscribe(this);
             item.events.beforeMoved.unsubscribe(this);
             this.audioProcessor.unregisterBuffer(af.audioBuffer!);
-        } else if (libraryItem.type === LibraryItemType.AUTOMATION_CLIP) {
-            const ac = libraryItem as AutomationClip;
-            // TODO: This doesn't work if the automation clip ends before the last point
-            this.automationClipValues.set(item.trackId, ac.lastValue);
         }
     }
 
     private isType(item: Item, type: LibraryItemType): boolean {
         if (!item.data || !item.data.libraryItem) { return false; }
-        const libraryItem = item.data.libraryItem as ILibraryItem;
+        const libraryItem = item.data.libraryItem as LibraryItem;
         return libraryItem.type === type;
     }
 
-    private processGraph(item: Item): void {
+    private processGraph(item: Item, calculationData: ICalculationData): void {
         const graph = item.data!.libraryItem as GraphLibraryItem;
-        graph.editor.enginePlugin.calculate();
+        graph.editor.enginePlugin.calculate(calculationData);
     }
 
     private processAutomationClip(unit: number, item: Item): void {
         const ac = item.data!.libraryItem as AutomationClip;
         const value = ac.getValueAt(unit - item.start);
-        this.automationClipValues.set(item.trackId, value);
+        this.trackValues.set(item.trackId, value);
+    }
+
+    private processNotePattern(unit: number, item: Item): void {
+        const np = item.data!.libraryItem as NotePattern;
+        const notes = np.getNotesAt(unit - item.start);
+        this.trackValues.set(item.trackId, notes);
     }
 
 }

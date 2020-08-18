@@ -1,5 +1,5 @@
 import { Drawable, IItemDrawableProps, ViewConstructor } from "@/lokumjs";
-import { ILibraryItem, LibraryItemType } from "@/entities/library";
+import { LibraryItem, LibraryItemType } from "@/entities/library";
 import { Text, TextStyle, Graphics } from "pixi.js";
 import { observable, observe, unobserve } from "@nx-js/observer-util";
 
@@ -10,7 +10,7 @@ const HEADER_HEIGHT = 15;
 
 export class ItemContainer extends Drawable<IItemDrawableProps> {
 
-    private libraryItem!: ILibraryItem;
+    private libraryItem!: LibraryItem;
     private observeFunction!: () => void;
 
     private textStyle = new TextStyle({ fill: this.viewInstance.colors.text, fontSize: 10 });
@@ -23,7 +23,7 @@ export class ItemContainer extends Drawable<IItemDrawableProps> {
         this.graphics.addChild(this.clipGraphics);
         this.graphics.mask = this.clipGraphics;
 
-        this.libraryItem = observable(this.props.item.data!.libraryItem as ILibraryItem);
+        this.libraryItem = observable(this.props.item.data!.libraryItem as LibraryItem);
 
         this.observeFunction = () => {
             this.updateText();

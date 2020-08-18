@@ -73,9 +73,9 @@ export class AudioProcessor {
         this.analyserNode.disconnect();
     }
 
-    public updatePosition() {
-        if (!globalState.isPlaying) { return; }
-        globalState.position = this.startPosition + this.secondsToUnits(this.audioContext.currentTime - this.startTime);
+    public updatePosition(): number {
+        if (!globalState.isPlaying) { return -1; }
+        return this.startPosition + this.secondsToUnits(this.audioContext.currentTime - this.startTime);
     }
 
     public unitToSeconds(units: number) {

@@ -1,7 +1,7 @@
 import Vue from "vue";
 import { Node } from "@baklavajs/core";
-import { globalProcessor } from "@/processing";
 import { globalState } from "@/entities/globalState";
+import { ICalculationData } from "../../types";
 
 export class AutomationNode extends Node {
 
@@ -19,16 +19,20 @@ export class AutomationNode extends Node {
         globalState.timeline.events.trackRemoved.subscribe(this, () => this.updateAvailableTracks());
     }
 
-    public calculate() {
+    public calculate(data: ICalculationData) {
 
         const min = this.getInterface("Min").value;
         const max = this.getInterface("Max").value;
 
-        const selectedName = this.getOptionValue("Track");
-        const track = globalState.timeline.tracks.find((t) => t.name === selectedName);
+        const { trackValues } = data;
+
+        const selectedTrack = this.getOptionValue("Track");
         let value = 0;
-        if (track) {
-            value = globalProcessor.timelineProcessor.automationClipValues.get(track.id) ?? 0;
+        if (selectedTrack) {
+            const trackValue = trackValues.get(selectedTrack);
+            if (typeof(trackValue) === "number") {
+                value = trackValue;
+            }
         }
 
         this.getInterface("Value").value = min + value * (max - min);
@@ -41,7 +45,10 @@ export class AutomationNode extends Node {
 
     private updateAvailableTracks() {
         // TODO: Check why this doesnt update in the view (probably bakalava issue)
-        Vue.set(this.options.get("Track")!, "items", globalState.timeline.tracks.map((t) => t.name));
+        Vue.set(this.options.get("Track")!, "items", globalState.timeline.tracks.map((t) => ({
+            text: t.name,
+            value: t.id
+        })));
     }
 
 }

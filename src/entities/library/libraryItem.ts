@@ -1,3 +1,5 @@
+import uuidv4 from "uuid/v4";
+
 export enum LibraryItemType {
     AUDIO_FILE = 1,
     GRAPH = 2,
@@ -5,11 +7,17 @@ export enum LibraryItemType {
     NOTE_PATTERN = 4
 }
 
-export interface ILibraryItem {
-    id: string;
-    type: LibraryItemType;
-    name: string;
-    loading: boolean;
-    error?: boolean;
-    serialize(): Buffer;
+export abstract class LibraryItem {
+
+    public id: string = uuidv4();
+
+    public abstract type: LibraryItemType;
+    public abstract name: string;
+
+    public loading: boolean = false;
+    public error: boolean = false;
+
+    public abstract serialize(): Buffer;
+    public abstract deserialize(buffer: Buffer): void;
+
 }

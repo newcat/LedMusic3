@@ -1,29 +1,13 @@
 import { serialize, deserialize } from "bson";
-import { ILibraryItem, LibraryItemType } from "./libraryItem";
-import uuidv4 from "uuid/v4";
+import { LibraryItem, LibraryItemType } from "./libraryItem";
 import { BaklavaEditor } from "@/editors/graph";
-import { IState } from "@baklavajs/core/dist/types";
 
-export class GraphLibraryItem implements ILibraryItem {
+export class GraphLibraryItem extends LibraryItem {
 
-    public static deserialize(data: Buffer) {
-        const { id, name, state } = deserialize(data);
-        const g = new GraphLibraryItem(state);
-        g.id = id;
-        g.name = name;
-        return g;
-    }
-
-    public id = uuidv4();
     public type = LibraryItemType.GRAPH;
     public name = "Graph";
-    public loading = false;
 
     public editor = new BaklavaEditor();
-
-    public constructor(state?: IState) {
-        if (state) { this.editor.load(state); }
-    }
 
     public serialize() {
         return serialize({
@@ -31,6 +15,13 @@ export class GraphLibraryItem implements ILibraryItem {
             name: this.name,
             state: this.editor.save()
         });
+    }
+
+    public deserialize(buffer: Buffer): void {
+        const { id, name, state } = deserialize(buffer);
+        this.id = id;
+        this.name = name;
+        this.editor.load(state);
     }
 
 }

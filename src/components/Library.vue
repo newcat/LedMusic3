@@ -37,7 +37,7 @@ v-card(flat)
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
-import { AudioFile, AutomationClip, GraphLibraryItem, LibraryItemType, ILibraryItem, NotePattern } from "@/entities/library";
+import { AudioFile, AutomationClip, GraphLibraryItem, LibraryItemType, LibraryItem, NotePattern } from "@/entities/library";
 import { globalState } from "@/entities/globalState";
 import ItemSettings from "./LibraryItemSettings.vue";
 
@@ -48,7 +48,7 @@ export default class Library extends Vue {
 
     globalState = globalState;
     settingsOpen = false;
-    settingsItem: ILibraryItem|null = null;
+    settingsItem: LibraryItem|null = null;
 
     get items() {
         return this.globalState.library.items;
@@ -61,7 +61,9 @@ export default class Library extends Vue {
     public async loadAudio(ev: any) {
         const f = ev.target.files[0] as File;
         if (!f) { return; }
-        const item = new AudioFile(f.name, f.path);
+        const item = new AudioFile();
+        item.name = f.name;
+        item.path = f.path;
         this.globalState.library.addItem(item);
         await item.load();
     }
@@ -70,7 +72,7 @@ export default class Library extends Vue {
         ev.dataTransfer!.setData("id", id);
     }
 
-    public getIcon(item: ILibraryItem) {
+    public getIcon(item: LibraryItem) {
         if (item.error) { return "warning"; }
         switch (item.type) {
             case LibraryItemType.AUDIO_FILE:
@@ -98,7 +100,7 @@ export default class Library extends Vue {
         this.globalState.library.addItem(new NotePattern());
     }
 
-    public openItemSettings(item: ILibraryItem) {
+    public openItemSettings(item: LibraryItem) {
         this.settingsItem = item;
         this.settingsOpen = true;
     }

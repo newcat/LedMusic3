@@ -1,7 +1,7 @@
 import { observe } from "@nx-js/observer-util";
 import { TICKS_PER_BEAT } from "@/constants";
 import { Editor, Track } from "@/lokumjs";
-import { ILibraryItem, LibraryItemType, AudioFile } from "@/entities/library";
+import { LibraryItem, LibraryItemType, AudioFile } from "@/entities/library";
 import { globalState } from "@/entities/globalState";
 
 export class LokumEditor extends Editor {
@@ -54,7 +54,7 @@ export class LokumEditor extends Editor {
 
             i.hooks.save.tap(this, (state) => {
                 if (state.data && state.data.libraryItem) {
-                    const libItem = state.data.libraryItem as ILibraryItem;
+                    const libItem = state.data.libraryItem as LibraryItem;
                     delete state.data.libraryItem;
                     state.data.libraryItemId = libItem.id;
                 }
@@ -89,7 +89,7 @@ export class LokumEditor extends Editor {
         const bpm = globalState.bpm;
         this.ignoreSnap = true;
         this.items.forEach((i) => {
-            const libItem = i.data!.libraryItem as ILibraryItem;
+            const libItem = i.data!.libraryItem as LibraryItem;
             if (libItem.type === LibraryItemType.AUDIO_FILE) {
                 const af = libItem as AudioFile;
                 if (!af.audioBuffer) { return; }

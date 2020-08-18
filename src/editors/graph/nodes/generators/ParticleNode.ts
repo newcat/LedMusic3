@@ -1,6 +1,6 @@
 import { Node } from "@baklavajs/core";
-import { globalState } from "@/entities/globalState";
 import { Color, mix, blend, darken } from "../../colors";
+import { ICalculationData } from "../../types";
 
 interface IParticle {
     currentLifetime: number;
@@ -41,9 +41,9 @@ export class ParticleNode extends Node {
 
     }
 
-    public calculate() {
+    public calculate(data: ICalculationData) {
 
-        const resolution = globalState.resolution;
+        const { fps, resolution } = data;
 
         this.particles.forEach((p) => p.currentLifetime++);
         this.particles = this.particles.filter((p) =>
@@ -56,7 +56,6 @@ export class ParticleNode extends Node {
 
         if (this.getInterface("Emit").value) {
 
-            const fps = globalState.fps;
             const rate = this.getInterface("Rate").value / fps;
             const randomness = this.getInterface("Randomness").value / fps;
             const glow = this.getInterface("Glow").value;

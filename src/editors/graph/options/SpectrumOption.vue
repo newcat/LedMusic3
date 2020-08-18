@@ -9,7 +9,7 @@ import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 export default class SpectrumOption extends Vue {
 
     @Prop()
-    public value!: Float32Array;
+    public value?: Float32Array;
 
     private canvas!: HTMLCanvasElement;
     private ctx!: CanvasRenderingContext2D;
@@ -34,6 +34,7 @@ export default class SpectrumOption extends Vue {
 
         const barWidth = width / this.value.length;
 
+        console.log(this.value);
         this.value.forEach((v, i) => {
             const b = 255 * v;
             this.ctx.fillStyle = `rgb(${b}, ${b}, ${b})`;

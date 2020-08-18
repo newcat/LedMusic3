@@ -22,7 +22,7 @@ import { View, Drawable, Track, Item } from "@/lokumjs";
 import { TICKS_PER_BEAT } from "@/constants";
 import { LokumEditor } from "@/editors/timeline";
 import { globalState } from "@/entities/globalState";
-import { AudioFile, LibraryItemType, GraphLibraryItem, AutomationClip, ILibraryItem } from "@/entities/library";
+import { AudioFile, LibraryItemType, GraphLibraryItem, AutomationClip, LibraryItem } from "@/entities/library";
 import { AudioProcessor, TimelineProcessor, globalProcessor } from "@/processing";
 import { ItemContainer } from "./itemContainer";
 import { PositionIndicator } from "./positionIndicator";
@@ -214,7 +214,7 @@ export default class Timeline extends Vue {
         return this.createItem(length, libraryItem);
     }
 
-    private createItem(length: number, libraryItem: ILibraryItem) {
+    private createItem(length: number, libraryItem: LibraryItem) {
         // set the track id to "" temporarily, we will determine the track later
         const item = new Item("", 0, length, { libraryItem });
         return item;

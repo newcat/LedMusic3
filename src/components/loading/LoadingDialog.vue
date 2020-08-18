@@ -25,7 +25,7 @@ v-dialog(:value="value", @input="$emit('input', $event)" max-width="400")
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import { remote } from "electron";
 import { globalState } from "../../entities/globalState";
-import { ILibraryItem, LibraryItemType, AudioFile } from "../../entities/library";
+import { LibraryItem, LibraryItemType, AudioFile } from "../../entities/library";
 import { StandardEvent } from "../../lokumjs";
 
 @Component
@@ -40,7 +40,7 @@ export default class LoadingDialog extends Vue {
         return this.gs.library.items.slice().sort((a, b) => a.loading ? 0 : 1);
     }
 
-    isAudioItem(item: ILibraryItem) {
+    isAudioItem(item: LibraryItem) {
         return item.type === LibraryItemType.AUDIO_FILE;
     }
 

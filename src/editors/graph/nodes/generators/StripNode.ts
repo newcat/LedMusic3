@@ -1,6 +1,6 @@
 import { Node } from "@baklavajs/core";
 import { Color } from "../../colors";
-import { globalState } from "@/entities/globalState";
+import { ICalculationData } from "../../types";
 
 export class StripNode extends Node {
 
@@ -15,9 +15,9 @@ export class StripNode extends Node {
         this.addOutputInterface("Output", { type: "color_array" });
     }
 
-    public calculate() {
+    public calculate(data: ICalculationData) {
 
-        const resolution = globalState.resolution;
+        const { resolution } = data;
 
         const start = this.getInterface("Start").value;
         const end = this.getInterface("End").value;

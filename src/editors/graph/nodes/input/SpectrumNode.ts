@@ -1,5 +1,5 @@
 import { Node } from "@baklavajs/core";
-import { globalProcessor } from "@/processing";
+import { ICalculationData } from "../../types";
 
 export class SpectrumNode extends Node {
 
@@ -17,12 +17,12 @@ export class SpectrumNode extends Node {
         this.addOutputInterface("Peak", { type: "number" });
     }
 
-    public calculate() {
-        const data = new Float32Array(globalProcessor.audioProcessor.analyserNode.fftSize);
-        globalProcessor.audioProcessor.analyserNode.getFloatFrequencyData(data);
+    public calculate(data: ICalculationData) {
+        const { frequencyData, sampleRate } = data;
 
-        const minIndex = this.clamp(this.getBinIndexByFrequency(this.getInterface("Min Freq").value), 1, data.length - 1);
-        const maxIndex = this.clamp(this.getBinIndexByFrequency(this.getInterface("Max Freq").value), 1, data.length - 1);
+        const fftSize = frequencyData.length;
+        const minIndex = this.clamp(this.getBinIndexByFrequency(this.getInterface("Min Freq").value, sampleRate, fftSize), 1, frequencyData.length - 1);
+        const maxIndex = this.clamp(this.getBinIndexByFrequency(this.getInterface("Max Freq").value, sampleRate, fftSize), 1, frequencyData.length - 1);
 
         const maxDb = this.clamp(this.getInterface("Max Decibels").value, -200, 0);
         const minDb = this.clamp(this.getInterface("Min Decibels").value, -200, maxDb);
@@ -31,7 +31,7 @@ export class SpectrumNode extends Node {
         let max = 0;
         let sum = 0;
         for (let i = 0; minIndex + i <= maxIndex; i++) {
-            const normalizedValue = this.clamp((data[minIndex + i] - minDb) / (maxDb - minDb), 0, 1);
+            const normalizedValue = this.clamp((frequencyData[minIndex + i] - minDb) / (maxDb - minDb), 0, 1);
             normalizedData[i] = normalizedValue;
             if (normalizedValue > max) { max = normalizedValue; }
             sum += normalizedValue;
@@ -43,9 +43,7 @@ export class SpectrumNode extends Node {
         this.getInterface("Average").value = sum / normalizedData.length;
     }
 
-    private getBinIndexByFrequency(f: number) {
-        const sampleRate = globalProcessor.audioProcessor.audioContext.sampleRate;
-        const fftSize = globalProcessor.audioProcessor.analyserNode.fftSize;
+    private getBinIndexByFrequency(f: number, sampleRate: number, fftSize: number) {
         return Math.round((f * fftSize) / sampleRate);
     }
 

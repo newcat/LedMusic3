@@ -1,5 +1,5 @@
 import { Node } from "@baklavajs/core";
-import { globalProcessor } from "@/processing";
+import { ICalculationData } from "../../types";
 
 export class PeakNode extends Node {
 
@@ -14,14 +14,13 @@ export class PeakNode extends Node {
         this.addOutputInterface("Peak", { type: "number" });
     }
 
-    public calculate() {
-        const data = new Float32Array(globalProcessor.audioProcessor.analyserNode.fftSize);
-        globalProcessor.audioProcessor.analyserNode.getFloatTimeDomainData(data);
+    public calculate(data: ICalculationData) {
+        const { timeDomainData, sampleRate } = data;
 
-        const sampleSize = Math.max(data.length, (globalProcessor.audioProcessor.audioContext.sampleRate / 1000) * 30);
+        const sampleSize = Math.max(timeDomainData.length, (sampleRate / 1000) * 30);
         let sum = 0;
-        for (let i = data.length - sampleSize; i < data.length; i++) {
-            sum += data[i] * data[i];
+        for (let i = timeDomainData.length - sampleSize; i < timeDomainData.length; i++) {
+            sum += timeDomainData[i] * timeDomainData[i];
         }
         const rms = Math.sqrt(sum / (sampleSize / 2));
         const db = 20 * Math.log10(rms);
