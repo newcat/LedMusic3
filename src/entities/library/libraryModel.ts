@@ -28,15 +28,15 @@ export class LibraryModel {
     }
 
     public load(serialized: Binary) {
-        const newItemStates = deserialize(serialized.buffer);
+        const newItemStates: Record<number, { type: number; data: Buffer }> = deserialize(serialized.buffer);
         const newItems: LibraryItem[] = [];
 
-        for (const item of newItemStates) {
+        for (const item of Object.values(newItemStates)) {
             if (!item) {
                 break;
             }
             const { type, data } = item;
-            const buffer = data.buffer;
+            const buffer = data.buffer as Buffer;
             let libItem: LibraryItem | undefined;
             switch (type) {
                 case LibraryItemType.AUDIO_FILE:

@@ -17,7 +17,7 @@
 
                 timeline-item(
                     v-for="item in getItemsForTrack(t)",
-                    :key="item.id", :item="i",,
+                    :key="item.id", :item="item",
                     :unitWidth="unitWidth",
                     :style="{ pointerEvents: disableItemPointerEvents ? 'none' : undefined }",
                     @drag-start="onDragStart")
@@ -63,12 +63,11 @@ export default class Timeline extends Vue {
     }
 
     get tracks() {
-        console.log(this.editor);
         return this.editor?.tracks ?? [];
     }
 
-    getItemsForTrack(trackId: string) {
-        return this.editor ? this.editor.items.filter((i) => i.trackId === trackId) : [];
+    getItemsForTrack(track: Track) {
+        return this.editor ? this.editor.items.filter((i) => i.trackId === track.id) : [];
     }
 
     unselectAllItems() {

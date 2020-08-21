@@ -1,15 +1,32 @@
 .timeline-item {
     position: absolute;
-    height: calc(100% - 2px);
-    top: 1px;
-    background-color: #1eb980;
-    border: 1px solid lighten(#1eb980, 20%);
+    height: calc(100% - 10px);
+    top: 5px;
+    background-color: #888;
     border-radius: 3px;
-    transition: border 0.1s;
-    transition: transform 0.05s, width 0.05s;
+    border: 2px solid transparent;
+    transition: transform 0.05s, width 0.05s, border-color 0.1s;
+
+    &:hover:not(.--selected) {
+        border-color: lighten(#888, 20%);
+    }
 
     &.--selected {
-        border: 2px solid #fff;
+        border-color: #1eb980;
+    }
+
+    .timeline-item__header {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    .timeline-item__header-text {
+        color: white;
+        padding: 0.1rem;
+        margin-left: 5px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
     }
 
     .__resizeHandle {

@@ -1,6 +1,6 @@
 <template lang="pug">
 v-app
-    v-content
+    v-main
         #app-container
             c-toolbar(
                 @newProject="newProject",

@@ -1,17 +1,17 @@
 import { serialize, deserialize } from "bson";
-import { Texture } from "pixi.js";
+// import { Texture } from "pixi.js";
 import { LibraryItem, LibraryItemType } from "./libraryItem";
 // import { AudioProcessor } from "../../processing/audioProcessor";
-import WaveformWorker from "worker-loader!./waveformWorker";
+// import WaveformWorker from "worker-loader!./waveformWorker";
 import { BaklavaEvent } from "@baklavajs/events";
 import { readFile } from "fs";
 import { promisify } from "util";
 
-interface IWaveformPart {
+/*interface IWaveformPart {
     start: number;
     end: number;
     texture: Texture;
-}
+}*/
 
 export class AudioFile extends LibraryItem {
     public static sampleRate = 192000;
@@ -20,7 +20,7 @@ export class AudioFile extends LibraryItem {
     public name = "Empty";
     public path = "";
     public audioBuffer: AudioBuffer | null = null;
-    public textures: IWaveformPart[] = [];
+    // public textures: IWaveformPart[] = [];
 
     public events = {
         loaded: new BaklavaEvent<void>(),
@@ -42,7 +42,7 @@ export class AudioFile extends LibraryItem {
         const offlineAudioContext = new OfflineAudioContext(1, 2, AudioFile.sampleRate);
         this.audioBuffer = await offlineAudioContext.decodeAudioData(rawData.buffer);
 
-        const worker = new WaveformWorker();
+        /*const worker = new WaveformWorker();
         const samples = this.audioBuffer.getChannelData(0);
         worker.postMessage({ samples, sampleRate: AudioFile.sampleRate, resolution: 256 }, [samples.buffer]);
 
@@ -66,7 +66,7 @@ export class AudioFile extends LibraryItem {
         } catch (err) {
             console.warn(err);
             this.error = true;
-        }
+        }*/
 
         this.loading = false;
         this.events.loaded.emit();

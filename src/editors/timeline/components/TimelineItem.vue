@@ -1,5 +1,7 @@
 <template lang="pug">
-.timeline-item(:class="{ '--selected': note.selected }", :style="styles", @mousedown.self="dragStart")
+.timeline-item(:class="{ '--selected': item.selected }", :style="styles", @mousedown.self="dragStart")
+    .timeline-item__header(:title="name")
+        .timeline-item__header-text {{ name }}
     .__resizeHandle
 </template>
 
@@ -8,12 +10,16 @@ import { Component, Prop, Vue } from "vue-property-decorator";
 import { Item } from "../model/item";
 
 @Component
-export default class Pianoroll extends Vue {
+export default class TimelineItem extends Vue {
     @Prop()
     item!: Item;
 
     @Prop()
     unitWidth!: number;
+
+    get name() {
+        return this.item.data?.libraryItem?.name ?? "";
+    }
 
     get styles() {
         return {
