@@ -1,4 +1,3 @@
-import Vue from "vue";
 import { Node } from "@baklavajs/core";
 import { globalState } from "@/entities/globalState";
 import { ICalculationData } from "../../types";
@@ -42,14 +41,11 @@ export class AutomationNode extends Node {
     }
 
     private updateAvailableTracks() {
-        // TODO: Check why this doesnt update in the view (probably bakalava issue)
-        Vue.set(
-            this.options.get("Track")!,
-            "items",
-            globalState.timeline.tracks.map((t) => ({
-                text: t.name,
-                value: t.id,
-            }))
-        );
+        const trackOption = this.options.get("Track")!;
+        trackOption.items = globalState.timeline.tracks.map((t) => ({
+            text: t.name,
+            value: t.id,
+        }));
+        trackOption.events.updated.emit();
     }
 }

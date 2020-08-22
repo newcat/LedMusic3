@@ -181,10 +181,10 @@
     lodash "^4.17.19"
     to-fast-properties "^2.0.0"
 
-"@baklavajs/core@^1.6.1":
-  version "1.6.1"
-  resolved "https://registry.yarnpkg.com/@baklavajs/core/-/core-1.6.1.tgz#3efbde3bc0e20ad87fd8e704c28f991547b59e0d"
-  integrity sha512-HX8IRuufARnuKoe33Rnx8R+QWww7KFVobKAE0T4MUPRYTyzfjEYToYC+qoNPSvankv3Sh9YHA64yviplv96OWQ==
+"@baklavajs/core@^1.7.2":
+  version "1.7.2"
+  resolved "https://registry.yarnpkg.com/@baklavajs/core/-/core-1.7.2.tgz#2381cc0786969c0a27053d3b42204ee59a3e3fa3"
+  integrity sha512-hBlPVHeJMFgc5oYfqQPRbAm3WguWq+cxsSi19vSCOfc7iwAqaF3UHNANn21bsJenBjA3sNYO8dl2hKONOsYiKQ==
   dependencies:
     "@baklavajs/events" "^1.5.2"
 
@@ -205,10 +205,10 @@
   resolved "https://registry.yarnpkg.com/@baklavajs/plugin-interface-types/-/plugin-interface-types-1.6.1.tgz#76d260d8a2b6cde28207e0f2f7009e4a8b844f2b"
   integrity sha512-sEChgRKnq1lh2tBX8WwnG9ZE5PwqSV2OMXP6aGZuRS0/zB1znTKYM0HCeVxvKYBLKtl+kNURG9+9YS5kN4bgAg==
 
-"@baklavajs/plugin-options-vue@^1.7.1":
-  version "1.7.1"
-  resolved "https://registry.yarnpkg.com/@baklavajs/plugin-options-vue/-/plugin-options-vue-1.7.1.tgz#3668531558ef527523e2e7f3d778f41dc2d4bd98"
-  integrity sha512-aV5P07Fh4/z0+h40DhMjtCnaqultA9oxpVLz3FqSmDXdnYsEezoUft32uwpXiwrTyh3WumplDh7p5tpoolGrBg==
+"@baklavajs/plugin-options-vue@^1.7.2":
+  version "1.7.2"
+  resolved "https://registry.yarnpkg.com/@baklavajs/plugin-options-vue/-/plugin-options-vue-1.7.2.tgz#f5bfcd2353709091c398e38f697738803873a8cd"
+  integrity sha512-6k7TD6TecFs2SgkGMskO+n7iusjZ+T9U2cwLg5EmGYVGohZeEuDoQdh8M//aLA6h95Tly1WcB17NYBmIahCZ8A==
 
 "@baklavajs/plugin-renderer-vue@^1.7.0":
   version "1.7.0"
@@ -1674,14 +1674,14 @@ babylon@^6.18.0:
   integrity sha512-q/UEjfGJ2Cm3oKV71DJz9d25TPnq5rhBVL2Q4fA5wcC3jcrdn7+SssEybFIxwAvvP+YCsCYNKughoF33GxgycQ==
 
 baklavajs@^1.7.1:
-  version "1.7.1"
-  resolved "https://registry.yarnpkg.com/baklavajs/-/baklavajs-1.7.1.tgz#2b316f072910334d3f0b481e7c9e18be2f1a94ef"
-  integrity sha512-hEKJ7EA7W9cmbJ8GGFJPhPAMlarjdvszQpAJZsoaWw62bAHbGNKj9qP/W18193DMcfK1oISF6e8PhO5fx7m65A==
+  version "1.7.2"
+  resolved "https://registry.yarnpkg.com/baklavajs/-/baklavajs-1.7.2.tgz#2be611b2d44e1530ef64e77f1c46b586628fb309"
+  integrity sha512-3acCEYox0xbmk/Ewa2Fu1mLrNy+gH3jWQ6p6verEGKsJRX8qLBD5RdXpL3+4rCxccik+AHj7AsuxICztoJSIKA==
   dependencies:
-    "@baklavajs/core" "^1.6.1"
+    "@baklavajs/core" "^1.7.2"
     "@baklavajs/plugin-engine" "^1.6.1"
     "@baklavajs/plugin-interface-types" "^1.6.1"
-    "@baklavajs/plugin-options-vue" "^1.7.1"
+    "@baklavajs/plugin-options-vue" "^1.7.2"
     "@baklavajs/plugin-renderer-vue" "^1.7.0"
 
 balanced-match@^1.0.0:
