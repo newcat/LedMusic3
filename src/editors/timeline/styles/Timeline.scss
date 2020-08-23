@@ -9,6 +9,10 @@
     $rowHeight: 100px;
     $headerWidth: 200px;
 
+    .--disable-child-pointer-events * {
+        pointer-events: none;
+    }
+
     .__content {
         position: relative;
         background-image: linear-gradient(90deg, #504f5c 1px, transparent 1px);
@@ -19,6 +23,21 @@
         &:focus {
             outline: none;
         }
+    }
+
+    .__header-row {
+        height: 40px;
+        padding-left: $headerWidth;
+        background-color: #33333d;
+        position: sticky;
+        top: 0;
+        z-index: 30;
+
+        & > .__container {
+            position: relative;
+            height: 100%;
+        }
+
     }
 
     .__row {

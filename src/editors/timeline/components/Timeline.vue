@@ -1,11 +1,15 @@
 <template lang="pug">
-.timeline
+.timeline(:class="{ 'disable-child-pointer-events': isDragging }")
     .__content(
         tabindex="-1"
         :style="contentStyles",
         @mousedown="mousedown",
         @mouseup="mouseup"
         @keydown="keydown")
+
+        .__header-row
+            .__container
+                marker-label(v-for="m in markers", :key="m.unit", :marker="m")
 
         .__row(v-for="t in tracks", :key="t.id")
             .__header
@@ -19,26 +23,30 @@
                     v-for="item in getItemsForTrack(t)",
                     :key="item.id", :item="item",
                     :unitWidth="unitWidth",
-                    :style="{ pointerEvents: disableItemPointerEvents ? 'none' : undefined }",
                     @drag-start="onDragStart")
 </template>
 
 <script lang="ts">
 import { Component, Vue, Watch } from "vue-property-decorator";
-import { ItemArea } from "../types";
+import { ItemArea, IMarker } from "../types";
 import { Editor, Item, Track, IItemState } from "../model";
-import TimelineItem from "./TimelineItem.vue";
-import "../styles/all.scss";
 import { globalState } from "@/entities/globalState";
+import { TICKS_PER_BEAT } from "@/constants";
+
+import TimelineItem from "./TimelineItem.vue";
+import MarkerLabel from "./MarkerLabel.vue";
+
+import "../styles/all.scss";
 
 @Component({
-    components: { TimelineItem },
+    components: { TimelineItem, MarkerLabel },
 })
 export default class Timeline extends Vue {
     unitWidth = 1.5;
     headerWidth = 50;
     snap = 96;
     lastItemEnd = 0;
+
     isDragging = false;
     dragArea: ItemArea | "" = "";
     dragItem?: Item;
@@ -64,6 +72,33 @@ export default class Timeline extends Vue {
 
     get tracks() {
         return this.editor?.tracks ?? [];
+    }
+
+    get markerSpacing(): { space: number; majorMultiplier: number } {
+        if (this.unitWidth < 0.25) {
+            return { space: TICKS_PER_BEAT * 16, majorMultiplier: 1 };
+        } else if (this.unitWidth > 2) {
+            return { space: TICKS_PER_BEAT, majorMultiplier: 4 };
+        } else {
+            return { space: TICKS_PER_BEAT * 4, majorMultiplier: 4 };
+        }
+    }
+
+    get markers(): IMarker[] {
+        if (this.unitWidth <= 0) {
+            return [];
+        }
+        const markers: IMarker[] = [];
+        for (let unit = 0; unit < this.lastItemEnd; unit += this.markerSpacing.space) {
+            const x = this.unitToPixel(unit);
+            const nthMarker = Math.floor(unit / this.markerSpacing.space);
+            if (nthMarker % this.markerSpacing.majorMultiplier === 0) {
+                markers.push({ type: "major", unit, position: x });
+            } else {
+                markers.push({ type: "minor", unit, position: x });
+            }
+        }
+        return markers;
     }
 
     getItemsForTrack(track: Track) {
