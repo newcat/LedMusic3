@@ -9,7 +9,7 @@
         v-divider.mx-4(vertical)
         v-text-field(:value="bpm", @input="setBpm", label="BPM", style="max-width: 6em;", dense, flat, solo, hide-details, prepend-icon="speed")
     #wrapper
-        timeline-base(@drop="drop" @dragover="$event.preventDefault()")
+        timeline-base(:snap="parseInt(snapUnits)", @drop="drop", @dragover="$event.preventDefault()")
 </template>
 
 <script lang="ts">
@@ -147,20 +147,6 @@ export default class Timeline extends Vue {
         // set the track id to "" temporarily, we will determine the track later
         const item = new Item("", 0, length, { libraryItem });
         return item;
-    }
-
-    private updateMarkerSpacing() {
-        /* TODO: const pc = this.viewInstance.positionCalculator;
-        if (pc.unitWidth < 0.25) {
-            pc.markerSpace = TICKS_PER_BEAT * 16;
-            pc.markerMajorMultiplier = 1;
-        } else if (pc.unitWidth > 2) {
-            pc.markerSpace = TICKS_PER_BEAT;
-            pc.markerMajorMultiplier = 4;
-        } else {
-            pc.markerSpace = TICKS_PER_BEAT * 4;
-            pc.markerMajorMultiplier = 4;
-        } */
     }
 }
 </script>

@@ -17,7 +17,8 @@
 
             .__item-container(
                 @mouseenter="onTrackMouseenter(t)",
-                @mouseleave="onTrackMouseleave()")
+                @mouseleave="onTrackMouseleave()"
+                @mousemove="onRowMouseMove")
 
                 timeline-item(
                     v-for="item in getItemsForTrack(t)",
@@ -27,7 +28,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from "vue-property-decorator";
+import { Component, Vue, Watch, Prop } from "vue-property-decorator";
 import { ItemArea, IMarker } from "../types";
 import { Editor, Item, Track, IItemState } from "../model";
 import { globalState } from "@/entities/globalState";
@@ -44,16 +45,18 @@ import "../styles/all.scss";
 export default class Timeline extends Vue {
     unitWidth = 1.5;
     headerWidth = 50;
-    snap = 96;
     lastItemEnd = 0;
 
     isDragging = false;
     dragArea: ItemArea | "" = "";
-    dragItem?: Item;
+    dragItem: Item | null = null;
     dragStartPosition = { x: 0, y: 0 };
     dragStartTrack?: Track;
     dragStartStates: Array<{ item: IItemState; trackIndex: number }> = [];
     hoveredTrack: Track | null = null;
+
+    @Prop({ type: Number, required: true })
+    snap!: number;
 
     get editor(): Editor {
         return globalState.timeline;
@@ -62,7 +65,9 @@ export default class Timeline extends Vue {
     get contentStyles() {
         return {
             width: `${(this.lastItemEnd + this.snap) * this.unitWidth + this.headerWidth}px`,
-            backgroundSize: `${this.snap * this.unitWidth}px ${this.snap * this.unitWidth}px`,
+            backgroundSize: `${this.markerSpacing.space * this.unitWidth}px ${
+                this.markerSpacing.space * this.unitWidth
+            }px`,
         };
     }
 
@@ -125,7 +130,7 @@ export default class Timeline extends Vue {
 
     mousedown(ev: MouseEvent) {
         const target = ev.target as HTMLElement | null;
-        if (target && !target.matches(".note")) {
+        if (target && !target.matches(".timeline-item")) {
             this.unselectAllItems();
         }
         this.isDragging = true;
@@ -134,6 +139,7 @@ export default class Timeline extends Vue {
 
     mouseup() {
         this.isDragging = false;
+        this.dragItem = null;
     }
 
     keydown(ev: KeyboardEvent) {
@@ -192,8 +198,10 @@ export default class Timeline extends Vue {
                         const item = this.editor.items.find((j) => j.id === state.item.id)!;
                         const newTrackIndex = state.trackIndex + diffTracks;
                         const newTrack = this.editor.tracks[newTrackIndex];
+                        const newStart = this.performSnap(state.item.start + diffUnits);
+                        const newEnd = newStart + (state.item.end - state.item.start);
                         item.trackId = newTrack.id;
-                        item.move(state.item.start + diffUnits, state.item.end + diffUnits);
+                        item.move(newStart, newEnd);
                     });
                 }
             }
@@ -202,8 +210,16 @@ export default class Timeline extends Vue {
 
     onDragStart(draggedItem: Item, dragArea: ItemArea) {
         this.unselectAllItems();
+        draggedItem.selected = true;
         this.dragItem = draggedItem;
         this.dragArea = dragArea;
+        this.isDragging = true;
+        this.dragStartStates = this.editor.items
+            .filter((i) => i.selected)
+            .map((i) => ({
+                item: i.save(),
+                trackIndex: this.editor.tracks.findIndex((t) => t.id === i.trackId),
+            }));
     }
 
     onTrackMouseenter(track: Track): void {

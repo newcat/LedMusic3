@@ -6,8 +6,9 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import { Item } from "../model/item";
+import { ItemArea } from "../types";
 
 @Component
 export default class TimelineItem extends Vue {
@@ -28,8 +29,13 @@ export default class TimelineItem extends Vue {
         };
     }
 
-    dragStart(ev: MouseEvent) {
-        this.$emit("drag-start", this.item, ev.offsetX);
+    @Watch("item.selected")
+    cs() {
+        console.log(this.item.selected);
+    }
+
+    dragStart() {
+        this.$emit("drag-start", this.item, "center" as ItemArea);
     }
 }
 </script>

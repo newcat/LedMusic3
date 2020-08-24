@@ -56,7 +56,7 @@ export class Item {
         return this._trackId;
     }
     public set trackId(v: string) {
-        if (this.events.beforeTrackChanged.emit(v)) {
+        if (!this.events.beforeTrackChanged.emit(v)) {
             this._trackId = v;
             this.events.trackChanged.emit(v);
         }
@@ -66,7 +66,7 @@ export class Item {
         return this._selected;
     }
     public set selected(v: boolean) {
-        if (this.events.beforeSelectedChanged.emit(v)) {
+        if (!this.events.beforeSelectedChanged.emit(v)) {
             this._selected = v;
             this.events.selectedChanged.emit(v);
         }
@@ -76,7 +76,7 @@ export class Item {
         return this._resizable;
     }
     public set resizable(v: boolean) {
-        if (this.events.beforeResizableChanged.emit(v)) {
+        if (!this.events.beforeResizableChanged.emit(v)) {
             this._resizable = v;
             this.events.resizableChanged.emit(v);
         }
@@ -100,7 +100,7 @@ export class Item {
     }
 
     public move(start: number, end: number) {
-        if (this.events.beforeMoved.emit({ start, end })) {
+        if (!this.events.beforeMoved.emit({ start, end })) {
             this._start = start;
             this._end = end;
             this.events.moved.emit({ start, end });

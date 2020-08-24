@@ -8,7 +8,6 @@ export * from "./model";
 
 export class TimelineEditor extends Editor {
     snapUnits = TICKS_PER_BEAT / 2;
-    ignoreSnap = false;
 
     constructor() {
         super();
@@ -27,31 +26,6 @@ export class TimelineEditor extends Editor {
                 }
             }
 
-            i.events.beforeMoved.addListener(this, (newPos) => {
-                const startChanged = newPos.start !== i.start;
-                const endChanged = newPos.end !== i.end;
-                if (startChanged && endChanged) {
-                    // item was moved, not resized. Make sure, the overall length stays the same
-                    const snappedStart = this.snap(newPos.start);
-                    if (snappedStart !== newPos.start) {
-                        i.move(snappedStart, snappedStart + (newPos.end - newPos.start));
-                        return false;
-                    }
-                } else if (startChanged) {
-                    const snappedStart = this.snap(newPos.start);
-                    if (snappedStart !== newPos.start) {
-                        i.move(snappedStart, newPos.end);
-                        return false;
-                    }
-                } else if (endChanged) {
-                    const snappedEnd = this.snap(newPos.end);
-                    if (snappedEnd !== newPos.end) {
-                        i.move(newPos.start, snappedEnd);
-                        return false;
-                    }
-                }
-            });
-
             i.hooks.save.tap(this, (state) => {
                 if (state.data && state.data.libraryItem) {
                     const libItem = state.data.libraryItem as LibraryItem;
@@ -63,7 +37,6 @@ export class TimelineEditor extends Editor {
         });
 
         this.events.itemRemoved.addListener(this, (i) => {
-            i.events.beforeMoved.removeListener(this);
             i.hooks.save.untap(this);
         });
 
@@ -78,18 +51,9 @@ export class TimelineEditor extends Editor {
         return t;
     }
 
-    public snap(unit: number) {
-        if (this.ignoreSnap) {
-            return unit;
-        }
-        const mod = unit % this.snapUnits;
-        return mod <= this.snapUnits / 2 ? unit - mod : unit + this.snapUnits - mod;
-    }
-
     /** This function is called whenever the BPM is changed */
     private updateAudioItemLengths() {
         const bpm = globalState.bpm;
-        this.ignoreSnap = true;
         this.items.forEach((i) => {
             const libItem = i.data!.libraryItem as LibraryItem;
             if (libItem.type === LibraryItemType.AUDIO_FILE) {
@@ -101,6 +65,5 @@ export class TimelineEditor extends Editor {
                 i.move(i.start, i.start + length);
             }
         });
-        this.ignoreSnap = false;
     }
 }
