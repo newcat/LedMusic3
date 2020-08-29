@@ -8,8 +8,8 @@
         v-select(:value="snapUnits", @input="setSnap", :items="snapItems", style="max-width: 12em;", dense, flat, solo, hide-details, prepend-icon="straighten")
         v-divider.mx-4(vertical)
         v-text-field(:value="bpm", @input="setBpm", label="BPM", style="max-width: 6em;", dense, flat, solo, hide-details, prepend-icon="speed")
-    #wrapper
-        timeline-base(:snap="parseInt(snapUnits)", @drop="drop", @dragover="$event.preventDefault()")
+    #wrapper(@drop="drop", @dragover="$event.preventDefault()")
+        timeline-base(:snap="parseInt(snapUnits)")
 </template>
 
 <script lang="ts">

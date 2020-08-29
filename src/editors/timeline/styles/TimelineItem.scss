@@ -5,7 +5,7 @@
     background-color: #888;
     border-radius: 3px;
     border: 2px solid transparent;
-    transition: transform 0.05s, width 0.05s, border-color 0.1s;
+    transition: border-color 0.1s;
 
     &:hover:not(.--selected) {
         border-color: lighten(#888, 20%);
@@ -13,6 +13,26 @@
 
     &.--selected {
         border-color: #1eb980;
+    }
+
+    & > .__drag-handle {
+        position: absolute;
+        height: 50%;
+        width: 6px;
+        top: 25%;
+        background-color: #1eb980;
+        cursor: col-resize;
+
+        &.--left {
+            left: -6px;
+            border-radius: 3px 0 0 3px;
+        }
+
+        &.--right {
+            right: -6px;
+            border-radius: 0 3px 3px 0;
+        }
+
     }
 
     .timeline-item__header {
@@ -29,11 +49,4 @@
         overflow: hidden;
     }
 
-    .__resizeHandle {
-        position: absolute;
-        right: 0;
-        width: 8px;
-        height: 100%;
-        cursor: col-resize;
-    }
 }

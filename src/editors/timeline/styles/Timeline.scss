@@ -9,6 +9,10 @@
     $rowHeight: 100px;
     $headerWidth: 200px;
 
+    &:focus {
+        outline: none;
+    }
+
     .--disable-child-pointer-events * {
         pointer-events: none;
     }

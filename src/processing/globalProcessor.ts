@@ -61,11 +61,9 @@ class GlobalProcessor {
         if (!globalState.isPlaying) {
             return;
         }
-        const start = performance.now();
         globalState.position = this.audioProcessor.updatePosition();
         this.timelineProcessor.process(globalState.position);
         this.events.tick.emit();
-        console.log(performance.now() - start);
         if (this.socket && this.sendTo > 0) {
             const arr = new Uint8Array(this.globalPreview.length * 3 + 1);
             arr[0] = this.globalPreview.length;

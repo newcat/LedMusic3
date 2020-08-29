@@ -1,11 +1,12 @@
 <template lang="pug">
-.timeline(:class="{ 'disable-child-pointer-events': isDragging }")
-    .__content(
-        tabindex="-1"
-        :style="contentStyles",
-        @mousedown="mousedown",
-        @mouseup="mouseup"
-        @keydown="keydown")
+.timeline(
+    :class="{ 'disable-child-pointer-events': isDragging }",
+    tabindex="-1",
+    @mousedown="mousedown",
+    @mouseup="mouseup"
+    @keydown="keydown")
+
+    .__content(:style="contentStyles",)
 
         .__header-row
             .__container
@@ -38,6 +39,7 @@ import TimelineItem from "./TimelineItem.vue";
 import MarkerLabel from "./MarkerLabel.vue";
 
 import "../styles/all.scss";
+import { globalProcessor } from "@/processing";
 
 @Component({
     components: { TimelineItem, MarkerLabel },
@@ -130,7 +132,7 @@ export default class Timeline extends Vue {
 
     mousedown(ev: MouseEvent) {
         const target = ev.target as HTMLElement | null;
-        if (target && !target.matches(".timeline-item")) {
+        if (target && !this.isSelfOrIsChildOf(target, ".timeline-item")) {
             this.unselectAllItems();
         }
         this.isDragging = true;
@@ -143,24 +145,37 @@ export default class Timeline extends Vue {
     }
 
     keydown(ev: KeyboardEvent) {
+        ev.preventDefault();
         if (ev.key === "Delete") {
             const itemsToDelete = this.editor.items.filter((i) => i.selected);
             itemsToDelete.forEach((i) => this.editor.removeItem(i));
+        } else if (ev.key === " ") {
+            if (globalState.isPlaying) {
+                globalProcessor.pause();
+            } else {
+                globalProcessor.play();
+            }
         }
     }
 
     onRowMouseMove(ev: MouseEvent) {
         const x = ev.clientX;
+        const diffUnits = Math.floor((x - this.dragStartPosition.x) / this.unitWidth);
         if (this.isDragging && this.dragItem) {
             if (this.dragArea === "leftHandle" || this.dragArea === "rightHandle") {
-                const unit = this.pixelToUnit(x);
-                const newStart = this.dragArea === "leftHandle" ? unit : this.dragItem.start;
-                const newEnd = this.dragArea === "rightHandle" ? unit : this.dragItem.end;
-                if (this.editor.validateItem()) {
-                    this.dragItem.move(newStart, newEnd);
-                }
+                this.dragStartStates.forEach((state) => {
+                    const newStart =
+                        this.dragArea === "leftHandle"
+                            ? this.performSnap(state.item.start + diffUnits)
+                            : state.item.start;
+                    const newEnd =
+                        this.dragArea === "rightHandle" ? this.performSnap(state.item.end + diffUnits) : state.item.end;
+                    const item = this.editor.items.find((i) => i.id === state.item.id);
+                    if (item) {
+                        item.move(newStart, newEnd);
+                    }
+                });
             } else if (this.dragArea === "center") {
-                const diffUnits = Math.floor((x - this.dragStartPosition.x) / this.unitWidth);
                 let diffTracks = 0;
                 if (this.dragStartTrack && this.hoveredTrack) {
                     const startTrackIndex = this.editor.tracks.indexOf(this.dragStartTrack);
@@ -209,7 +224,6 @@ export default class Timeline extends Vue {
     }
 
     onDragStart(draggedItem: Item, dragArea: ItemArea) {
-        this.unselectAllItems();
         draggedItem.selected = true;
         this.dragItem = draggedItem;
         this.dragArea = dragArea;
@@ -241,6 +255,19 @@ export default class Timeline extends Vue {
 
     pixelToUnit(pixel: number): number {
         return Math.floor(pixel / this.unitWidth);
+    }
+
+    isSelfOrIsChildOf(el: HTMLElement, selector: string) {
+        if (el.matches(selector)) {
+            return true;
+        }
+        while (!el.matches(".timeline") && !!el.parentElement) {
+            if (el.matches(selector)) {
+                return true;
+            }
+            el = el.parentElement;
+        }
+        return false;
     }
 }
 </script>
