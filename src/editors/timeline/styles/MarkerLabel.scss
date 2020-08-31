@@ -3,6 +3,7 @@
     top: 50%;
     left: 0;
     font-size: 0.7rem;
+    pointer-events: none;
 
     &.--major {
         color: darken(#fff, 30%);

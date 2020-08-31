@@ -6,9 +6,11 @@
     @mouseup="mouseup"
     @keydown="keydown")
 
-    .__content(:style="contentStyles",)
+    .__content(:style="contentStyles")
 
-        .__header-row
+        position-marker(:unitWidth="unitWidth", :headerWidth="headerWidth")
+
+        .__header-row(@click="onHeaderClick")
             .__container
                 marker-label(v-for="m in markers", :key="m.unit", :marker="m")
 
@@ -37,17 +39,20 @@ import { TICKS_PER_BEAT } from "@/constants";
 
 import TimelineItem from "./TimelineItem.vue";
 import MarkerLabel from "./MarkerLabel.vue";
+import PositionMarker from "./PositionMarker.vue";
 
 import "../styles/all.scss";
 import { globalProcessor } from "@/processing";
 
 @Component({
-    components: { TimelineItem, MarkerLabel },
+    components: { TimelineItem, MarkerLabel, PositionMarker },
 })
 export default class Timeline extends Vue {
     unitWidth = 1.5;
-    headerWidth = 50;
+    headerWidth = 200;
     lastItemEnd = 0;
+
+    unwatchFn!: () => void;
 
     isDragging = false;
     dragArea: ItemArea | "" = "";
@@ -108,6 +113,19 @@ export default class Timeline extends Vue {
         return markers;
     }
 
+    mounted() {
+        this.unwatchFn = this.$watch(
+            () => {
+                return this.editor.items.map((i) => i.end);
+            },
+            () => this.updateLastNoteEnd()
+        );
+    }
+
+    beforeDestroy() {
+        this.unwatchFn();
+    }
+
     getItemsForTrack(track: Track) {
         return this.editor ? this.editor.items.filter((i) => i.trackId === track.id) : [];
     }
@@ -118,7 +136,6 @@ export default class Timeline extends Vue {
         });
     }
 
-    @Watch("editor.items", { deep: true })
     @Watch("draggedItem")
     @Watch("resizedItem")
     updateLastNoteEnd() {
@@ -242,6 +259,12 @@ export default class Timeline extends Vue {
 
     onTrackMouseleave(): void {
         this.hoveredTrack = null;
+    }
+
+    onHeaderClick(ev: MouseEvent): void {
+        console.log(ev);
+        const tick = this.pixelToUnit(ev.offsetX);
+        globalState.position = tick;
     }
 
     performSnap(unit: number): number {
