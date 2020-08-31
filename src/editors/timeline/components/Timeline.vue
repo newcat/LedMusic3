@@ -262,9 +262,8 @@ export default class Timeline extends Vue {
     }
 
     onHeaderClick(ev: MouseEvent): void {
-        console.log(ev);
         const tick = this.pixelToUnit(ev.offsetX);
-        globalState.position = tick;
+        globalState.setPositionByUser(tick);
     }
 
     performSnap(unit: number): number {
