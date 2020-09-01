@@ -13,33 +13,6 @@ export class TimelineEditor extends Editor {
         super();
         this.addDefaultTrack();
         this.labelFunction = (u) => (u / (TICKS_PER_BEAT * 4)).toString();
-
-        this.events.itemAdded.addListener(this, (i) => {
-            if (i.data && i.data.libraryItemId) {
-                const libItem = globalState.library.getItemById(i.data.libraryItemId);
-                if (libItem) {
-                    i.data.libraryItem = libItem;
-                    delete i.data.libraryItemId;
-                } else {
-                    // tslint:disable-next-line: no-console
-                    console.warn(`[Timeline] Could not find library item with id ${i.data.libraryItemId}`);
-                }
-            }
-
-            i.hooks.save.tap(this, (state) => {
-                if (state.data && state.data.libraryItem) {
-                    const libItem = state.data.libraryItem as LibraryItem;
-                    delete state.data.libraryItem;
-                    state.data.libraryItemId = libItem.id;
-                }
-                return state;
-            });
-        });
-
-        this.events.itemRemoved.addListener(this, (i) => {
-            i.hooks.save.untap(this);
-        });
-
         observe(() => {
             this.updateAudioItemLengths();
         });
@@ -55,9 +28,8 @@ export class TimelineEditor extends Editor {
     private updateAudioItemLengths() {
         const bpm = globalState.bpm;
         this.items.forEach((i) => {
-            const libItem = i.data!.libraryItem as LibraryItem;
-            if (libItem.type === LibraryItemType.AUDIO_FILE) {
-                const af = libItem as AudioFile;
+            if (i.libraryItem.type === LibraryItemType.AUDIO_FILE) {
+                const af = i.libraryItem as AudioFile;
                 if (!af.audioBuffer) {
                     return;
                 }

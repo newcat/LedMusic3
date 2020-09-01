@@ -1,6 +1,7 @@
 import { Track, ITrackState } from "./track";
 import { Item, IItemState } from "./item";
 import { BaklavaEvent, PreventableBaklavaEvent } from "@baklavajs/events";
+import { LibraryModel } from "@/entities/library";
 
 export interface IEditorState {
     tracks: ITrackState[];
@@ -31,7 +32,7 @@ export class Editor {
         return this._items as ReadonlyArray<Item>;
     }
 
-    public load(state: IEditorState) {
+    public load(state: IEditorState, library: LibraryModel) {
         this.items.forEach((i) => this.removeItem(i));
         this.tracks.forEach((t) => this.removeTrack(t));
         for (const ts of state.tracks) {
@@ -39,7 +40,7 @@ export class Editor {
             this.addTrack(t);
         }
         // state.tracks.forEach((ts) => this.addTrack(Track.load(ts)));
-        state.items.forEach((is) => this.addItem(Item.load(is)));
+        state.items.forEach((is) => this.addItem(Item.load(is, library)));
     }
 
     public save(): IEditorState {

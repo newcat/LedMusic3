@@ -59,7 +59,7 @@ class State implements IState {
 
         this.library = new LibraryModel();
         this.library.events.itemRemoved.addListener(this, (item) => {
-            const itemsToRemove = this.timeline.items.filter((i) => i.data?.libraryItem === item);
+            const itemsToRemove = this.timeline.items.filter((i) => i.libraryItem === item);
             for (const i of itemsToRemove) {
                 this.timeline.removeItem(i);
             }
@@ -94,7 +94,7 @@ class State implements IState {
         const data = deserialize(serialized);
         this.scene = data.scene;
         this.library.load(data.library);
-        this.timeline.load(data.timeline);
+        this.timeline.load(data.timeline, this.library);
         this.bpm = data.bpm ?? defaults.bpm;
         this.fps = data.fps ?? defaults.fps;
     }

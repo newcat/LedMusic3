@@ -1,4 +1,6 @@
 .timeline-item {
+    display: flex;
+    flex-direction: column;
     position: absolute;
     height: calc(100% - 10px);
     top: 5px;
@@ -47,6 +49,12 @@
         text-overflow: ellipsis;
         white-space: nowrap;
         overflow: hidden;
+    }
+
+    & > .preview-container {
+        width: 100%;
+        overflow: hidden;
+        position: relative;
     }
 
 }

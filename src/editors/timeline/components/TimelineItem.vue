@@ -4,12 +4,24 @@
         .timeline-item__header-text {{ name }}
     .__drag-handle.--left(v-show="item.selected", @mousedown="dragStart('leftHandle')")
     .__drag-handle.--right(v-show="item.selected", @mousedown="dragStart('rightHandle')")
+    .preview-container(v-if="previewComponent")
+        component(:is="previewComponent", :item="item", :unitWidth="unitWidth")
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import { Item } from "../model/item";
 import { ItemArea } from "../types";
+import { LibraryItemType } from "@/entities/library";
+import AudioFile from "./itempreviews/AudioFile.vue";
+import { VueConstructor } from "vue";
+
+const ITEM_COMPONENT_MAPPING: Record<LibraryItemType, VueConstructor | null> = {
+    [LibraryItemType.AUDIO_FILE]: AudioFile,
+    [LibraryItemType.GRAPH]: null,
+    [LibraryItemType.AUTOMATION_CLIP]: null,
+    [LibraryItemType.NOTE_PATTERN]: null,
+};
 
 @Component
 export default class TimelineItem extends Vue {
@@ -20,7 +32,7 @@ export default class TimelineItem extends Vue {
     unitWidth!: number;
 
     get name() {
-        return this.item.data?.libraryItem?.name ?? "";
+        return this.item.libraryItem.name ?? "";
     }
 
     get styles() {
@@ -28,6 +40,10 @@ export default class TimelineItem extends Vue {
             transform: `translateX(${this.item.start * this.unitWidth}px)`,
             width: `${(this.item.end - this.item.start) * this.unitWidth}px`,
         };
+    }
+
+    get previewComponent() {
+        return ITEM_COMPONENT_MAPPING[this.item.libraryItem.type];
     }
 
     @Watch("item.selected")

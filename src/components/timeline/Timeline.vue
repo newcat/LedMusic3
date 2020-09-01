@@ -145,7 +145,7 @@ export default class Timeline extends Vue {
 
     private createItem(length: number, libraryItem: LibraryItem) {
         // set the track id to "" temporarily, we will determine the track later
-        const item = new Item("", 0, length, { libraryItem });
+        const item = new Item(libraryItem, "", 0, length);
         return item;
     }
 }

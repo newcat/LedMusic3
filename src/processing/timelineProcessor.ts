@@ -57,12 +57,8 @@ export class TimelineProcessor {
     }
 
     private activate(item: Item) {
-        if (!item.data || !item.data.libraryItem) {
-            return;
-        }
-        const libraryItem = item.data.libraryItem as LibraryItem;
-        if (libraryItem.type === LibraryItemType.AUDIO_FILE) {
-            const af = libraryItem as AudioFile;
+        if (item.libraryItem.type === LibraryItemType.AUDIO_FILE) {
+            const af = item.libraryItem as AudioFile;
             if (af.loading) {
                 af.events.loaded.addListener(this, () => {
                     af.events.loaded.removeListener(this);
@@ -85,12 +81,8 @@ export class TimelineProcessor {
     }
 
     private deactivate(item: Item) {
-        if (!item.data || !item.data.libraryItem) {
-            return;
-        }
-        const libraryItem = item.data.libraryItem as LibraryItem;
-        if (libraryItem.type === LibraryItemType.AUDIO_FILE) {
-            const af = libraryItem as AudioFile;
+        if (item.libraryItem.type === LibraryItemType.AUDIO_FILE) {
+            const af = item.libraryItem as AudioFile;
             item.events.moved.removeListener(this);
             item.events.beforeMoved.removeListener(this);
             this.audioProcessor.unregisterBuffer(af.audioBuffer!);
@@ -98,26 +90,22 @@ export class TimelineProcessor {
     }
 
     private isType(item: Item, type: LibraryItemType): boolean {
-        if (!item.data || !item.data.libraryItem) {
-            return false;
-        }
-        const libraryItem = item.data.libraryItem as LibraryItem;
-        return libraryItem.type === type;
+        return item.libraryItem.type === type;
     }
 
     private processGraph(item: Item, calculationData: ICalculationData): void {
-        const graph = item.data!.libraryItem as GraphLibraryItem;
+        const graph = item.libraryItem as GraphLibraryItem;
         graph.editor.enginePlugin.calculate(calculationData);
     }
 
     private processAutomationClip(unit: number, item: Item): void {
-        const ac = item.data!.libraryItem as AutomationClip;
+        const ac = item.libraryItem as AutomationClip;
         const value = ac.getValueAt(unit - item.start);
         this.trackValues.set(item.trackId, value);
     }
 
     private processNotePattern(unit: number, item: Item): void {
-        const np = item.data!.libraryItem as NotePattern;
+        const np = item.libraryItem as NotePattern;
         const notes = np.getNotesAt(unit - item.start);
         this.trackValues.set(item.trackId, notes);
     }
