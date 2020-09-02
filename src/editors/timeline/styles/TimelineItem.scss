@@ -8,6 +8,7 @@
     border-radius: 3px;
     border: 2px solid transparent;
     transition: border-color 0.1s;
+    z-index: 0;
 
     &:hover:not(.--selected) {
         border-color: lighten(#888, 20%);
@@ -15,6 +16,7 @@
 
     &.--selected {
         border-color: #1eb980;
+        z-index: 1;
     }
 
     & > .__drag-handle {
@@ -44,6 +46,7 @@
 
     .timeline-item__header-text {
         color: white;
+        font-size: 0.75rem;
         padding: 0.1rem;
         margin-left: 5px;
         text-overflow: ellipsis;

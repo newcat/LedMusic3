@@ -4,7 +4,8 @@
     tabindex="-1",
     @mousedown="mousedown",
     @mouseup="mouseup"
-    @keydown="keydown")
+    @keydown="keydown"
+    @keyup="keyup")
 
     .__content(:style="contentStyles")
 
@@ -54,6 +55,7 @@ export default class Timeline extends Vue {
 
     unwatchFn!: () => void;
 
+    ctrlPressed = false;
     isDragging = false;
     dragArea: ItemArea | "" = "";
     dragItem: Item | null = null;
@@ -172,6 +174,16 @@ export default class Timeline extends Vue {
             } else {
                 globalProcessor.play();
             }
+        } else if (ev.key === "Control") {
+            console.log("CTRL");
+            this.ctrlPressed = true;
+        }
+    }
+
+    keyup(ev: KeyboardEvent) {
+        ev.preventDefault();
+        if (ev.key === "Control") {
+            this.ctrlPressed = false;
         }
     }
 
@@ -213,34 +225,23 @@ export default class Timeline extends Vue {
                     }
                 });
 
-                // validate all items
-                // TODO: Dont validate items one after another!
-                let valid = true;
                 this.dragStartStates.forEach((state) => {
                     const item = this.editor.items.find((j) => j.id === state.item.id)!;
                     const newTrackIndex = state.trackIndex + diffTracks;
                     const newTrack = this.editor.tracks[newTrackIndex];
-                    if (!this.editor.validateItem()) {
-                        valid = false;
-                    }
+                    const newStart = this.performSnap(state.item.start + diffUnits);
+                    const newEnd = newStart + (state.item.end - state.item.start);
+                    item.trackId = newTrack.id;
+                    item.move(newStart, newEnd);
                 });
-
-                if (valid) {
-                    this.dragStartStates.forEach((state) => {
-                        const item = this.editor.items.find((j) => j.id === state.item.id)!;
-                        const newTrackIndex = state.trackIndex + diffTracks;
-                        const newTrack = this.editor.tracks[newTrackIndex];
-                        const newStart = this.performSnap(state.item.start + diffUnits);
-                        const newEnd = newStart + (state.item.end - state.item.start);
-                        item.trackId = newTrack.id;
-                        item.move(newStart, newEnd);
-                    });
-                }
             }
         }
     }
 
     onDragStart(draggedItem: Item, dragArea: ItemArea) {
+        if (!this.ctrlPressed) {
+            this.unselectAllItems();
+        }
         draggedItem.selected = true;
         this.dragItem = draggedItem;
         this.dragArea = dragArea;

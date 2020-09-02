@@ -6,15 +6,15 @@ v-dialog(:value="value", @input="$emit('input', $event)" max-width="400")
         
         v-card-text
             
-            .my-3(v-for="item in items", :key="item.id")
-                .d-flex.align-items-center
-                    .mr-2
-                        v-progress-circular(v-if="item.loading", indeterminate, color="green", :size="25", :width="2")
-                        v-icon(v-else-if="item.error", color="red") close
-                        v-icon(v-else, color="green") check
-                    div
-                        div {{ item.name }}
-                        v-btn(v-if="isAudioItem(item) && item.error", @click="replaceAudioFile(item)", x-small, outlined) Choose File
+            template(v-for="item in items")
+                .my-3(v-if="item.loading || item.error", :key="item.id")
+                    .d-flex.align-items-center
+                        .mr-2
+                            v-progress-circular(v-if="item.loading", indeterminate, color="green", :size="25", :width="2")
+                            v-icon(v-else-if="item.error", color="red") close
+                        div
+                            div {{ item.name }}
+                            v-btn(v-if="isAudioItem(item) && item.error", @click="replaceAudioFile(item)", x-small, outlined) Choose File
 
         v-card-actions
             v-spacer
