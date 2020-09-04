@@ -36,7 +36,6 @@ export default class SpectrumOption extends Vue {
 
         const barWidth = width / this.value.length;
 
-        console.log(this.value);
         this.value.forEach((v, i) => {
             const b = 255 * v;
             this.ctx.fillStyle = `rgb(${b}, ${b}, ${b})`;

@@ -17,22 +17,33 @@ v-card(flat)
                 v-list-item(@click="addNotePattern")
                     v-list-item-title Note Pattern
 
-    v-container(fluid, style="height: calc(100% - 48px); overflow-y: auto;", grid-list-md)
-        .library-grid
-            v-card.pa-3(
-                v-for="(item, i) in items", :key="i",
-                outlined, draggable, color="#424250",
-                @dragstart="dragstart($event, item.id)",
-                @dblclick="openItemSettings(item)"
-            )
-                .library-item
-                    div.mb-2
-                        v-progress-circular(v-if="item.loading", indeterminate, color="primary")
-                        v-icon(v-else) {{ getIcon(item) }}
+    v-treeview(
+        :active="!!activeItem ? [activeItem.id] : []",
+        :items="items",
+        @update:active="onActiveItemChanged"
+        open-all,
+        open-on-click,
+        activatable)
+
+        template(v-slot:prepend="{ item }")
+            v-progress-circular(v-if="item.rawItem && item.rawItem.loading", :size="24", :width="2" indeterminate, color="primary")
+            v-icon(v-else) {{ item.icon || getIcon(item.rawItem) }}
+
+        template(v-slot:label="{ item }")
+            .v-treeview-node__label(
+                :draggable="item.rawItem",
+                @dragstart="dragstart($event, item.rawItem)")
                     | {{ item.name }}
 
+        template(v-slot:append="{ item }")
+            div(v-if="!item.id.startsWith('_folder') && activeItem === item")
+                v-btn(icon, @click.stop="settingsOpen = true")
+                    v-icon edit
+                v-btn(icon, @click.stop="deleteItem(item.rawItem)")
+                    v-icon delete
+
     input(ref="fileinput", type="file", @change="loadAudio", style="display: none;")
-    item-settings(v-model="settingsOpen", :item="settingsItem")
+    item-settings(v-model="settingsOpen", :item="activeItem")
 </template>
 
 <script lang="ts">
@@ -48,6 +59,14 @@ import {
 import { globalState } from "@/entities/globalState";
 import ItemSettings from "./LibraryItemSettings.vue";
 
+interface ITreeNode {
+    id: string;
+    name: string;
+    icon?: string;
+    children?: ITreeNode[];
+    rawItem?: LibraryItem;
+}
+
 @Component({
     components: { ItemSettings },
 })
@@ -55,9 +74,45 @@ export default class Library extends Vue {
     globalState = globalState;
     settingsOpen = false;
     settingsItem: LibraryItem | null = null;
+    activeItem: LibraryItem | null = null;
 
     get items() {
-        return this.globalState.library.items;
+        const audioFiles: ITreeNode = { id: "_folder_af", name: "Audio Files", icon: "library_music", children: [] };
+        const graphs: ITreeNode = { id: "_folder_graphs", name: "Graphs", icon: "device_hub", children: [] };
+        const automationClips: ITreeNode = {
+            id: "_folder_ac",
+            name: "Automation Clips",
+            icon: "timeline",
+            children: [],
+        };
+        const notePatterns: ITreeNode = { id: "_folder_np", name: "Note Patterns", icon: "queue_music", children: [] };
+        this.globalState.library.items.forEach((item) => {
+            const itemData = { id: item.id, name: item.name, rawItem: item };
+            switch (item.type) {
+                case LibraryItemType.AUDIO_FILE:
+                    audioFiles.children!.push(itemData);
+                    break;
+                case LibraryItemType.GRAPH:
+                    graphs.children!.push(itemData);
+                    break;
+                case LibraryItemType.AUTOMATION_CLIP:
+                    automationClips.children!.push(itemData);
+                    break;
+                case LibraryItemType.NOTE_PATTERN:
+                    notePatterns.children!.push(itemData);
+                    break;
+            }
+        });
+        return [audioFiles, graphs, automationClips, notePatterns];
+    }
+
+    public onActiveItemChanged(newActiveItems: string[]) {
+        if (newActiveItems.length === 0 || newActiveItems[0].startsWith("_folder")) {
+            this.activeItem === null;
+        } else {
+            this.activeItem = this.globalState.library.getItemById(newActiveItems[0]) ?? null;
+        }
+        this.$emit("item-selected", this.activeItem);
     }
 
     public openFileDialog() {
@@ -76,8 +131,10 @@ export default class Library extends Vue {
         await item.load();
     }
 
-    public dragstart(ev: DragEvent, id: string) {
-        ev.dataTransfer!.setData("id", id);
+    public dragstart(ev: DragEvent, item?: LibraryItem) {
+        if (item) {
+            ev.dataTransfer!.setData("id", item.id);
+        }
     }
 
     public getIcon(item: LibraryItem) {
@@ -110,29 +167,8 @@ export default class Library extends Vue {
         this.globalState.library.addItem(new NotePattern());
     }
 
-    public openItemSettings(item: LibraryItem) {
-        this.settingsItem = item;
-        this.settingsOpen = true;
+    public deleteItem(item: LibraryItem) {
+        this.globalState.library.removeItem(item);
     }
 }
 </script>
-
-<style scoped>
-.library-grid {
-    display: grid;
-    grid-gap: 10px;
-    grid-auto-flow: row;
-    grid-auto-rows: 1fr;
-    grid-template-columns: repeat(3, 1fr);
-}
-
-.library-item {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    align-items: center;
-    text-align: center;
-    height: 100%;
-    min-height: 4em;
-}
-</style>

@@ -100,7 +100,6 @@ export class AudioProcessor {
             this.destroySource(this.tracks[i].source);
             this.tracks.splice(i, 1);
         } else {
-            // tslint:disable-next-line:no-console
             console.warn("Buffer not found");
         }
     }
@@ -111,7 +110,6 @@ export class AudioProcessor {
         source.connect(this.analyserNode);
         const offset = this.unitToSeconds(globalState.position - startUnit);
         if (offset < 0) {
-            // tslint:disable-next-line:no-console
             console.warn("Source offset < 0");
         }
         source.start(0, Math.max(offset, 0));

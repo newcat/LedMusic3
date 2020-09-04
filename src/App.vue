@@ -9,19 +9,15 @@ v-app
                 @saveAs="saveAs",
                 @showSettings="showSettings = true"
             )
-            split-pane(split="horizontal")
+            split-pane(split="vertical", :min-percent='10', :default-percent='20')
                 template(slot="paneL")
-                    split-pane(split="vertical")
-                        template(slot="paneL")
-                            split-pane(split="horizontal")
-                                template(slot="paneL")
-                                    c-library.fill-height
-                                template(slot="paneR")
-                                    c-graph.fill-height
-                        template(slot="paneR")
-                            c-note-editor.fill-height
+                    c-library.fill-height
                 template(slot="paneR")
-                    c-timeline
+                    split-pane(split="horizontal")
+                        template(slot="paneL")
+                            c-graph.fill-height
+                        template(slot="paneR")
+                            c-timeline
             c-global-preview
     c-settings(v-model="showSettings")
     c-loading-dialog(v-model="showLoadingDialog")

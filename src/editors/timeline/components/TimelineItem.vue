@@ -48,11 +48,6 @@ export default class TimelineItem extends Vue {
         return ITEM_COMPONENT_MAPPING[this.item.libraryItem.type];
     }
 
-    @Watch("item.selected")
-    cs() {
-        console.log(this.item.selected);
-    }
-
     dragStart(area: ItemArea) {
         this.$emit("drag-start", this.item, area);
     }

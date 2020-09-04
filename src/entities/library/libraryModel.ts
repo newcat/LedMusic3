@@ -52,7 +52,6 @@ export class LibraryModel {
                     libItem = new NotePattern();
                     break;
                 default:
-                    // tslint:disable-next-line: no-console
                     console.warn(`Unknown library type: ${type}`);
             }
 

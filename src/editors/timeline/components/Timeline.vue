@@ -175,7 +175,6 @@ export default class Timeline extends Vue {
                 globalProcessor.play();
             }
         } else if (ev.key === "Control") {
-            console.log("CTRL");
             this.ctrlPressed = true;
         }
     }

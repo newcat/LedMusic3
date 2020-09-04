@@ -34,11 +34,15 @@ export class AudioFile extends LibraryItem {
             this.error = true;
             return;
         }
+        console.log("Reading Data");
         const rawData = await promisify(readFile)(this.path);
 
+        console.log("Creating Offline Context with sample rate", AudioFile.sampleRate);
         const offlineAudioContext = new OfflineAudioContext(1, 2, AudioFile.sampleRate);
+        console.log("Decoding...")
         this.audioBuffer = await offlineAudioContext.decodeAudioData(rawData.buffer);
 
+        console.log("Creating waveform");
         const worker = new WaveformWorker();
         const samples = this.audioBuffer.getChannelData(0);
         worker.postMessage({ samples, sampleRate: AudioFile.sampleRate, resolution: 256 }, [samples.buffer]);
