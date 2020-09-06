@@ -26,20 +26,21 @@ v-card(flat)
         activatable)
 
         template(v-slot:prepend="{ item }")
-            v-progress-circular(v-if="item.rawItem && item.rawItem.loading", :size="24", :width="2" indeterminate, color="primary")
-            v-icon(v-else) {{ item.icon || getIcon(item.rawItem) }}
+            v-progress-circular(v-if="item.loading", :size="24", :width="2" indeterminate, color="primary")
+            v-icon(v-else-if="item.error") warning
+            v-icon(v-else) {{ item.icon || getIcon(item.type) }}
 
         template(v-slot:label="{ item }")
             .v-treeview-node__label(
-                :draggable="item.rawItem",
-                @dragstart="dragstart($event, item.rawItem)")
+                :draggable="!item.id.startsWith('_folder')",
+                @dragstart="dragstart($event, item.id)")
                     | {{ item.name }}
 
         template(v-slot:append="{ item }")
-            div(v-if="!item.id.startsWith('_folder') && activeItem === item")
+            div(v-if="activeItem && activeItem.id === item.id")
                 v-btn(icon, @click.stop="settingsOpen = true")
                     v-icon edit
-                v-btn(icon, @click.stop="deleteItem(item.rawItem)")
+                v-btn(icon, @click.stop="deleteItem(item.id)")
                     v-icon delete
 
     input(ref="fileinput", type="file", @change="loadAudio", style="display: none;")
@@ -64,7 +65,9 @@ interface ITreeNode {
     name: string;
     icon?: string;
     children?: ITreeNode[];
-    rawItem?: LibraryItem;
+    loading?: boolean;
+    error?: boolean;
+    type?: LibraryItemType;
 }
 
 @Component({
@@ -87,7 +90,13 @@ export default class Library extends Vue {
         };
         const notePatterns: ITreeNode = { id: "_folder_np", name: "Note Patterns", icon: "queue_music", children: [] };
         this.globalState.library.items.forEach((item) => {
-            const itemData = { id: item.id, name: item.name, rawItem: item };
+            const itemData = {
+                id: item.id,
+                name: item.name,
+                type: item.type,
+                loading: item.loading,
+                error: item.error,
+            };
             switch (item.type) {
                 case LibraryItemType.AUDIO_FILE:
                     audioFiles.children!.push(itemData);
@@ -108,7 +117,7 @@ export default class Library extends Vue {
 
     public onActiveItemChanged(newActiveItems: string[]) {
         if (newActiveItems.length === 0 || newActiveItems[0].startsWith("_folder")) {
-            this.activeItem === null;
+            this.activeItem = null;
         } else {
             this.activeItem = this.globalState.library.getItemById(newActiveItems[0]) ?? null;
         }
@@ -131,17 +140,12 @@ export default class Library extends Vue {
         await item.load();
     }
 
-    public dragstart(ev: DragEvent, item?: LibraryItem) {
-        if (item) {
-            ev.dataTransfer!.setData("id", item.id);
-        }
+    public dragstart(ev: DragEvent, itemId: string) {
+        ev.dataTransfer!.setData("id", itemId);
     }
 
-    public getIcon(item: LibraryItem) {
-        if (item.error) {
-            return "warning";
-        }
-        switch (item.type) {
+    public getIcon(type: LibraryItemType) {
+        switch (type) {
             case LibraryItemType.AUDIO_FILE:
                 return "library_music";
             case LibraryItemType.GRAPH:
@@ -167,8 +171,8 @@ export default class Library extends Vue {
         this.globalState.library.addItem(new NotePattern());
     }
 
-    public deleteItem(item: LibraryItem) {
-        this.globalState.library.removeItem(item);
+    public deleteItem(id: string) {
+        this.globalState.library.removeItem(this.globalState.library.getItemById(id)!);
     }
 }
 </script>

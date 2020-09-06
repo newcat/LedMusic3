@@ -72,6 +72,7 @@ export class AudioProcessor {
         this.tracks = [];
         this.gainNode.disconnect();
         this.analyserNode.disconnect();
+        this.audioContext.close();
     }
 
     public updatePosition(): number {
