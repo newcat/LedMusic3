@@ -7,7 +7,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
-import ColorPicker from "@/components/ColorPicker.vue";
+import ColorPicker from "./ColorPicker.vue";
 import { fromChroma, Color, chroma, toChroma } from "../colors";
 
 @Component({

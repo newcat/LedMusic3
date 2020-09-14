@@ -1,6 +1,7 @@
 use super::colors::Color;
-use palette::{Blend, Lab, LinSrgb, Mix, Shade};
-use rand::prelude::*;
+use palette::{Blend, Hsv, LinSrgb, Mix};
+use rand::rngs::SmallRng;
+use rand::{Rng, SeedableRng};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -28,6 +29,7 @@ pub struct ParticleNode {
     particles: Vec<Particle>,
     particles_to_spawn: f32,
     output_buffer: Vec<Color>,
+    rng: SmallRng,
 }
 
 #[wasm_bindgen]
@@ -114,6 +116,7 @@ impl ParticleNode {
             particles: Vec::new(),
             particles_to_spawn: 0.0,
             output_buffer: Vec::new(),
+            rng: SmallRng::from_entropy(),
         }
     }
 
@@ -129,15 +132,13 @@ impl ParticleNode {
             let start_color = color_to_linsrgb(&p.start_color);
             let end_color = color_to_linsrgb(&p.end_color);
             let mixed_color = rgb_to_color(start_color.mix(&end_color, life_progress));
-            p.color[0] = mixed_color[0];
-            p.color[1] = mixed_color[1];
-            p.color[2] = mixed_color[2];
+            p.color = mixed_color;
             p.position += p.start_velocity + (p.end_velocity - p.start_velocity) * life_progress;
         }
 
         if calculation_data.emit {
             let rate = calculation_data.rate / calculation_data.fps as f32;
-            // let randomness = calculation_data.randomness / calculation_data.fps as f32;
+            let randomness = calculation_data.randomness / calculation_data.fps as f32;
             let start_velocity = calculation_data.start_velocity / calculation_data.fps as f32;
             let end_velocity = calculation_data.end_velocity / calculation_data.fps as f32;
             let lifetime_in_frames =
@@ -150,8 +151,8 @@ impl ParticleNode {
                     current_lifetime: 0,
                     position: calculation_data.emitter_position,
                     glow: calculation_data.glow,
-                    start_velocity: start_velocity, // + (2.0 * random::<f32>() - 1.0) * randomness,
-                    end_velocity: end_velocity,     // + (2.0 * random::<f32>() - 1.0) * randomness,
+                    start_velocity: start_velocity + (2.0 * self.rng.gen::<f32>() - 1.0) * randomness,
+                    end_velocity: end_velocity + (2.0 * self.rng.gen::<f32>() - 1.0) * randomness,
                     color: calculation_data.start_color,
                     start_color: calculation_data.start_color,
                     end_color: calculation_data.end_color,
@@ -190,17 +191,15 @@ impl ParticleNode {
                 calculation_data.resolution as i32 - 1,
             ) as usize;
             let particle_color = color_to_linsrgb(&p.color);
-            let lab = Lab::from(particle_color);
+            let hsv = Hsv::from(particle_color);
             for i in start..end {
                 let pos = i as f32 / calculation_data.resolution as f32;
                 let intensity = clamp(linear_intensity(p.position, pos, p.glow), 0.0, 1.0);
-                let darkened = lab.darken(1.0 - intensity);
+                let mut darkened = hsv.clone();
+                darkened.value *= intensity;
                 let buffer_color = color_to_linsrgb(&self.output_buffer[i]);
-                let components =
-                    LinSrgb::from(buffer_color.overlay(LinSrgb::from(darkened))).into_components();
-                self.output_buffer[i][0] = (components.0 * 255.0) as u8;
-                self.output_buffer[i][1] = (components.1 * 255.0) as u8;
-                self.output_buffer[i][2] = (components.2 * 255.0) as u8;
+                let result_color = rgb_to_color(LinSrgb::from(buffer_color.dodge(LinSrgb::from(darkened))));
+                self.output_buffer[i] = result_color;
             }
         }
     }

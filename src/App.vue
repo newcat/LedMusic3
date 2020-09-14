@@ -11,11 +11,11 @@ v-app
             )
             split-pane(split="vertical", :min-percent='10', :default-percent='20')
                 template(slot="paneL")
-                    c-library.fill-height
+                    c-library.fill-height(@item-selected="onItemSelected")
                 template(slot="paneR")
                     split-pane(split="horizontal")
                         template(slot="paneL")
-                            c-graph.fill-height
+                            c-unified-editor(:selectedItemId="selectedLibraryItemId").fill-height
                         template(slot="paneR")
                             c-timeline
             c-global-preview
@@ -25,30 +25,31 @@ v-app
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-
-import CLibrary from "@/components/Library.vue";
-import CTimeline from "@/components/timeline/Timeline.vue";
-import CGraph from "@/components/Graph.vue";
-import CNoteEditor from "@/components/NoteEditor.vue";
-import CSettings from "@/components/Settings.vue";
-import CToolbar from "@/components/Toolbar.vue";
-import CLoadingDialog from "@/components/loading/LoadingDialog.vue";
-import CGlobalPreview from "@/components/GlobalPreview.vue";
-import { globalState } from "@/entities/globalState";
-
 import { remote } from "electron";
 import { readFile, writeFile } from "fs";
 import { promisify } from "util";
+
+import CLibrary from "@/components/Library.vue";
+import CSettings from "@/components/Settings.vue";
+import CToolbar from "@/components/Toolbar.vue";
+import CLoadingDialog from "@/components/LoadingDialog.vue";
+import CGlobalPreview from "@/components/GlobalPreview.vue";
+import CUnifiedEditor from "@/editors/UnifiedEditor.vue";
+import CTimeline from "@/editors/timeline/Timeline.vue";
+
+import { globalState } from "@/entities/globalState";
+import { LibraryItem } from "@/entities/library";
 
 const readFileP = promisify(readFile);
 const writeFileP = promisify(writeFile);
 
 @Component({
-    components: { CLibrary, CTimeline, CGraph, CNoteEditor, CSettings, CToolbar, CLoadingDialog, CGlobalPreview },
+    components: { CLibrary, CTimeline, CUnifiedEditor, CSettings, CToolbar, CLoadingDialog, CGlobalPreview },
 })
 export default class App extends Vue {
     showSettings = false;
     showLoadingDialog = false;
+    selectedLibraryItemId = "";
 
     created(): void {
         this.newProject();
@@ -56,6 +57,14 @@ export default class App extends Vue {
 
     newProject(): void {
         globalState.reset();
+    }
+
+    onItemSelected(item: LibraryItem | undefined) {
+        if (item) {
+            this.selectedLibraryItemId = item.id;
+        } else {
+            this.selectedLibraryItemId = "";
+        }
     }
 
     async load(): Promise<void> {
