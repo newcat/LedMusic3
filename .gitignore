@@ -27,3 +27,5 @@ yarn-error.log*
 /public/beat.mp3
 #Electron-builder output
 /dist_electron
+/src/rust/pkg
+/src/rust/target

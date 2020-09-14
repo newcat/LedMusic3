@@ -14,6 +14,9 @@ Vue.component("SplitPane", splitPane);
 import "./styles/all.scss";
 import vuetify from "./plugins/vuetify";
 
+import { wasmInterop } from "./wasmInterop";
+wasmInterop.init();
+
 new (Vue as any)({
     vuetify,
     render: (h: any) => h(App),

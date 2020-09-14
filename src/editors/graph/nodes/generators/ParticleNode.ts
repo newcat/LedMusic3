@@ -1,6 +1,7 @@
 import { Node } from "@baklavajs/core";
 import { Color, mix, blend, darken } from "../../colors";
 import { ICalculationData } from "../../types";
+import { wasmInterop } from "@/wasmInterop";
 
 interface IParticle {
     currentLifetime: number;
@@ -20,6 +21,9 @@ export class ParticleNode extends Node {
 
     private particles: IParticle[] = [];
     private particlesToSpawn = 0.0;
+    private wasmParticleNode = new wasmInterop.wasmModule.ParticleNode();
+    private calcSum = 0;
+    private calcIt = 0;
 
     constructor() {
         super();
@@ -40,6 +44,59 @@ export class ParticleNode extends Node {
     }
 
     public calculate(data: ICalculationData) {
+        const start = performance.now();
+        // this.calculateJs(data);
+        this.calculateWasm(data);
+        this.calcSum += performance.now() - start;
+        this.calcIt++;
+        if (this.calcIt >= 100) {
+            console.log("Took ", this.calcSum / this.calcIt);
+            this.calcSum = 0;
+            this.calcIt = 0;
+        }
+        // ~4ms JS, ~0.17ms Rust with opt-level=4 and lto=true
+    }
+
+    public calculateWasm(data: ICalculationData) {
+        const { fps, resolution } = data;
+        const emit = this.getInterface("Emit").value;
+        const rate = this.getInterface("Rate").value;
+        const randomness = this.getInterface("Randomness").value;
+        const glow = this.getInterface("Glow").value;
+        const startVelocity = this.getInterface("Start Velocity").value;
+        const endVelocity = this.getInterface("End Velocity").value;
+        const emitterPosition = this.getInterface("Emitter Position").value;
+        const symmetric = this.getInterface("Symmetric").value;
+        const lifetimeInFrames = this.getInterface("Lifetime").value;
+        const startColor = this.getInterface("Start Color").value;
+        const endColor = this.getInterface("End Color").value;
+        const calculationData = new wasmInterop.wasmModule.CalculationData(
+            fps,
+            resolution,
+            emit,
+            rate,
+            startVelocity,
+            endVelocity,
+            randomness,
+            glow,
+            emitterPosition,
+            symmetric,
+            lifetimeInFrames,
+            startColor,
+            endColor
+        );
+        this.wasmParticleNode.calculate(calculationData);
+        calculationData.free();
+
+        const flattenedOutputBuffer = this.wasmParticleNode.get_output_buffer();
+        const output = [];
+        for (let i = 0; i < flattenedOutputBuffer.length; i += 3) {
+            output.push([flattenedOutputBuffer[i], flattenedOutputBuffer[i + 1], flattenedOutputBuffer[i + 2]]);
+        }
+        this.getInterface("Output").value = output;
+    }
+
+    public calculateJs(data: ICalculationData) {
         const { fps, resolution } = data;
 
         this.particles.forEach((p) => p.currentLifetime++);
