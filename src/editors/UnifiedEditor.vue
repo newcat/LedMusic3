@@ -6,6 +6,7 @@ v-card.d-flex.flex-column(flat)
             small(v-if="selectedItem") &nbsp; ({{ selectedItem.name }})
     baklava-editor(v-if="isGraph", :plugin="selectedItem.editor.viewPlugin", :key="selectedItemId")
     note-editor(v-else-if="isNotePattern", :notePattern="selectedItem", :key="selectedItemId")
+    automation-editor(v-else-if="isAutomationClip", :automationClip="selectedItem", :key="selectedItemId")
 </template>
 
 <script lang="ts">
@@ -13,9 +14,10 @@ import { Component, Prop, Vue } from "vue-property-decorator";
 import { globalState } from "@/entities/globalState";
 import { LibraryItemType } from "@/entities/library";
 import NoteEditor from "./note/NoteEditor.vue";
+import AutomationEditor from "./automation/AutomationEditor.vue";
 
 @Component({
-    components: { NoteEditor },
+    components: { NoteEditor, AutomationEditor },
 })
 export default class Graph extends Vue {
     @Prop({ type: String, default: "" })
