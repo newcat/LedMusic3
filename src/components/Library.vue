@@ -49,15 +49,12 @@ v-card(flat)
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import {
-    AudioFile,
-    AutomationClip,
-    GraphLibraryItem,
-    LibraryItemType,
-    LibraryItem,
-    NotePattern,
-} from "@/entities/library";
-import { globalState } from "@/entities/globalState";
+import { AudioLibraryItem } from "@/audio";
+import { AutomationLibraryItem } from "@/automation";
+import { GraphLibraryItem } from "@/graph";
+import { PatternLibraryItem } from "@/pattern";
+import { LibraryItemType, LibraryItem } from "@/library";
+import { globalState } from "@/globalState";
 import ItemSettings from "./LibraryItemSettings.vue";
 
 interface ITreeNode {
@@ -98,16 +95,16 @@ export default class Library extends Vue {
                 error: item.error,
             };
             switch (item.type) {
-                case LibraryItemType.AUDIO_FILE:
+                case LibraryItemType.AUDIO:
                     audioFiles.children!.push(itemData);
                     break;
                 case LibraryItemType.GRAPH:
                     graphs.children!.push(itemData);
                     break;
-                case LibraryItemType.AUTOMATION_CLIP:
+                case LibraryItemType.AUTOMATION:
                     automationClips.children!.push(itemData);
                     break;
-                case LibraryItemType.NOTE_PATTERN:
+                case LibraryItemType.PATTERN:
                     notePatterns.children!.push(itemData);
                     break;
             }
@@ -133,7 +130,7 @@ export default class Library extends Vue {
         if (!f || f.length === 0) {
             return;
         }
-        const item = new AudioFile();
+        const item = new AudioLibraryItem();
         item.name = f[0].name;
         item.path = f[0].path;
         this.globalState.library.addItem(item);
@@ -146,13 +143,13 @@ export default class Library extends Vue {
 
     public getIcon(type: LibraryItemType) {
         switch (type) {
-            case LibraryItemType.AUDIO_FILE:
+            case LibraryItemType.AUDIO:
                 return "library_music";
             case LibraryItemType.GRAPH:
                 return "device_hub";
-            case LibraryItemType.AUTOMATION_CLIP:
+            case LibraryItemType.AUTOMATION:
                 return "timeline";
-            case LibraryItemType.NOTE_PATTERN:
+            case LibraryItemType.PATTERN:
                 return "queue_music";
             default:
                 return "note";
@@ -164,11 +161,11 @@ export default class Library extends Vue {
     }
 
     public addAutomationClip() {
-        this.globalState.library.addItem(new AutomationClip());
+        this.globalState.library.addItem(new AutomationLibraryItem());
     }
 
     public addNotePattern() {
-        this.globalState.library.addItem(new NotePattern());
+        this.globalState.library.addItem(new PatternLibraryItem());
     }
 
     public deleteItem(id: string) {

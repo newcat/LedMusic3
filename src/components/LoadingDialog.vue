@@ -22,11 +22,13 @@ v-dialog(:value="value", @input="$emit('input', $event)" max-width="400")
 </template>
 
 <script lang="ts">
+import type { AudioLibraryItem } from "@/audio";
+
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import { remote } from "electron";
-import { globalState } from "@/entities/globalState";
-import { LibraryItem, LibraryItemType, AudioFile } from "@/entities/library";
 import { BaklavaEvent } from "@baklavajs/events";
+import { globalState } from "@/globalState";
+import { LibraryItem, LibraryItemType } from "@/library";
 
 @Component
 export default class LoadingDialog extends Vue {
@@ -40,10 +42,10 @@ export default class LoadingDialog extends Vue {
     }
 
     isAudioItem(item: LibraryItem) {
-        return item.type === LibraryItemType.AUDIO_FILE;
+        return item.type === LibraryItemType.AUDIO;
     }
 
-    async replaceAudioFile(item: AudioFile) {
+    async replaceAudioFile(item: AudioLibraryItem) {
         const dialogResult = await remote.dialog.showOpenDialog({
             title: "Select Audio File",
             filters: [

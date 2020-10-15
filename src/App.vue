@@ -18,7 +18,6 @@ v-app
                             c-unified-editor(:selectedItemId="selectedLibraryItemId").fill-height
                         template(slot="paneR")
                             c-timeline
-            c-global-preview
     c-settings(v-model="showSettings")
     c-loading-dialog(v-model="showLoadingDialog")
 </template>
@@ -33,25 +32,27 @@ import CLibrary from "@/components/Library.vue";
 import CSettings from "@/components/Settings.vue";
 import CToolbar from "@/components/Toolbar.vue";
 import CLoadingDialog from "@/components/LoadingDialog.vue";
-import CGlobalPreview from "@/components/GlobalPreview.vue";
-import CUnifiedEditor from "@/editors/UnifiedEditor.vue";
-import CTimeline from "@/editors/timeline/Timeline.vue";
+import CUnifiedEditor from "@/components/UnifiedEditor.vue";
+import CTimeline from "@/timeline/Timeline.vue";
 
-import { globalState } from "@/entities/globalState";
-import { LibraryItem } from "@/entities/library";
+import { globalState } from "@/globalState";
+import type { LibraryItem } from "@/library";
+import { TimelineProcessor } from "@/timeline";
 
 const readFileP = promisify(readFile);
 const writeFileP = promisify(writeFile);
 
 @Component({
-    components: { CLibrary, CTimeline, CUnifiedEditor, CSettings, CToolbar, CLoadingDialog, CGlobalPreview },
+    components: { CLibrary, CTimeline, CUnifiedEditor, CSettings, CToolbar, CLoadingDialog },
 })
 export default class App extends Vue {
     showSettings = false;
     showLoadingDialog = false;
     selectedLibraryItemId = "";
+    processor = new TimelineProcessor();
 
     created(): void {
+        this.processor.initialize();
         this.newProject();
     }
 
