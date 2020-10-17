@@ -28,7 +28,7 @@ import { remote } from "electron";
 import { readFile, writeFile } from "fs";
 import { promisify } from "util";
 
-import CLibrary from "@/components/Library.vue";
+import CLibrary from "@/library/Library.vue";
 import CSettings from "@/components/Settings.vue";
 import CToolbar from "@/components/Toolbar.vue";
 import CLoadingDialog from "@/components/LoadingDialog.vue";
@@ -36,7 +36,7 @@ import CUnifiedEditor from "@/components/UnifiedEditor.vue";
 import CTimeline from "@/timeline/Timeline.vue";
 
 import { globalState } from "@/globalState";
-import type { LibraryItem } from "@/library";
+import { LibraryItem } from "@/library";
 import { TimelineProcessor } from "@/timeline";
 
 const readFileP = promisify(readFile);

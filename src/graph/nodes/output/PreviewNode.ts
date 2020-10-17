@@ -6,8 +6,8 @@ export class PreviewNode extends Node {
 
     public constructor() {
         super();
-        this.addInputInterface("Colors", undefined, [0, 0, 0], { type: "color_array" });
-        this.addOption("Preview", "PreviewOption", [0, 0, 0]);
+        this.addInputInterface("Colors", undefined, [[0, 0, 0]], { type: "color_array" });
+        this.addOption("Preview", "PreviewOption", [[0, 0, 0]]);
         this.addOption("Led Count", "NumberOption", 30, undefined, { min: 1 });
     }
 

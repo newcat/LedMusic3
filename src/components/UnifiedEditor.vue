@@ -7,6 +7,7 @@ v-card.d-flex.flex-column(flat)
     baklava-editor(v-if="isGraph", :plugin="selectedItem.editor.viewPlugin", :key="selectedItemId")
     note-editor(v-else-if="isPattern", :notePattern="selectedItem", :key="selectedItemId")
     automation-editor(v-else-if="isAutomation", :automationClip="selectedItem", :key="selectedItemId")
+    output-editor(v-else-if="isOutput", :output="selectedItem", :key="selectedItemId")
 </template>
 
 <script lang="ts">
@@ -15,9 +16,10 @@ import { globalState } from "@/globalState";
 import { LibraryItemType } from "@/library";
 import { NoteEditor } from "@/pattern";
 import { AutomationEditor } from "@/automation";
+import { OutputEditor } from "@/output";
 
 @Component({
-    components: { NoteEditor, AutomationEditor },
+    components: { NoteEditor, AutomationEditor, OutputEditor },
 })
 export default class Graph extends Vue {
     @Prop({ type: String, default: "" })
@@ -37,6 +39,10 @@ export default class Graph extends Vue {
 
     get isPattern() {
         return this.selectedItem?.type === LibraryItemType.PATTERN;
+    }
+
+    get isOutput() {
+        return this.selectedItem?.type === LibraryItemType.OUTPUT;
     }
 }
 </script>

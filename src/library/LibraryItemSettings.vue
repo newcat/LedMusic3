@@ -15,7 +15,7 @@ v-dialog(:value="value", @input="$emit('input', $event)" max-width="400")
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import { globalState } from "@/globalState";
-import { LibraryItem } from "@/library";
+import { LibraryItem } from "./libraryItem";
 
 @Component
 export default class Settings extends Vue {

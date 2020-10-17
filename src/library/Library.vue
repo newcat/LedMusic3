@@ -16,6 +16,8 @@ v-card(flat)
                     v-list-item-title Automation Clip
                 v-list-item(@click="addNotePattern")
                     v-list-item-title Note Pattern
+                v-list-item(@click="addOutput")
+                    v-list-item-title Output
 
     v-treeview(
         :active="!!activeItem ? [activeItem.id] : []",
@@ -28,7 +30,7 @@ v-card(flat)
         template(v-slot:prepend="{ item }")
             v-progress-circular(v-if="item.loading", :size="24", :width="2" indeterminate, color="primary")
             v-icon(v-else-if="item.error") warning
-            v-icon(v-else) {{ item.icon || getIcon(item.type) }}
+            v-icon(v-else) {{ getIcon(item.type) }}
 
         template(v-slot:label="{ item }")
             .v-treeview-node__label(
@@ -49,22 +51,22 @@ v-card(flat)
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import { AudioLibraryItem } from "@/audio";
-import { AutomationLibraryItem } from "@/automation";
-import { GraphLibraryItem } from "@/graph";
-import { PatternLibraryItem } from "@/pattern";
-import { LibraryItemType, LibraryItem } from "@/library";
+import { AudioLibraryItem } from "@/audio/audio.libraryItem";
+import { AutomationLibraryItem } from "@/automation/automation.libraryItem";
+import { GraphLibraryItem } from "@/graph/graph.libraryItem";
+import { PatternLibraryItem } from "@/pattern/pattern.libraryItem";
 import { globalState } from "@/globalState";
+import { LibraryItemType, LibraryItem } from "./libraryItem";
 import ItemSettings from "./LibraryItemSettings.vue";
+import { OutputLibraryItem } from "@/output/output.libraryItem";
 
 interface ITreeNode {
     id: string;
     name: string;
-    icon?: string;
+    type: LibraryItemType;
     children?: ITreeNode[];
     loading?: boolean;
     error?: boolean;
-    type?: LibraryItemType;
 }
 
 @Component({
@@ -77,15 +79,37 @@ export default class Library extends Vue {
     activeItem: LibraryItem | null = null;
 
     get items() {
-        const audioFiles: ITreeNode = { id: "_folder_af", name: "Audio Files", icon: "library_music", children: [] };
-        const graphs: ITreeNode = { id: "_folder_graphs", name: "Graphs", icon: "device_hub", children: [] };
+        const audioFiles: ITreeNode = {
+            id: "_folder_af",
+            name: "Audio Files",
+            children: [],
+            type: LibraryItemType.AUDIO,
+        };
+        const graphs: ITreeNode = {
+            id: "_folder_graphs",
+            name: "Graphs",
+            children: [],
+            type: LibraryItemType.GRAPH,
+        };
         const automationClips: ITreeNode = {
             id: "_folder_ac",
             name: "Automation Clips",
-            icon: "timeline",
             children: [],
+            type: LibraryItemType.AUTOMATION,
         };
-        const notePatterns: ITreeNode = { id: "_folder_np", name: "Note Patterns", icon: "queue_music", children: [] };
+        const notePatterns: ITreeNode = {
+            id: "_folder_np",
+            name: "Note Patterns",
+            children: [],
+            type: LibraryItemType.PATTERN,
+        };
+        const outputs: ITreeNode = {
+            id: "_folder_op",
+            name: "Outputs",
+            children: [],
+            type: LibraryItemType.OUTPUT,
+        };
+        const rootItems = [audioFiles, graphs, automationClips, notePatterns, outputs];
         this.globalState.library.items.forEach((item) => {
             const itemData = {
                 id: item.id,
@@ -94,22 +118,14 @@ export default class Library extends Vue {
                 loading: item.loading,
                 error: item.error,
             };
-            switch (item.type) {
-                case LibraryItemType.AUDIO:
-                    audioFiles.children!.push(itemData);
-                    break;
-                case LibraryItemType.GRAPH:
-                    graphs.children!.push(itemData);
-                    break;
-                case LibraryItemType.AUTOMATION:
-                    automationClips.children!.push(itemData);
-                    break;
-                case LibraryItemType.PATTERN:
-                    notePatterns.children!.push(itemData);
-                    break;
+            const rootItem = rootItems.find((ri) => ri.type === item.type);
+            if (rootItem) {
+                rootItem.children!.push(itemData);
+            } else {
+                console.warn("No root item for type", item.type);
             }
         });
-        return [audioFiles, graphs, automationClips, notePatterns];
+        return rootItems;
     }
 
     public onActiveItemChanged(newActiveItems: string[]) {
@@ -151,6 +167,8 @@ export default class Library extends Vue {
                 return "timeline";
             case LibraryItemType.PATTERN:
                 return "queue_music";
+            case LibraryItemType.OUTPUT:
+                return "mediation";
             default:
                 return "note";
         }
@@ -166,6 +184,10 @@ export default class Library extends Vue {
 
     public addNotePattern() {
         this.globalState.library.addItem(new PatternLibraryItem());
+    }
+
+    public addOutput() {
+        this.globalState.library.addItem(new OutputLibraryItem());
     }
 
     public deleteItem(id: string) {

@@ -1,4 +1,5 @@
 import type { Item } from "@/timeline";
+import type { BaseOutput, OutputLibraryItem } from "@/output";
 
 import { observe } from "@nx-js/observer-util";
 import { BaklavaEvent } from "@baklavajs/events";
@@ -9,7 +10,6 @@ import { AutomationLibraryItem } from "@/automation";
 import { LibraryItemType } from "@/library";
 import { INote, PatternLibraryItem } from "@/pattern";
 import { ICalculationData } from "@/graph";
-
 import { globalState } from "@/globalState";
 
 export class TimelineProcessor {
@@ -75,7 +75,7 @@ export class TimelineProcessor {
         this.events.tick.emit();
     }
 
-    public process(unit: number) {
+    public async process(unit: number) {
         const currentActiveItems = globalState.timeline.items.filter((i) => i.start <= unit && i.end >= unit);
 
         const newActiveItems = currentActiveItems.filter((i) => !this.activeItems.includes(i));
@@ -104,9 +104,18 @@ export class TimelineProcessor {
             frequencyData: audioData.frequencyData,
             trackValues: this.trackValues,
         };
-        currentActiveItems
-            .filter((i) => this.isType(i, LibraryItemType.GRAPH))
-            .forEach((i) => this.processGraph(i, calculationData));
+        const outputMap: Map<BaseOutput, any> = new Map();
+        const graphs = currentActiveItems.filter((i) => this.isType(i, LibraryItemType.GRAPH));
+        for (const g of graphs) {
+            await this.processGraph(g, calculationData, outputMap);
+        }
+
+        const outputs = globalState.library.items.filter(
+            (i) => i.type === LibraryItemType.OUTPUT
+        ) as OutputLibraryItem[];
+        for (const o of outputs) {
+            o.outputInstance.send(outputMap.get(o.outputInstance));
+        }
     }
 
     private activate(item: Item) {
@@ -146,9 +155,20 @@ export class TimelineProcessor {
         return item.libraryItem.type === type;
     }
 
-    private processGraph(item: Item, calculationData: ICalculationData): void {
+    private async processGraph(
+        item: Item,
+        calculationData: ICalculationData,
+        outputMap: Map<BaseOutput, any>
+    ): Promise<void> {
         const graph = item.libraryItem as GraphLibraryItem;
-        graph.editor.enginePlugin.calculate(calculationData);
+        const results = (await graph.editor.enginePlugin.calculate(calculationData))!;
+        results.forEach((v) => {
+            const { id, data } = v as { id: string; data: any };
+            const outputInstance = globalState.library.getItemById<OutputLibraryItem>(id)?.outputInstance;
+            if (outputInstance) {
+                outputMap.set(outputInstance, data);
+            }
+        });
     }
 
     private processAutomation(unit: number, item: Item): void {

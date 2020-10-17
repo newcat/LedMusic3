@@ -5,6 +5,7 @@ import { AutomationLibraryItem } from "@/automation";
 import { GraphLibraryItem } from "@/graph";
 import { BaklavaEvent } from "@baklavajs/events";
 import { PatternLibraryItem } from "@/pattern";
+import { OutputLibraryItem } from "@/output";
 
 export class LibraryModel {
     public events = {
@@ -51,6 +52,9 @@ export class LibraryModel {
                 case LibraryItemType.PATTERN:
                     libItem = new PatternLibraryItem();
                     break;
+                case LibraryItemType.OUTPUT:
+                    libItem = new OutputLibraryItem();
+                    break;
                 default:
                     console.warn(`Unknown library type: ${type}`);
             }
@@ -67,8 +71,8 @@ export class LibraryModel {
         this._items = newItems;
     }
 
-    public getItemById(id: string) {
-        return this.items.find((i) => i.id === id);
+    public getItemById<T extends LibraryItem = LibraryItem>(id: string): T | undefined {
+        return this.items.find((i) => i.id === id) as T | undefined;
     }
 
     public addItem(item: LibraryItem) {
