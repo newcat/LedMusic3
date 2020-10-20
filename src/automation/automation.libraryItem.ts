@@ -1,5 +1,5 @@
 import { deserialize, serialize } from "bson";
-import uuidv4 from "uuid/v4";
+import { v4 as uuidv4 } from "uuid";
 import { LibraryItem, LibraryItemType } from "@/library";
 import { TICKS_PER_BEAT } from "@/constants";
 import { BaklavaEvent } from "@baklavajs/events";

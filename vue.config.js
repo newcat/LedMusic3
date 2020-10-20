@@ -19,6 +19,7 @@ module.exports = {
     },
 
     configureWebpack: {
+        target: "electron-renderer",
         plugins: [
             new WasmPackPlugin({
                 crateDirectory: path.resolve(__dirname, "src", "rust"),
