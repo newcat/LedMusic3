@@ -107,7 +107,15 @@ export class TimelineProcessor {
         const outputMap: Map<BaseOutput, any> = new Map();
         const graphs = currentActiveItems.filter((i) => this.isType(i, LibraryItemType.GRAPH));
         for (const g of graphs) {
-            await this.processGraph(g, calculationData, outputMap);
+            try {
+                await this.processGraph(g, calculationData, outputMap);
+                if (g.libraryItem.error) {
+                    g.libraryItem.error = false;
+                }
+            } catch (err) {
+                console.error(err);
+                g.libraryItem.error = true;
+            }
         }
 
         const outputs = globalState.library.items.filter(
