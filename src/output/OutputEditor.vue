@@ -17,11 +17,13 @@ import { OutputType } from "./outputTypes";
 import { OutputLibraryItem } from "./output.libraryItem";
 
 import WledOutputSettings from "./wled/WledOutputSettings.vue";
+import DmxOutputSettings from "./dmx/DmxOutputSettings.vue";
 import { createOutput } from "./outputFactory";
 
 const outputSettingsComponentMapping: Record<OutputType, VueConstructor<Vue> | undefined> = {
     [OutputType.DUMMY]: undefined,
     [OutputType.WLED]: WledOutputSettings,
+    [OutputType.DMX]: DmxOutputSettings,
 };
 
 @Component
@@ -32,6 +34,7 @@ export default class OutputEditor extends Vue {
     outputTypes = [
         { text: "Dummy", value: OutputType.DUMMY },
         { text: "WLED", value: OutputType.WLED },
+        { text: "DMX", value: OutputType.DMX },
     ];
 
     get outputSettingsComponent() {

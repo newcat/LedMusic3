@@ -19,4 +19,7 @@ export abstract class LibraryItem {
 
     public abstract serialize(): Buffer;
     public abstract deserialize(buffer: Buffer): void;
+
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    public async destroy(): Promise<void> {}
 }

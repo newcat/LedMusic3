@@ -28,7 +28,7 @@ export class LibraryModel {
         );
     }
 
-    public load(serialized: Binary) {
+    public async load(serialized: Binary) {
         const newItemStates: Record<number, { type: number; data: Buffer }> = deserialize(serialized.buffer);
         const newItems: LibraryItem[] = [];
 
@@ -68,6 +68,10 @@ export class LibraryModel {
             }
         }
 
+        for (const item of this._items.slice()) {
+            await this.removeItem(item);
+        }
+
         this._items = newItems;
     }
 
@@ -80,11 +84,18 @@ export class LibraryModel {
         this.events.itemAdded.emit(item);
     }
 
-    public removeItem(item: LibraryItem) {
+    public async removeItem(item: LibraryItem) {
         const i = this._items.indexOf(item);
         if (i >= 0) {
+            await this._items[i].destroy();
             this._items.splice(i, 1);
             this.events.itemRemoved.emit(item);
+        }
+    }
+
+    public async destroy() {
+        for (const item of this._items.slice()) {
+            await this.removeItem(item);
         }
     }
 }

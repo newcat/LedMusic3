@@ -40,5 +40,16 @@ export class BaklavaEditor extends Editor {
                 (n as any).destroy();
             }
         });
+
+        this.events.addConnection.addListener(this, () => this.updateNodeInterfaceTypes());
+        this.events.removeConnection.addListener(this, () => this.updateNodeInterfaceTypes());
+    }
+
+    private updateNodeInterfaceTypes() {
+        this.nodes.forEach((n) => {
+            if ((n as any).updateNodeInterfaceTypes) {
+                (n as any).updateNodeInterfaceTypes(this);
+            }
+        });
     }
 }

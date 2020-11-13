@@ -56,8 +56,8 @@ export default class App extends Vue {
         this.newProject();
     }
 
-    newProject(): void {
-        globalState.reset();
+    async newProject(): Promise<void> {
+        await globalState.reset();
     }
 
     onItemSelected(item: LibraryItem | undefined) {
@@ -74,10 +74,10 @@ export default class App extends Vue {
             return;
         }
         const buff = await readFileP(p);
-        globalState.reset();
+        await globalState.reset();
         globalState.projectFilePath = p;
         this.showLoadingDialog = true;
-        globalState.load(buff);
+        await globalState.load(buff);
     }
 
     async save(): Promise<void> {

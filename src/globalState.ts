@@ -3,6 +3,7 @@ import { observable } from "@nx-js/observer-util";
 import { TimelineEditor } from "@/timeline";
 import { LibraryModel } from "./library/libraryModel";
 import { BaklavaEvent } from "@baklavajs/events";
+import { ipcRenderer } from "electron";
 
 interface IProp {
     type: string;
@@ -52,8 +53,9 @@ export class State implements IState {
         (window as any).globalState = this;
     }
 
-    public initialize() {
+    public async initialize() {
         if (this.library) {
+            await this.library.destroy();
             this.library.events.itemRemoved.removeListener(this);
         }
 
@@ -69,7 +71,8 @@ export class State implements IState {
         this.events.initialized.emit();
     }
 
-    public reset() {
+    public async reset() {
+        ipcRenderer.send("RESET");
         this.projectFilePath = "";
         this.bpm = defaults.bpm;
         this.fps = defaults.fps;
@@ -77,7 +80,7 @@ export class State implements IState {
         this.position = 0;
         this.isPlaying = false;
         this.resolution = defaults.resolution;
-        this.initialize();
+        await this.initialize();
     }
 
     public save(): Buffer {
@@ -90,10 +93,10 @@ export class State implements IState {
         });
     }
 
-    public load(serialized: Buffer) {
+    public async load(serialized: Buffer) {
         const data = deserialize(serialized);
         this.scene = data.scene;
-        this.library.load(data.library);
+        await this.library.load(data.library);
         this.timeline.load(data.timeline, this.library);
         this.bpm = data.bpm ?? defaults.bpm;
         this.fps = data.fps ?? defaults.fps;

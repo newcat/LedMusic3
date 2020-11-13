@@ -1,8 +1,12 @@
-import { Node } from "@baklavajs/core";
+import { Node, Editor } from "@baklavajs/core";
+import Vue from "vue";
 
 export class SwitchNode extends Node {
     public type = "Switch";
     public name = this.type;
+
+    private intfType: string | undefined = undefined;
+    private editor?: Editor;
 
     constructor() {
         super();
@@ -39,7 +43,8 @@ export class SwitchNode extends Node {
 
     addNewInterface() {
         const numIntf = Object.keys(this.inputInterfaces).length;
-        this.addInputInterface(`Value ${numIntf}`);
+        this.addInputInterface(`Value ${numIntf}`, undefined, undefined, { type: this.intfType });
+        this.updateNodeInterfaceTypes();
     }
 
     removeLastInterface() {
@@ -47,6 +52,7 @@ export class SwitchNode extends Node {
         if (intfs.length > 2) {
             this.removeInterface(intfs[intfs.length - 1]);
         }
+        this.updateNodeInterfaceTypes();
     }
 
     onButtonClick(optionName: string) {
@@ -69,5 +75,32 @@ export class SwitchNode extends Node {
             outputVal = this.getInterface(intfs[val]).value;
         }
         this.getInterface("Output").value = outputVal;
+    }
+
+    updateNodeInterfaceTypes(editor?: Editor) {
+        if (editor && !this.editor) {
+            this.editor = editor;
+        } else if (!this.editor) {
+            return;
+        }
+        let type: string | undefined = undefined;
+        for (const k in this.inputInterfaces) {
+            const intf = this.interfaces.get(k)!;
+            if (intf.connectionCount > 0) {
+                const conn = this.editor.connections.find((c) => c.to === intf);
+                if (conn) {
+                    type = conn.from.type;
+                    break;
+                }
+            }
+        }
+        if (!type) {
+            type = undefined;
+        }
+        this.intfType = type;
+        this.interfaces.forEach((i) => {
+            i.type = type;
+            i.events.updated.emit();
+        });
     }
 }

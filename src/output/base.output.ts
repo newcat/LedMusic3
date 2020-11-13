@@ -1,7 +1,7 @@
 import { OutputType } from "./outputTypes";
 
 export abstract class BaseOutput<S = unknown, D = unknown> {
-    public warnings = [];
+    public warnings: string[] = [];
     public abstract type: OutputType;
 
     protected abstract _state: S;

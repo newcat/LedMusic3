@@ -16,6 +16,9 @@ module.exports = {
             analyzerMode: "static",
             openAnalyzer: false,
         },
+        electronBuilder: {
+            externals: ["serialport"],
+        },
     },
 
     configureWebpack: {

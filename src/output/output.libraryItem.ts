@@ -26,4 +26,8 @@ export class OutputLibraryItem extends LibraryItem {
         this.outputInstance = createOutput(type);
         this.outputInstance.applyState(state);
     }
+
+    public async destroy() {
+        await this.outputInstance?.destroy();
+    }
 }

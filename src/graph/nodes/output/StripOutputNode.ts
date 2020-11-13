@@ -4,7 +4,7 @@ import { globalState } from "@/globalState";
 import { OutputLibraryItem, OutputType } from "@/output";
 import { LibraryItemType } from "@/library";
 
-const compatibleOutputTypes: OutputType[] = [OutputType.DUMMY, OutputType.WLED];
+const compatibleOutputTypes: OutputType[] = [OutputType.DUMMY, OutputType.WLED, OutputType.DMX];
 
 export class StripOutputNode extends Node {
     public type = "Strip Output";

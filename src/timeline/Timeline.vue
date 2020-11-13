@@ -14,7 +14,6 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import { Sprite } from "pixi.js";
 
 import { TICKS_PER_BEAT } from "@/constants";
 import { globalState } from "@/globalState";
@@ -24,12 +23,6 @@ import type { AutomationLibraryItem } from "@/automation";
 import { LibraryItemType, LibraryItem } from "@/library";
 import { Item } from "./model/item";
 import TimelineBase from "./components/Timeline.vue";
-
-interface IWaveformPart {
-    start: number;
-    end: number;
-    sprite: Sprite;
-}
 
 enum LabelMode {
     BEATS,
