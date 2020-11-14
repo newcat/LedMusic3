@@ -27,6 +27,7 @@ export class WledOutput extends BaseOutput<IWledOutputState, IWledOutputData> {
     };
 
     private socket?: dgram.Socket;
+    private buff?: Buffer;
 
     public constructor() {
         super();
@@ -34,36 +35,38 @@ export class WledOutput extends BaseOutput<IWledOutputState, IWledOutputData> {
     }
 
     public applyState(newState: IWledOutputState) {
-        this.warnings = [];
+        this.error = "";
         super.applyState(newState);
         this.socket?.close();
         this.socket = dgram.createSocket("udp4");
     }
 
-    public send(data?: IWledOutputData): void {
-        if (!this.socket) {
-            return;
-        }
-
+    public onData(data?: IWledOutputData): void {
         let colors: Color[] = [[0, 0, 0]];
         if (data && data.colors) {
             colors = data.colors;
         }
 
-        const buff = Buffer.allocUnsafe(3 * this.state.numLeds + 2);
+        this.buff = Buffer.allocUnsafe(3 * this.state.numLeds + 2);
         colors = scaleColorArray(colors, this.state.numLeds);
 
-        buff[0] = 2; // Use DRGB protocol
-        buff[1] = this.state.timeout;
+        this.buff[0] = 2; // Use DRGB protocol
+        this.buff[1] = this.state.timeout;
 
         for (let i = 0; i < this.state.numLeds; i++) {
-            buff[i * 3 + 2] = colors[i][0];
-            buff[i * 3 + 3] = colors[i][1];
-            buff[i * 3 + 4] = colors[i][2];
+            this.buff[i * 3 + 2] = colors[i][0];
+            this.buff[i * 3 + 3] = colors[i][1];
+            this.buff[i * 3 + 4] = colors[i][2];
         }
+    }
 
-        this.socket.send(buff, this.state.port, this.state.host, (err) => {
+    public send(): void {
+        if (!this.socket || !this.buff) {
+            return;
+        }
+        this.socket.send(this.buff, this.state.port, this.state.host, (err) => {
             if (err) {
+                this.error = "Failed to send WLED data";
                 console.warn(`Failed to send WLED data to ${this.state.host}:${this.state.port}`, err);
             }
         });

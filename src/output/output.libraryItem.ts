@@ -16,13 +16,15 @@ export class OutputLibraryItem extends LibraryItem {
 
     public serialize(): Buffer {
         return serialize({
-            type: this.type,
+            id: this.id,
+            type: this.outputInstance.type,
             state: this.outputInstance.state,
         });
     }
 
     public deserialize(buffer: Buffer): void {
-        const { type, state } = deserialize(buffer);
+        const { id, type, state } = deserialize(buffer);
+        this.id = id;
         this.outputInstance = createOutput(type);
         this.outputInstance.applyState(state);
     }

@@ -1,7 +1,6 @@
 <template lang="pug">
 div
     v-text-field(outlined, label="Port", v-model="port")
-    v-text-field(outlined, label="Channels", v-model="channels")
     v-btn(text, @click="apply") Apply
     v-btn(text, @click="updateValues") Cancel
 </template>
@@ -13,7 +12,6 @@ import { DmxOutput } from "./dmx.output";
 @Component
 export default class DmxOutputSettings extends Vue {
     port = "";
-    channels = "";
 
     @Prop()
     output!: DmxOutput;
@@ -23,15 +21,13 @@ export default class DmxOutputSettings extends Vue {
     }
 
     updateValues() {
-        const { port, channels } = this.output.state;
+        const { port } = this.output.state;
         this.port = port;
-        this.channels = channels;
     }
 
     apply() {
         this.output.applyState({
             port: this.port,
-            channels: this.channels,
         });
         this.updateValues();
     }

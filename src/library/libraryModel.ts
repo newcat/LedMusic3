@@ -9,6 +9,7 @@ import { OutputLibraryItem } from "@/output";
 
 export class LibraryModel {
     public events = {
+        loaded: new BaklavaEvent<void>(),
         itemAdded: new BaklavaEvent<LibraryItem>(),
         itemRemoved: new BaklavaEvent<LibraryItem>(),
     };
@@ -73,6 +74,7 @@ export class LibraryModel {
         }
 
         this._items = newItems;
+        this.events.loaded.emit();
     }
 
     public getItemById<T extends LibraryItem = LibraryItem>(id: string): T | undefined {

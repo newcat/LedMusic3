@@ -1,7 +1,7 @@
 import type { Item } from "@/timeline";
 import type { BaseOutput, OutputLibraryItem } from "@/output";
 
-import { observe } from "@nx-js/observer-util";
+import { observe, unobserve } from "@nx-js/observer-util";
 import { BaklavaEvent } from "@baklavajs/events";
 
 import { AudioLibraryItem, AudioProcessor } from "@/audio";
@@ -40,7 +40,7 @@ export class TimelineProcessor {
         if (this.audioProcessor) {
             this.audioProcessor.destroy();
         }
-        this.observers.forEach((unobserve) => unobserve());
+        this.observers.forEach((reaction) => unobserve(reaction));
         this.observers = [];
         this.observers.push(observe(() => this.setTimer()));
         this.observers.push(observe(() => this.onIsPlayingChanged()));
@@ -49,7 +49,6 @@ export class TimelineProcessor {
     }
 
     public onIsPlayingChanged() {
-        console.log("IPC", globalState.isPlaying);
         if (globalState.isPlaying && !this.internalPlayState) {
             this.audioProcessor?.play();
             this.internalPlayState = true;
@@ -86,12 +85,8 @@ export class TimelineProcessor {
 
         this.activeItems = currentActiveItems;
 
-        currentActiveItems
-            .filter((i) => this.isType(i, LibraryItemType.AUTOMATION))
-            .forEach((i) => this.processAutomation(unit, i));
-        currentActiveItems
-            .filter((i) => this.isType(i, LibraryItemType.PATTERN))
-            .forEach((i) => this.processPattern(unit, i));
+        currentActiveItems.filter((i) => this.isType(i, LibraryItemType.AUTOMATION)).forEach((i) => this.processAutomation(unit, i));
+        currentActiveItems.filter((i) => this.isType(i, LibraryItemType.PATTERN)).forEach((i) => this.processPattern(unit, i));
 
         const audioData = this.audioProcessor!.getAudioData();
 
@@ -118,11 +113,12 @@ export class TimelineProcessor {
             }
         }
 
-        const outputs = globalState.library.items.filter(
-            (i) => i.type === LibraryItemType.OUTPUT
-        ) as OutputLibraryItem[];
+        const outputs = globalState.library.items.filter((i) => i.type === LibraryItemType.OUTPUT) as OutputLibraryItem[];
         for (const o of outputs) {
-            o.outputInstance.send(outputMap.get(o.outputInstance));
+            await o.outputInstance.onData(outputMap.get(o.outputInstance));
+        }
+        for (const o of outputs) {
+            await o.outputInstance.send();
         }
     }
 
@@ -163,14 +159,13 @@ export class TimelineProcessor {
         return item.libraryItem.type === type;
     }
 
-    private async processGraph(
-        item: Item,
-        calculationData: ICalculationData,
-        outputMap: Map<BaseOutput, any>
-    ): Promise<void> {
+    private async processGraph(item: Item, calculationData: ICalculationData, outputMap: Map<BaseOutput, any>): Promise<void> {
         const graph = item.libraryItem as GraphLibraryItem;
         const results = (await graph.editor.enginePlugin.calculate(calculationData))!;
         results.forEach((v) => {
+            if (!v) {
+                return;
+            }
             const { id, data } = v as { id: string; data: any };
             const outputInstance = globalState.library.getItemById<OutputLibraryItem>(id)?.outputInstance;
             if (outputInstance) {

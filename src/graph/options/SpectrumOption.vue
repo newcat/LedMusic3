@@ -30,7 +30,7 @@ export default class SpectrumOption extends Vue {
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, width, height);
 
-        if (!this.value) {
+        if (!this.value || !(this.value instanceof Float32Array)) {
             return;
         }
 

@@ -1,27 +1,26 @@
 import { Buffer } from "buffer";
-import { Color } from "@/graph/colors";
-import { BaseOutput } from "../base.output";
-import { OutputType } from "../outputTypes";
 import { v4 as uuidv4 } from "uuid";
 import { ipcRenderer } from "electron";
+import { BaseOutput } from "../base.output";
+import { OutputType } from "../outputTypes";
 
 export interface IDmxOutputState {
     port: string;
-    channels: string;
 }
 
 export interface IDmxOutputData {
-    colors: Color[];
+    channels: Map<number, number>;
 }
 
 export class DmxOutput extends BaseOutput<IDmxOutputState, IDmxOutputData> {
     public type = OutputType.DMX;
-    private id = uuidv4();
 
     protected _state: IDmxOutputState = {
         port: "",
-        channels: "",
     };
+
+    private id = uuidv4();
+    private currentChannelValues: Map<number, number> = new Map();
 
     public constructor() {
         super();
@@ -29,50 +28,42 @@ export class DmxOutput extends BaseOutput<IDmxOutputState, IDmxOutputData> {
     }
 
     public applyState(newState: IDmxOutputState) {
-        this.warnings = [];
+        this.error = "";
         super.applyState(newState);
         this.open();
     }
 
-    public async send(data?: IDmxOutputData): Promise<void> {
-        if (!this.state.channels) {
+    public onData(data?: IDmxOutputData) {
+        if (!data) {
             return;
         }
 
-        let colors: Color[] = [[0, 0, 0]];
-        if (data && data.colors) {
-            colors = data.colors;
+        data.channels.forEach((value, channel) => {
+            if (channel > 0) {
+                this.currentChannelValues.set(channel, value);
+            }
+        });
+    }
+
+    public async send() {
+        const maxChannel = Math.max(0, ...Array.from(this.currentChannelValues.keys()));
+        if (maxChannel <= 0) {
+            return;
         }
 
-        let ri = 0;
-        let gi = 0;
-        let bi = 0;
-
-        const buffer = Buffer.alloc(this.state.channels.length + 2);
-        buffer[0] = Math.floor(this.state.channels.length / 256);
-        buffer[1] = this.state.channels.length % 256;
-        for (let i = 0; i < this.state.channels.length; i++) {
-            const c = this.state.channels[i];
-            if (c === "r" && ri < colors.length) {
-                buffer[i + 2] = colors[ri][0];
-                ri++;
-            } else if (c === "g" && gi < colors.length) {
-                buffer[i + 2] = colors[gi][1];
-                gi++;
-            } else if (c === "b" && bi < colors.length) {
-                buffer[i + 2] = colors[bi][2];
-                bi++;
-            } else {
-                buffer[i + 2] = 0;
-            }
+        const buffer = Buffer.alloc(maxChannel + 2);
+        buffer[0] = Math.floor(maxChannel / 256);
+        buffer[1] = maxChannel % 256;
+        for (let i = 1; i <= maxChannel; i++) {
+            buffer[i + 1] = this.currentChannelValues.get(i) ?? 0;
         }
 
         const result = await ipcRenderer.invoke("SERIALPORT_SEND", this.id, buffer);
         if (!result || !result.success) {
-            this.warnings = ["Failed to send data"];
+            this.error = "Failed to send data";
             console.warn(result);
         } else {
-            this.warnings = [];
+            this.error = "";
         }
     }
 
@@ -89,7 +80,7 @@ export class DmxOutput extends BaseOutput<IDmxOutputState, IDmxOutputData> {
         }
         const result = await ipcRenderer.invoke("SERIALPORT_OPEN", this.id, this.state.port);
         if (!result || !result.success) {
-            this.warnings = ["Failed to open port"];
+            this.error = "Failed to open port";
             console.warn(result);
         }
     }

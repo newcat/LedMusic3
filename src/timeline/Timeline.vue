@@ -23,6 +23,7 @@ import type { AutomationLibraryItem } from "@/automation";
 import { LibraryItemType, LibraryItem } from "@/library";
 import { Item } from "./model/item";
 import TimelineBase from "./components/Timeline.vue";
+import { PatternLibraryItem } from "@/pattern";
 
 enum LabelMode {
     BEATS,
@@ -84,6 +85,9 @@ export default class Timeline extends Vue {
             case LibraryItemType.AUTOMATION:
                 item = this.addAutomationItem(libraryItem as AutomationLibraryItem);
                 break;
+            case LibraryItemType.PATTERN:
+                item = this.addPatternItem(libraryItem as PatternLibraryItem);
+                break;
         }
 
         if (item) {
@@ -136,6 +140,11 @@ export default class Timeline extends Vue {
 
     private addAutomationItem(libraryItem: AutomationLibraryItem): Item {
         const length = libraryItem.points.reduce((p, c) => Math.max(p, c.unit), 0);
+        return this.createItem(length, libraryItem);
+    }
+
+    private addPatternItem(libraryItem: PatternLibraryItem): Item {
+        const length = libraryItem.notes.reduce((p, c) => Math.max(p, c.end), 0);
         return this.createItem(length, libraryItem);
     }
 
