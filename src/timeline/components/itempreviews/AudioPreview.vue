@@ -42,11 +42,12 @@ export default class Audio extends Vue {
         this.resizeObserver?.disconnect();
     }
 
+    @Watch("libraryItem.loading")
     @Watch("libraryItem.waveform")
     @Watch("unitWidth")
     drawWaveform() {
         if (this.renderingContext) {
-            if (this.libraryItem.waveform.length === 0) {
+            if (this.libraryItem.waveform.length === 0 || this.libraryItem.loading) {
                 return;
             }
             const height = this.renderingContext.canvas.height;

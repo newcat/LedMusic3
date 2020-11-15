@@ -15,20 +15,38 @@
             .__container
                 marker-label(v-for="m in markers", :key="m.unit", :marker="m")
 
-        .__row(v-for="t in tracks", :key="t.id")
-            .__header
-                div {{ t.name }}
+        track-view(
+            v-for="t in tracks",
+            :key="t.id",
+            :track="t",
+            :items="getItemsForTrack(t)"
+            :unitWidth="unitWidth",
+            @mouseenter="onTrackMouseenter(t)",
+            @mouseleave="onTrackMouseleave()",
+            @mousemove="onTrackMouseMove",
+            @drag-start="onDragStart")
 
-            .__item-container(
-                @mouseenter="onTrackMouseenter(t)",
-                @mouseleave="onTrackMouseleave()"
-                @mousemove="onRowMouseMove")
-
-                timeline-item(
-                    v-for="item in getItemsForTrack(t)",
-                    :key="item.id", :item="item",
-                    :unitWidth="unitWidth",
-                    @drag-start="onDragStart")
+        //.__row(v-for="t in tracks", :key="t.id")
+        //    .__header
+        //        .__title {{ t.name }}
+        //        .__actions
+        //            v-btn(icon, x-small)
+        //                v-icon create
+        //            v-btn(icon, x-small)
+        //                v-icon keyboard_arrow_up
+        //            v-btn(icon, x-small)
+        //                v-icon keyboard_arrow_down
+        //
+        //    .__item-container(
+        //        @mouseenter="onTrackMouseenter(t)",
+        //        @mouseleave="onTrackMouseleave()"
+        //        @mousemove="onRowMouseMove")
+        //
+        //        timeline-item(
+        //            v-for="item in getItemsForTrack(t)",
+        //            :key="item.id", :item="item",
+        //            :unitWidth="unitWidth",
+        //            @drag-start="onDragStart")
 </template>
 
 <script lang="ts">
@@ -38,14 +56,14 @@ import { Editor, Item, Track, IItemState } from "../model";
 import { globalState } from "@/globalState";
 import { TICKS_PER_BEAT } from "@/constants";
 
-import TimelineItem from "./TimelineItem.vue";
 import MarkerLabel from "./MarkerLabel.vue";
 import PositionMarker from "./PositionMarker.vue";
+import TrackView from "./Track.vue";
 
 import "../styles/all.scss";
 
 @Component({
-    components: { TimelineItem, MarkerLabel, PositionMarker },
+    components: { MarkerLabel, PositionMarker, TrackView },
 })
 export default class Timeline extends Vue {
     unitWidth = 1.5;
@@ -73,9 +91,7 @@ export default class Timeline extends Vue {
     get contentStyles() {
         return {
             width: `${(this.lastItemEnd + this.snap) * this.unitWidth + this.headerWidth}px`,
-            backgroundSize: `${this.markerSpacing.space * this.unitWidth}px ${
-                this.markerSpacing.space * this.unitWidth
-            }px`,
+            backgroundSize: `${this.markerSpacing.space * this.unitWidth}px ${this.markerSpacing.space * this.unitWidth}px`,
         };
     }
 
@@ -181,18 +197,14 @@ export default class Timeline extends Vue {
         }
     }
 
-    onRowMouseMove(ev: MouseEvent) {
+    onTrackMouseMove(ev: MouseEvent) {
         const x = ev.clientX;
         const diffUnits = Math.floor((x - this.dragStartPosition.x) / this.unitWidth);
         if (this.isDragging && this.dragItem) {
             if (this.dragArea === "leftHandle" || this.dragArea === "rightHandle") {
                 this.dragStartStates.forEach((state) => {
-                    const newStart =
-                        this.dragArea === "leftHandle"
-                            ? this.performSnap(state.item.start + diffUnits)
-                            : state.item.start;
-                    const newEnd =
-                        this.dragArea === "rightHandle" ? this.performSnap(state.item.end + diffUnits) : state.item.end;
+                    const newStart = this.dragArea === "leftHandle" ? this.performSnap(state.item.start + diffUnits) : state.item.start;
+                    const newEnd = this.dragArea === "rightHandle" ? this.performSnap(state.item.end + diffUnits) : state.item.end;
                     const item = this.editor.items.find((i) => i.id === state.item.id);
                     if (item) {
                         item.move(newStart, newEnd);

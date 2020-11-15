@@ -1,10 +1,13 @@
 import { Node } from "@baklavajs/core";
 import { globalState } from "@/globalState";
 import { ICalculationData } from "../../types";
+import Vue from "vue";
 
 export class AutomationNode extends Node {
     public type = "Automation";
     public name = this.type;
+
+    private vueInstance: Vue;
 
     public constructor() {
         super();
@@ -12,9 +15,17 @@ export class AutomationNode extends Node {
         this.addInputInterface("Max", "NumberOption", 1, { type: "number" });
         this.addOption("Track", "SelectOption", "", undefined, { items: [] });
         this.addOutputInterface("Value", { type: "number" });
-        this.updateAvailableTracks();
-        globalState.timeline.events.trackAdded.addListener(this, () => this.updateAvailableTracks());
-        globalState.timeline.events.trackRemoved.addListener(this, () => this.updateAvailableTracks());
+
+        // Hacky workaround because the nx-js observer doesnt pick the change up
+        // for whatever reason
+        this.vueInstance = new Vue();
+        this.vueInstance.$watch(
+            () => globalState.timeline.tracks.map((t) => t.name),
+            () => {
+                this.updateAvailableTracks();
+            },
+            { immediate: true }
+        );
     }
 
     public calculate(data: ICalculationData) {
@@ -36,16 +47,16 @@ export class AutomationNode extends Node {
     }
 
     public destroy() {
-        globalState.timeline.events.trackAdded.removeListener(this);
-        globalState.timeline.events.trackRemoved.removeListener(this);
+        this.vueInstance.$destroy();
     }
 
     private updateAvailableTracks() {
+        const optionItems: Array<{ text: string; value: string }> = [];
+        for (const track of globalState.timeline.tracks) {
+            optionItems.push({ text: track.name, value: track.id });
+        }
         const trackOption = this.options.get("Track")!;
-        trackOption.items = globalState.timeline.tracks.map((t) => ({
-            text: t.name,
-            value: t.id,
-        }));
+        trackOption.items = optionItems;
         trackOption.events.updated.emit();
     }
 }

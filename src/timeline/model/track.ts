@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { PreventableBaklavaEvent, BaklavaEvent, SequentialHook } from "@baklavajs/events";
+import { SequentialHook } from "@baklavajs/events";
 
 export interface ITrackState {
     id: string;
@@ -21,55 +21,16 @@ export class Track {
     public id = uuidv4();
     public data?: Record<string, any>;
 
-    public events = {
-        beforeNameChanged: new PreventableBaklavaEvent<string>(),
-        nameChanged: new BaklavaEvent<string>(),
-        beforeHeightChanged: new PreventableBaklavaEvent<number>(),
-        heightChanged: new BaklavaEvent<number>(),
-        beforeRemovableChanged: new PreventableBaklavaEvent<boolean>(),
-        removableChanged: new BaklavaEvent<boolean>(),
-    };
-
     public hooks = {
         save: new SequentialHook<ITrackState>(),
     };
 
-    public _name: string;
-    public _height = 100;
-    public _removable = true;
-
-    public get name() {
-        return this._name;
-    }
-    public set name(v: string) {
-        if (this.events.beforeNameChanged.emit(v)) {
-            this._name = v;
-            this.events.nameChanged.emit(v);
-        }
-    }
-
-    public get height() {
-        return this._height;
-    }
-    public set height(v: number) {
-        if (this.events.beforeHeightChanged.emit(v)) {
-            this._height = v;
-            this.events.heightChanged.emit(v);
-        }
-    }
-
-    public get removable() {
-        return this._removable;
-    }
-    public set removable(v: boolean) {
-        if (this.events.beforeRemovableChanged.emit(v)) {
-            this._removable = v;
-            this.events.removableChanged.emit(v);
-        }
-    }
+    public name: string;
+    public height = 100;
+    public removable = true;
 
     public constructor(name: string, data?: Record<string, any>) {
-        this._name = name;
+        this.name = name;
         this.data = data;
     }
 

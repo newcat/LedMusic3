@@ -5,6 +5,7 @@ div.automation-editor
         :style="{ width: `${width}px` }"
         @mouseup="mouseup",
         @mousemove="mousemove",
+        @mouseleave="mouseup"
         @dblclick="dblclick"
         @wheel="wheel")
 
@@ -17,14 +18,8 @@ div.automation-editor
         // horizontal
         line.h-grid-line(v-for="i in 5", :key="i", :x1="getXCoordinate(0)", :x2="horizontalLineWidth", :y1="getYCoordinate(i / 5)", :y2="getYCoordinate(i / 5)")
 
-        // --- points & lines ---
+        // --- lines ---
         template(v-for="p, i in points")
-            circle(
-                @mousedown="mousedown(p.id)"
-                :key="p.id + '-point'"
-                :cx="getXCoordinate(p.unit)",
-                :cy="getYCoordinate(p.value)",
-                r="5")
             template(v-if="i > 0")
                 template(v-if="p.type === 'linear'")
                     line(
@@ -46,6 +41,16 @@ div.automation-editor
                         :x2="getXCoordinate(p.unit)",
                         :y1="getYCoordinate(points[i - 1].value)",
                         :y2="getYCoordinate(p.value)")
+
+        // --- points ---
+        circle(
+            v-for="p, i in points"
+            @mousedown="mousedown(p.id)"
+            :key="p.id + '-point'"
+            :class="{ '--dragged': draggedPoint === p }"
+            :cx="getXCoordinate(p.unit)",
+            :cy="getYCoordinate(p.value)",
+            r="5")
 </template>
 
 <script lang="ts">
@@ -118,7 +123,7 @@ export default class AutomationEditor extends Vue {
     }
 
     getUnit(xCoordinate: number) {
-        return Math.max(Math.floor((xCoordinate - this.padding) / this.unitWidth), 0);
+        return Math.max(Math.round((xCoordinate - this.padding) / this.unitWidth), 0);
     }
 
     getYCoordinate(value: number) {
@@ -194,8 +199,19 @@ export default class AutomationEditor extends Vue {
 svg {
     min-width: 100%;
     height: 100%;
-    & line,
+
+    & line {
+        stroke: white;
+    }
+
     & circle {
+        stroke: darkgray;
+        fill: darkgray;
+        z-index: 4;
+        transition: fill 0.2s linear, stroke 0.2s linear;
+    }
+    & circle:hover,
+    & circle.--dragged {
         stroke: white;
         fill: white;
     }
