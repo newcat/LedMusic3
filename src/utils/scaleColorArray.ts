@@ -4,7 +4,7 @@ import { clamp } from "./clamp";
 export function scaleColorArray(colors: Color[], targetSize: number): Color[] {
     const output: Color[] = [];
     for (let i = 0; i < targetSize; i++) {
-        const originalIndex = ((i + 1) / targetSize) * colors.length;
+        const originalIndex = (i / targetSize) * colors.length;
         const lowerIndex = clamp(Math.floor(originalIndex), 0, colors.length - 1);
         const upperIndex = clamp(Math.ceil(originalIndex), 0, colors.length - 1);
         if (lowerIndex === upperIndex) {

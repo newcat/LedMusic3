@@ -33,8 +33,8 @@ export abstract class BaseOutputNode extends Node {
         const optionItems: Array<{ text: string; value: string }> = [];
         for (const item of globalState.library.items) {
             if (
-                item.type === LibraryItemType.OUTPUT &&
-                this.compatibleOutputTypes.includes((item as OutputLibraryItem).outputInstance.type)
+                item?.type === LibraryItemType.OUTPUT &&
+                this.compatibleOutputTypes.includes((item as OutputLibraryItem).outputInstance?.type)
             ) {
                 optionItems.push({ text: item.name, value: item.id });
             }

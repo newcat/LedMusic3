@@ -5,7 +5,9 @@
     @mousedown="mousedown",
     @mouseup="mouseup"
     @keydown="keydown"
-    @keyup="keyup")
+    @keyup="keyup"
+    @drop="drop",
+    @dragover="$event.preventDefault()")
 
     .__content(:style="contentStyles")
 
@@ -18,43 +20,26 @@
         track-view(
             v-for="t in tracks",
             :key="t.id",
+            :editor="editor",
             :track="t",
-            :items="getItemsForTrack(t)"
             :unitWidth="unitWidth",
             @mouseenter="onTrackMouseenter(t)",
             @mouseleave="onTrackMouseleave()",
             @mousemove="onTrackMouseMove",
             @drag-start="onDragStart")
-
-        //.__row(v-for="t in tracks", :key="t.id")
-        //    .__header
-        //        .__title {{ t.name }}
-        //        .__actions
-        //            v-btn(icon, x-small)
-        //                v-icon create
-        //            v-btn(icon, x-small)
-        //                v-icon keyboard_arrow_up
-        //            v-btn(icon, x-small)
-        //                v-icon keyboard_arrow_down
-        //
-        //    .__item-container(
-        //        @mouseenter="onTrackMouseenter(t)",
-        //        @mouseleave="onTrackMouseleave()"
-        //        @mousemove="onRowMouseMove")
-        //
-        //        timeline-item(
-        //            v-for="item in getItemsForTrack(t)",
-        //            :key="item.id", :item="item",
-        //            :unitWidth="unitWidth",
-        //            @drag-start="onDragStart")
 </template>
 
 <script lang="ts">
 import { Component, Vue, Watch, Prop } from "vue-property-decorator";
 import { ItemArea, IMarker } from "../types";
-import { Editor, Item, Track, IItemState } from "../model";
+import { TimelineEditor, Item, Track, IItemState } from "../model";
 import { globalState } from "@/globalState";
 import { TICKS_PER_BEAT } from "@/constants";
+import { LibraryItem, LibraryItemType } from "@/library";
+import { AudioLibraryItem } from "@/audio";
+import { GraphLibraryItem } from "@/graph";
+import { AutomationLibraryItem } from "@/automation";
+import { PatternLibraryItem } from "@/pattern";
 
 import MarkerLabel from "./MarkerLabel.vue";
 import PositionMarker from "./PositionMarker.vue";
@@ -77,14 +62,14 @@ export default class Timeline extends Vue {
     dragArea: ItemArea | "" = "";
     dragItem: Item | null = null;
     dragStartPosition = { x: 0, y: 0 };
-    dragStartTrack?: Track;
+    dragStartTrack: Track | null = null;
     dragStartStates: Array<{ item: IItemState; trackIndex: number }> = [];
     hoveredTrack: Track | null = null;
 
     @Prop({ type: Number, required: true })
     snap!: number;
 
-    get editor(): Editor {
+    get editor(): TimelineEditor {
         return globalState.timeline;
     }
 
@@ -141,10 +126,6 @@ export default class Timeline extends Vue {
 
     beforeDestroy() {
         this.unwatchFn();
-    }
-
-    getItemsForTrack(track: Track) {
-        return this.editor ? this.editor.items.filter((i) => i.trackId === track.id) : [];
     }
 
     unselectAllItems() {
@@ -251,6 +232,7 @@ export default class Timeline extends Vue {
         draggedItem.selected = true;
         this.dragItem = draggedItem;
         this.dragArea = dragArea;
+        this.dragStartTrack = this.hoveredTrack;
         this.isDragging = true;
         this.dragStartStates = this.editor.items
             .filter((i) => i.selected)
@@ -261,11 +243,71 @@ export default class Timeline extends Vue {
     }
 
     onTrackMouseenter(track: Track): void {
+        console.log(track.name);
         this.hoveredTrack = track;
     }
 
     onTrackMouseleave(): void {
         this.hoveredTrack = null;
+    }
+
+    public drop(ev: DragEvent) {
+        const id = ev.dataTransfer!.getData("id");
+        const libraryItem = globalState.library.getItemById(id);
+        if (!libraryItem) {
+            return;
+        }
+
+        let item: Item | undefined;
+        switch (libraryItem.type) {
+            case LibraryItemType.AUDIO:
+                item = this.addMusicItem(libraryItem as AudioLibraryItem);
+                break;
+            case LibraryItemType.GRAPH:
+                item = this.addGraphItem(libraryItem as GraphLibraryItem);
+                break;
+            case LibraryItemType.AUTOMATION:
+                item = this.addAutomationItem(libraryItem as AutomationLibraryItem);
+                break;
+            case LibraryItemType.PATTERN:
+                item = this.addPatternItem(libraryItem as PatternLibraryItem);
+                break;
+        }
+
+        if (item) {
+            const bounds = this.$el.getBoundingClientRect();
+            const x = ev.clientX - bounds.left - this.headerWidth;
+            const unit = this.performSnap(this.pixelToUnit(x));
+            item.move(unit, unit + (item.end - item.start));
+
+            const isOverlapping = (i1: Item, i2: Item) => Math.max(i1.start, i2.start) <= Math.min(i1.end, i2.end);
+
+            // FIXME: Not working yet
+            // check, whether the currently hovered track is free
+            let track: Track | undefined;
+            if (this.hoveredTrack) {
+                const trackItems = this.editor.items.filter((i) => i.trackId === this.hoveredTrack!.id);
+                if (!trackItems.some((i) => isOverlapping(i, item!))) {
+                    track = this.hoveredTrack;
+                }
+            }
+
+            // if unsuccessful, find a free track
+            if (!track) {
+                track = this.editor.tracks.find((t) => {
+                    const trackItems = this.editor.items.filter((i) => i.trackId === t.id);
+                    return !trackItems.some((i) => isOverlapping(i, item!));
+                });
+            }
+
+            // if no free track was found, create a new one
+            if (!track) {
+                track = this.editor.addDefaultTrack();
+            }
+
+            item.trackId = track.id;
+            this.editor.addItem(item);
+        }
     }
 
     onHeaderClick(ev: MouseEvent): void {
@@ -297,6 +339,37 @@ export default class Timeline extends Vue {
             el = el.parentElement;
         }
         return false;
+    }
+
+    private addMusicItem(libraryItem: AudioLibraryItem): Item | undefined {
+        if (libraryItem.loading) {
+            return;
+        }
+        const length = libraryItem.audioBuffer!.duration * (globalState.bpm / 60) * TICKS_PER_BEAT;
+        const item = this.createItem(length, libraryItem);
+        item.resizable = false;
+        return item;
+    }
+
+    private addGraphItem(libraryItem: GraphLibraryItem): Item {
+        const length = TICKS_PER_BEAT * 4;
+        return this.createItem(length, libraryItem);
+    }
+
+    private addAutomationItem(libraryItem: AutomationLibraryItem): Item {
+        const length = libraryItem.points.reduce((p, c) => Math.max(p, c.unit), 0);
+        return this.createItem(length, libraryItem);
+    }
+
+    private addPatternItem(libraryItem: PatternLibraryItem): Item {
+        const length = libraryItem.notes.reduce((p, c) => Math.max(p, c.end), 0);
+        return this.createItem(length, libraryItem);
+    }
+
+    private createItem(length: number, libraryItem: LibraryItem) {
+        // set the track id to "" temporarily, we will determine the track later
+        const item = new Item(libraryItem, "", 0, length);
+        return item;
     }
 }
 </script>

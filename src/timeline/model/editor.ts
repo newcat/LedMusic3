@@ -1,14 +1,19 @@
 import { Track, ITrackState } from "./track";
 import { Item, IItemState } from "./item";
 import { BaklavaEvent, PreventableBaklavaEvent } from "@baklavajs/events";
-import { LibraryModel } from "@/library";
+import { LibraryItemType, LibraryModel } from "@/library";
+import Vue from "vue";
+import { globalState } from "@/globalState";
+import { AudioLibraryItem } from "@/audio";
+import { TICKS_PER_BEAT } from "@/constants";
+import { observe } from "@nx-js/observer-util";
 
 export interface IEditorState {
     tracks: ITrackState[];
     items: IItemState[];
 }
 
-export class Editor {
+export class TimelineEditor {
     public events = {
         beforeItemAdded: new PreventableBaklavaEvent<Item>(),
         itemAdded: new BaklavaEvent<Item>(),
@@ -30,6 +35,14 @@ export class Editor {
     }
     public get items() {
         return this._items as ReadonlyArray<Item>;
+    }
+
+    public constructor() {
+        this.addDefaultTrack();
+        this.labelFunction = (u) => (u / (TICKS_PER_BEAT * 4)).toString();
+        observe(() => {
+            this.updateAudioItemLengths();
+        });
     }
 
     public load(state: IEditorState, library: LibraryModel) {
@@ -61,6 +74,12 @@ export class Editor {
         }
     }
 
+    public addDefaultTrack() {
+        const t = new Track(`Track ${this.tracks.length + 1}`);
+        this.addTrack(t);
+        return t;
+    }
+
     public getTrackById(trackId: string) {
         return this.tracks.find((t) => t.id === trackId);
     }
@@ -73,6 +92,17 @@ export class Editor {
                 this.events.trackRemoved.emit(track);
             }
         }
+    }
+
+    public moveTrack(track: Track, direction: "up" | "down") {
+        const i = this.tracks.indexOf(track);
+        const other = direction === "up" ? i - 1 : i + 1;
+        if (i < 0 || i >= this.tracks.length || other < 0 || other >= this.tracks.length) {
+            return;
+        }
+        const temp = this.tracks[i];
+        Vue.set(this._tracks, i, this.tracks[other]);
+        Vue.set(this._tracks, other, temp);
     }
 
     public addItem(item: Item) {
@@ -105,5 +135,20 @@ export class Editor {
         );*/
         // TODO: Rework
         return true;
+    }
+
+    /** This function is called whenever the BPM is changed */
+    private updateAudioItemLengths() {
+        const bpm = globalState.bpm;
+        this.items.forEach((i) => {
+            if (i.libraryItem.type === LibraryItemType.AUDIO) {
+                const af = i.libraryItem as AudioLibraryItem;
+                if (!af.audioBuffer) {
+                    return;
+                }
+                const length = af.audioBuffer.duration * (bpm / 60) * TICKS_PER_BEAT;
+                i.move(i.start, i.start + length);
+            }
+        });
     }
 }

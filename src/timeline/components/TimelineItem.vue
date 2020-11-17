@@ -17,12 +17,13 @@ import { LibraryItemType } from "@/library";
 import { VueConstructor } from "vue";
 import AudioPreview from "./itempreviews/AudioPreview.vue";
 import AutomationPreview from "./itempreviews/AutomationPreview.vue";
+import PatternPreview from "./itempreviews/PatternPreview.vue";
 
 const ITEM_COMPONENT_MAPPING: Record<LibraryItemType, VueConstructor | null> = {
     [LibraryItemType.AUDIO]: AudioPreview,
     [LibraryItemType.GRAPH]: null,
     [LibraryItemType.AUTOMATION]: AutomationPreview,
-    [LibraryItemType.PATTERN]: null,
+    [LibraryItemType.PATTERN]: PatternPreview,
     [LibraryItemType.OUTPUT]: null,
 };
 

@@ -5,10 +5,12 @@
         .__actions
             v-btn(icon, x-small, @click="settingsOpen = true")
                 v-icon create
-            v-btn(icon, x-small)
+            v-btn(icon, x-small, @click="moveUp")
                 v-icon keyboard_arrow_up
-            v-btn(icon, x-small)
+            v-btn(icon, x-small, @click="moveDown")
                 v-icon keyboard_arrow_down
+            v-btn(icon, x-small)
+                v-icon close
 
     .__item-container(
         @mouseenter="$emit('mouseenter', $event)",
@@ -26,7 +28,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
-import { Track, Item } from "../model";
+import { Track, Item, TimelineEditor } from "../model";
 import TimelineItem from "./TimelineItem.vue";
 import TrackSettings from "./TrackSettings.vue";
 
@@ -35,13 +37,25 @@ import TrackSettings from "./TrackSettings.vue";
 })
 export default class TrackView extends Vue {
     @Prop()
+    editor!: TimelineEditor;
+
+    @Prop()
     track!: Track;
 
     @Prop()
-    items!: Item[];
-
-    @Prop()
     unitWidth!: number;
+
+    get items(): Item[] {
+        return this.editor ? this.editor.items.filter((i) => i.trackId === this.track.id) : [];
+    }
+
+    moveUp() {
+        this.editor.moveTrack(this.track, "up");
+    }
+
+    moveDown() {
+        this.editor.moveTrack(this.track, "down");
+    }
 
     settingsOpen = false;
 }

@@ -4,8 +4,9 @@
         tabindex="-1"
         :style="contentStyles",
         @mousedown="mousedown",
-        @mouseup="mouseup"
-        @keydown="keydown")
+        @mouseup="mouseup",
+        @keydown="keydown",
+        @keyup="keyup")
 
         .__row(v-for="i in 128", :key="i", :data-row-value="i")
             .__header
@@ -17,8 +18,8 @@
                 @mousedown.self="createNote(i, $event)")
 
                 c-note(
-                    v-for="n, ni in getNotesForTrack(i)",
-                    :key="ni", :note="n",,
+                    v-for="n in getNotesForTrack(i)",
+                    :key="n.id", :note="n",,
                     :tickWidth="tickWidth",
                     :style="{ pointerEvents: disableNotePointerEvents ? 'none' : undefined }",
                     @drag-start="onDragStart",
@@ -26,11 +27,12 @@
 </template>
 
 <script lang="ts">
-import type { PatternLibraryItem } from "./pattern.libraryItem";
-
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+import { v4 as uuidv4 } from "uuid";
+import type { PatternLibraryItem } from "./pattern.libraryItem";
 import { INote } from "./types";
 import CNote from "./Note.vue";
+import { globalState } from "@/globalState";
 
 @Component({
     components: { CNote },
@@ -38,8 +40,8 @@ import CNote from "./Note.vue";
 export default class NoteEditor extends Vue {
     tickWidth = 1.5;
     headerWidth = 50;
-    snap = 96;
     lastNoteEnd = 0;
+    altKeyPressed = false;
 
     draggedNote: INote | null = null;
     dragOffset = 0;
@@ -59,6 +61,10 @@ export default class NoteEditor extends Vue {
 
     get disableNotePointerEvents() {
         return !!this.draggedNote || !!this.resizedNote;
+    }
+
+    get snap() {
+        return globalState.snapUnits;
     }
 
     getNotesForTrack(track: number) {
@@ -84,8 +90,7 @@ export default class NoteEditor extends Vue {
     }
 
     mousedown(ev: MouseEvent) {
-        const target = ev.target as HTMLElement | null;
-        if (target && !target.matches(".note")) {
+        if (!this.clickedOnNote(ev)) {
             this.notePattern.notes.forEach((n) => {
                 n.selected = false;
             });
@@ -99,11 +104,17 @@ export default class NoteEditor extends Vue {
 
     keydown(ev: KeyboardEvent) {
         if (ev.key === "Delete") {
-            const noteIndicesToDelete = this.notePattern.notes
-                .map((v, i) => (v.selected ? i : -1))
-                .filter((i) => i >= 0);
+            const noteIndicesToDelete = this.notePattern.notes.map((v, i) => (v.selected ? i : -1)).filter((i) => i >= 0);
             noteIndicesToDelete.reverse();
             noteIndicesToDelete.forEach((i) => this.notePattern.notes.splice(i, 1));
+        } else if (ev.key === "Alt") {
+            this.altKeyPressed = true;
+        }
+    }
+
+    keyup(ev: KeyboardEvent) {
+        if (ev.key === "Alt") {
+            this.altKeyPressed = false;
         }
     }
 
@@ -148,6 +159,7 @@ export default class NoteEditor extends Vue {
             let start = ev.offsetX / this.tickWidth;
             start = start - (start % this.snap);
             this.notePattern.notes.push({
+                id: uuidv4(),
                 start,
                 end: start + this.snap,
                 value,
@@ -157,8 +169,18 @@ export default class NoteEditor extends Vue {
     }
 
     performSnap(tick: number) {
+        if (this.altKeyPressed) {
+            return tick;
+        }
         const mod = tick % this.snap;
         return mod <= this.snap / 2 ? tick - mod : tick + this.snap - mod;
+    }
+
+    clickedOnNote(ev: MouseEvent) {
+        return ev
+            .composedPath()
+            .filter((t) => t instanceof HTMLElement)
+            .some((t) => (t as HTMLElement).matches(".note"));
     }
 }
 </script>

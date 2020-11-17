@@ -41,7 +41,10 @@ export default class Pianoroll extends Vue {
     border: 1px solid lighten(#1eb980, 20%);
     border-radius: 3px;
     transition: border 0.1s;
-    transition: transform 0.05s, width 0.05s;
+
+    &:hover {
+        border-color: #fff;
+    }
 
     &.--selected {
         border: 2px solid #fff;

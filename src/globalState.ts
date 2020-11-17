@@ -4,6 +4,7 @@ import { TimelineEditor } from "@/timeline";
 import { LibraryModel } from "./library/libraryModel";
 import { BaklavaEvent } from "@baklavajs/events";
 import { ipcRenderer } from "electron";
+import { TICKS_PER_BEAT } from "./constants";
 
 interface IProp {
     type: string;
@@ -22,6 +23,7 @@ export interface IState {
     timeline: TimelineEditor;
     bpm: number;
     fps: number;
+    snapUnits: number;
 }
 
 const defaults = {
@@ -29,6 +31,7 @@ const defaults = {
     fps: 30,
     volume: 0.5,
     resolution: 128,
+    snapUnits: TICKS_PER_BEAT,
 };
 
 export class State implements IState {
@@ -43,6 +46,7 @@ export class State implements IState {
     public position = 0;
     public isPlaying = false;
     public resolution = defaults.resolution;
+    public snapUnits = defaults.snapUnits;
 
     public events = {
         initialized: new BaklavaEvent<void>(),
@@ -80,6 +84,7 @@ export class State implements IState {
         this.position = 0;
         this.isPlaying = false;
         this.resolution = defaults.resolution;
+        this.snapUnits = defaults.snapUnits;
         await this.initialize();
     }
 
