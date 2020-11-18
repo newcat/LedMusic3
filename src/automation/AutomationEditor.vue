@@ -18,6 +18,9 @@ div.automation-editor
         // horizontal
         line.h-grid-line(v-for="i in 5", :key="i", :x1="getXCoordinate(0)", :x2="horizontalLineWidth", :y1="getYCoordinate(i / 5)", :y2="getYCoordinate(i / 5)")
 
+        // vertical
+        line.v-grid-line(v-for="x, i in verticalLines", :key="i", :x1="x", :x2="x", :y1="getYCoordinate(0)", :y2="getYCoordinate(1)")
+
         // --- lines ---
         template(v-for="p, i in points")
             template(v-if="i > 0")
@@ -51,13 +54,19 @@ div.automation-editor
             :cx="getXCoordinate(p.unit)",
             :cy="getYCoordinate(p.value)",
             r="5")
+
+        // --- drag value popup ---
+        g(v-if="popupWindow", :transform="`translate(${popupWindow.x}, ${popupWindow.y})`")
+            rect(x="0", y="0", width="40", height="20", fill="black", fill-opacity="0.6")
+            text(x="20", y="10", font-size="12", fill="white", dominant-baseline="middle", text-anchor="middle") {{ popupWindow.text }}
 </template>
 
 <script lang="ts">
 import { TICKS_PER_BEAT } from "@/constants";
-import { clamp, normalizeMouseWheel } from "@/utils";
+import { clamp, normalizeMouseWheel, snap } from "@/utils";
 import { AutomationLibraryItem, IAutomationPoint } from "./automation.libraryItem";
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+import { globalState } from "@/globalState";
 
 @Component
 export default class AutomationEditor extends Vue {
@@ -89,6 +98,32 @@ export default class AutomationEditor extends Vue {
             elWidth = this.$el.clientWidth;
         }
         return Math.max(this.width, elWidth) - this.padding;
+    }
+
+    get verticalLines() {
+        const xCoords = [];
+        let unit = 0;
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+            unit += globalState.snapUnits * 4;
+            const x = this.getXCoordinate(unit);
+            if (x > this.horizontalLineWidth) {
+                break;
+            }
+            xCoords.push(x);
+        }
+        return xCoords;
+    }
+
+    get popupWindow() {
+        if (!this.draggedPoint) {
+            return undefined;
+        }
+        const x = this.getXCoordinate(this.draggedPoint.unit) - 20;
+        let y = this.getYCoordinate(this.draggedPoint.value);
+        y += this.draggedPoint.value > 0.8 ? 20 : -35;
+        const text = this.draggedPoint.value.toFixed(2);
+        return { x, y, text };
     }
 
     @Watch("draggedPoint.unit")
@@ -145,7 +180,7 @@ export default class AutomationEditor extends Vue {
     mousemove(ev: MouseEvent) {
         if (this.draggedPoint) {
             if (this.draggedPoint !== this.points[0]) {
-                this.draggedPoint.unit = this.getUnit(ev.offsetX);
+                this.draggedPoint.unit = snap(this.getUnit(ev.offsetX));
             }
             this.draggedPoint.value = this.getValue(ev.offsetY);
             this.automationClip.sortPoints();
@@ -222,6 +257,10 @@ svg {
 }
 
 .h-grid-line {
+    stroke: #fff5;
+}
+
+.v-grid-line {
     stroke: #fff5;
 }
 </style>

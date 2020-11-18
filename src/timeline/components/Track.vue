@@ -2,14 +2,18 @@
 .__track
     .__header
         .__title {{ track.name }}
-        .__actions
+        .__actions(v-if="confirmRemove")
+            .text-caption Remove?
+            v-btn(text, x-small, @click="remove") Yes
+            v-btn(text, x-small, @click="confirmRemove = false") No
+        .__actions(v-else)
             v-btn(icon, x-small, @click="settingsOpen = true")
                 v-icon create
             v-btn(icon, x-small, @click="moveUp")
                 v-icon keyboard_arrow_up
             v-btn(icon, x-small, @click="moveDown")
                 v-icon keyboard_arrow_down
-            v-btn(icon, x-small)
+            v-btn(icon, x-small, @click="confirmRemove = true")
                 v-icon close
 
     .__item-container(
@@ -57,6 +61,12 @@ export default class TrackView extends Vue {
         this.editor.moveTrack(this.track, "down");
     }
 
+    remove() {
+        this.items.forEach((i) => this.editor.removeItem(i));
+        this.editor.removeTrack(this.track);
+    }
+
     settingsOpen = false;
+    confirmRemove = false;
 }
 </script>

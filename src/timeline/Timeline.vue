@@ -9,7 +9,7 @@
         v-divider.mx-4(vertical)
         v-text-field(:value="bpm", @input="setBpm", label="BPM", style="max-width: 6em;", dense, flat, solo, hide-details, prepend-icon="speed")
     #wrapper
-        timeline-base(:snap="parseInt(snapUnits)")
+        timeline-base
 </template>
 
 <script lang="ts">

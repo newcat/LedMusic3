@@ -30,7 +30,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch, Prop } from "vue-property-decorator";
+import { Component, Vue, Watch } from "vue-property-decorator";
 import { ItemArea, IMarker } from "../types";
 import { TimelineEditor, Item, Track, IItemState } from "../model";
 import { globalState } from "@/globalState";
@@ -40,6 +40,7 @@ import { AudioLibraryItem } from "@/audio";
 import { GraphLibraryItem } from "@/graph";
 import { AutomationLibraryItem } from "@/automation";
 import { PatternLibraryItem } from "@/pattern";
+import { snap } from "@/utils";
 
 import MarkerLabel from "./MarkerLabel.vue";
 import PositionMarker from "./PositionMarker.vue";
@@ -66,16 +67,13 @@ export default class Timeline extends Vue {
     dragStartStates: Array<{ item: IItemState; trackIndex: number }> = [];
     hoveredTrack: Track | null = null;
 
-    @Prop({ type: Number, required: true })
-    snap!: number;
-
     get editor(): TimelineEditor {
         return globalState.timeline;
     }
 
     get contentStyles() {
         return {
-            width: `${(this.lastItemEnd + this.snap) * this.unitWidth + this.headerWidth}px`,
+            width: `${(this.lastItemEnd + globalState.snapUnits) * this.unitWidth + this.headerWidth}px`,
             backgroundSize: `${this.markerSpacing.space * this.unitWidth}px ${this.markerSpacing.space * this.unitWidth}px`,
         };
     }
@@ -103,7 +101,7 @@ export default class Timeline extends Vue {
             return [];
         }
         const markers: IMarker[] = [];
-        for (let unit = 0; unit < this.lastItemEnd; unit += this.markerSpacing.space) {
+        for (let unit = 0; unit < this.lastItemEnd + globalState.snapUnits; unit += this.markerSpacing.space) {
             const x = this.unitToPixel(unit);
             const nthMarker = Math.floor(unit / this.markerSpacing.space);
             if (nthMarker % this.markerSpacing.majorMultiplier === 0) {
@@ -134,8 +132,7 @@ export default class Timeline extends Vue {
         });
     }
 
-    @Watch("draggedItem")
-    @Watch("resizedItem")
+    @Watch("dragItem")
     updateLastNoteEnd() {
         const newLastItemEnd = this.editor.items.reduce((p, i) => Math.max(p, i.end), 0);
         if (this.dragItem && newLastItemEnd < this.lastItemEnd) {
@@ -184,8 +181,8 @@ export default class Timeline extends Vue {
         if (this.isDragging && this.dragItem) {
             if (this.dragArea === "leftHandle" || this.dragArea === "rightHandle") {
                 this.dragStartStates.forEach((state) => {
-                    const newStart = this.dragArea === "leftHandle" ? this.performSnap(state.item.start + diffUnits) : state.item.start;
-                    const newEnd = this.dragArea === "rightHandle" ? this.performSnap(state.item.end + diffUnits) : state.item.end;
+                    const newStart = this.dragArea === "leftHandle" ? snap(state.item.start + diffUnits) : state.item.start;
+                    const newEnd = this.dragArea === "rightHandle" ? snap(state.item.end + diffUnits) : state.item.end;
                     const item = this.editor.items.find((i) => i.id === state.item.id);
                     if (item) {
                         item.move(newStart, newEnd);
@@ -216,7 +213,7 @@ export default class Timeline extends Vue {
                     const item = this.editor.items.find((j) => j.id === state.item.id)!;
                     const newTrackIndex = state.trackIndex + diffTracks;
                     const newTrack = this.editor.tracks[newTrackIndex];
-                    const newStart = this.performSnap(state.item.start + diffUnits);
+                    const newStart = snap(state.item.start + diffUnits);
                     const newEnd = newStart + (state.item.end - state.item.start);
                     item.trackId = newTrack.id;
                     item.move(newStart, newEnd);
@@ -243,7 +240,6 @@ export default class Timeline extends Vue {
     }
 
     onTrackMouseenter(track: Track): void {
-        console.log(track.name);
         this.hoveredTrack = track;
     }
 
@@ -277,7 +273,7 @@ export default class Timeline extends Vue {
         if (item) {
             const bounds = this.$el.getBoundingClientRect();
             const x = ev.clientX - bounds.left - this.headerWidth;
-            const unit = this.performSnap(this.pixelToUnit(x));
+            const unit = snap(this.pixelToUnit(x));
             item.move(unit, unit + (item.end - item.start));
 
             const isOverlapping = (i1: Item, i2: Item) => Math.max(i1.start, i2.start) <= Math.min(i1.end, i2.end);
@@ -313,11 +309,6 @@ export default class Timeline extends Vue {
     onHeaderClick(ev: MouseEvent): void {
         const tick = this.pixelToUnit(ev.offsetX);
         globalState.setPositionByUser(tick);
-    }
-
-    performSnap(unit: number): number {
-        const mod = unit % this.snap;
-        return mod <= this.snap / 2 ? unit - mod : unit + this.snap - mod;
     }
 
     unitToPixel(unit: number): number {
