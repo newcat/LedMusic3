@@ -4,7 +4,6 @@ import App from "./App.vue";
 Vue.config.productionTip = false;
 
 import { BaklavaVuePlugin } from "@baklavajs/plugin-renderer-vue";
-import "@baklavajs/plugin-renderer-vue/dist/styles.css";
 Vue.use(BaklavaVuePlugin);
 
 // @ts-ignore

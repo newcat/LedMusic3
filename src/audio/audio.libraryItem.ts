@@ -47,7 +47,8 @@ export class AudioLibraryItem extends LibraryItem {
             console.log("Creating waveform");
             const worker = new WaveformWorker();
             const samples = this.audioBuffer.getChannelData(0);
-            worker.postMessage({ samples, sampleRate: AudioLibraryItem.sampleRate, resolution: 256 }, [samples.buffer]);
+            // Important! Using transferable here crashes Electron 8.4+
+            worker.postMessage({ samples, sampleRate: AudioLibraryItem.sampleRate, resolution: 256 } /*, [samples.buffer]*/);
 
             await new Promise<void>((res, rej) => {
                 worker.addEventListener("message", (ev) => {

@@ -1,7 +1,6 @@
-import chroma, { Color as ChromaColor } from "chroma-js";
+import chroma, { InterpolationMode, Color as ChromaColor } from "chroma-js";
 
 type BlendMode = "multiply" | "darken" | "lighten" | "screen" | "overlay" | "burn" | "dodge";
-type ColorSpace = "rgb" | "rgba" | "hsl" | "hsv" | "hsi" | "lab" | "lch" | "hcl" | "cmyk" | "gl";
 
 export { chroma };
 
@@ -15,7 +14,7 @@ export function fromChroma(c: ChromaColor): Color {
     return c.rgb();
 }
 
-export function mix(a: Color, b: Color, factor = 0.5, colorSpace: ColorSpace = "rgb"): Color {
+export function mix(a: Color, b: Color, factor = 0.5, colorSpace: InterpolationMode = "rgb"): Color {
     return fromChroma(chroma.mix(toChroma(a), toChroma(b), factor, colorSpace));
 }
 

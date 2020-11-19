@@ -1,4 +1,5 @@
 @import "./animations.scss";
+@import "./graph.scss";
 
 html {
     overflow: hidden !important;
@@ -8,13 +9,4 @@ body {
     margin: 0;
     padding: 0;
     user-select: none;
-}
-
-.node-editor {
-    background-repeat: repeat;
-}
-
-.option-canvas {
-    width: 100%;
-    height: 20px;
 }

@@ -5,9 +5,7 @@
     @mousedown="mousedown",
     @mouseup="mouseup"
     @keydown="keydown"
-    @keyup="keyup"
-    @drop="drop",
-    @dragover="$event.preventDefault()")
+    @keyup="keyup")
 
     .__content(:style="contentStyles")
 
@@ -26,7 +24,9 @@
             @mouseenter="onTrackMouseenter(t)",
             @mouseleave="onTrackMouseleave()",
             @mousemove="onTrackMouseMove",
-            @drag-start="onDragStart")
+            @drag-start="onDragStart",
+            @dragover.native="$event.preventDefault()",
+            @drop.native.capture="drop(t, $event)")
 </template>
 
 <script lang="ts">
@@ -247,7 +247,7 @@ export default class Timeline extends Vue {
         this.hoveredTrack = null;
     }
 
-    public drop(ev: DragEvent) {
+    public drop(track: Track, ev: DragEvent) {
         const id = ev.dataTransfer!.getData("id");
         const libraryItem = globalState.library.getItemById(id);
         if (!libraryItem) {
@@ -271,37 +271,33 @@ export default class Timeline extends Vue {
         }
 
         if (item) {
-            const bounds = this.$el.getBoundingClientRect();
-            const x = ev.clientX - bounds.left - this.headerWidth;
+            const x = ev.offsetX;
             const unit = snap(this.pixelToUnit(x));
             item.move(unit, unit + (item.end - item.start));
 
             const isOverlapping = (i1: Item, i2: Item) => Math.max(i1.start, i2.start) <= Math.min(i1.end, i2.end);
 
-            // FIXME: Not working yet
-            // check, whether the currently hovered track is free
-            let track: Track | undefined;
-            if (this.hoveredTrack) {
-                const trackItems = this.editor.items.filter((i) => i.trackId === this.hoveredTrack!.id);
-                if (!trackItems.some((i) => isOverlapping(i, item!))) {
-                    track = this.hoveredTrack;
-                }
+            // check, whether the track is free
+            let chosenTrack: Track | undefined;
+            const trackItems = this.editor.items.filter((i) => i.trackId === track.id);
+            if (!trackItems.some((i) => isOverlapping(i, item!))) {
+                chosenTrack = track;
             }
 
             // if unsuccessful, find a free track
-            if (!track) {
-                track = this.editor.tracks.find((t) => {
+            if (!chosenTrack) {
+                chosenTrack = this.editor.tracks.find((t) => {
                     const trackItems = this.editor.items.filter((i) => i.trackId === t.id);
                     return !trackItems.some((i) => isOverlapping(i, item!));
                 });
             }
 
             // if no free track was found, create a new one
-            if (!track) {
-                track = this.editor.addDefaultTrack();
+            if (!chosenTrack) {
+                chosenTrack = this.editor.addDefaultTrack();
             }
 
-            item.trackId = track.id;
+            item.trackId = chosenTrack.id;
             this.editor.addItem(item);
         }
     }
