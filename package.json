@@ -19,6 +19,7 @@
         "@types/chroma-js": "^2.1.2",
         "@types/serialport": "^8.0.1",
         "@types/uuid": "^8.3.0",
+        "axios": "^0.21.0",
         "baklavajs": "^1.8.1",
         "bson": "^4.1.0",
         "chroma-js": "^2.0.6",

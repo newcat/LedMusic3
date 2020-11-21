@@ -24,6 +24,7 @@ const outputSettingsComponentMapping: Record<OutputType, VueConstructor<Vue> | u
     [OutputType.DUMMY]: undefined,
     [OutputType.WLED]: WledOutputSettings,
     [OutputType.DMX]: DmxOutputSettings,
+    [OutputType.RAZER_CHROMA]: undefined,
 };
 
 @Component
@@ -35,6 +36,7 @@ export default class OutputEditor extends Vue {
         { text: "Dummy", value: OutputType.DUMMY },
         { text: "WLED", value: OutputType.WLED },
         { text: "DMX", value: OutputType.DMX },
+        { text: "Razer Chroma", value: OutputType.RAZER_CHROMA },
     ];
 
     get outputSettingsComponent() {

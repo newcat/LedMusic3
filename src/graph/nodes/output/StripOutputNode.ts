@@ -6,7 +6,7 @@ export class StripOutputNode extends BaseOutputNode {
     public name = this.type;
 
     public constructor() {
-        super([OutputType.DUMMY, OutputType.WLED]);
+        super([OutputType.DUMMY, OutputType.WLED, OutputType.RAZER_CHROMA]);
         this.addInputInterface("Colors", undefined, [[0, 0, 0]], { type: "color_array" });
         this.addOption("Preview", "PreviewOption", [[0, 0, 0]]);
     }

@@ -3,6 +3,7 @@ import { DummyOutput } from "./dummy.output";
 import { OutputType } from "./outputTypes";
 import { DmxOutput } from "./dmx/dmx.output";
 import { WledOutput } from "./wled/wled.output";
+import { ChromaOutput } from "./razerchroma/chroma.output";
 
 export function createOutput(type: OutputType): BaseOutput<unknown, unknown> {
     switch (type) {
@@ -12,6 +13,8 @@ export function createOutput(type: OutputType): BaseOutput<unknown, unknown> {
             return new WledOutput();
         case OutputType.DMX:
             return new DmxOutput();
+        case OutputType.RAZER_CHROMA:
+            return new ChromaOutput();
         default:
             throw new Error(`Unknown output type: ${type}`);
     }

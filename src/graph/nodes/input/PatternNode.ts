@@ -16,6 +16,6 @@ export class PatternNode extends TrackInputNode {
         if (Array.isArray(trackValue) && trackValue.length > 0 && typeof trackValue[0].value === "number") {
             value = trackValue[0].value;
         }
-        this.getInterface("Value").value = value;
+        this.getInterface("Single Note").value = value;
     }
 }
