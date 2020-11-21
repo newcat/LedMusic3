@@ -19,7 +19,7 @@
 
     .__content {
         position: relative;
-        background-image: linear-gradient(90deg, #504f5c 1px, transparent 1px);
+        background-image: linear-gradient(90deg, #bbbbbb 1px, transparent 1px), linear-gradient(90deg, #504f5c 1px, transparent 1px);
         background-position: ($headerWidth - 1px) -1px;
         background-repeat: repeat;
         min-width: 100%;

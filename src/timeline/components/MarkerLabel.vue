@@ -26,7 +26,8 @@ export default class MarkerLabel extends Vue {
     }
 
     get label() {
-        return (this.marker.unit / (TICKS_PER_BEAT * 4)).toString();
+        const value = this.marker.unit / (TICKS_PER_BEAT * 4);
+        return Number.isInteger(value) ? value.toString() : "";
     }
 }
 </script>

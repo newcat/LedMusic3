@@ -5,7 +5,8 @@
     @mousedown="mousedown",
     @mouseup="mouseup"
     @keydown="keydown"
-    @keyup="keyup")
+    @keyup="keyup"
+    @wheel="wheel")
 
     .__content(:style="contentStyles")
 
@@ -40,7 +41,7 @@ import { AudioLibraryItem } from "@/audio";
 import { GraphLibraryItem } from "@/graph";
 import { AutomationLibraryItem } from "@/automation";
 import { PatternLibraryItem } from "@/pattern";
-import { snap } from "@/utils";
+import { normalizeMouseWheel, snap } from "@/utils";
 
 import MarkerLabel from "./MarkerLabel.vue";
 import PositionMarker from "./PositionMarker.vue";
@@ -72,9 +73,10 @@ export default class Timeline extends Vue {
     }
 
     get contentStyles() {
+        const baseBgSize = this.markerSpacing.space * this.unitWidth;
         return {
             width: `${(this.lastItemEnd + globalState.snapUnits) * this.unitWidth + this.headerWidth}px`,
-            backgroundSize: `${this.markerSpacing.space * this.unitWidth}px ${this.markerSpacing.space * this.unitWidth}px`,
+            backgroundSize: `${4 * baseBgSize}px ${4 * baseBgSize}px, ${baseBgSize}px ${baseBgSize}px`,
         };
     }
 
@@ -305,6 +307,14 @@ export default class Timeline extends Vue {
     onHeaderClick(ev: MouseEvent): void {
         const tick = this.pixelToUnit(ev.offsetX);
         globalState.setPositionByUser(tick);
+    }
+
+    wheel(ev: WheelEvent) {
+        const amount = normalizeMouseWheel(ev);
+        const unit = this.pixelToUnit(ev.offsetX); // the unit which is currently hovered
+        this.unitWidth *= 1 - amount / 1500;
+        // scroll so that the unit stays at the same place visually
+        this.$el.scrollBy(this.unitToPixel(unit) - ev.offsetX, 0);
     }
 
     unitToPixel(unit: number): number {
