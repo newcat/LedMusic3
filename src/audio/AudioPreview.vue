@@ -47,5 +47,6 @@ export default class Audio extends Vue {
     top: 0;
     height: 100%;
     image-rendering: pixelated;
+    pointer-events: none;
 }
 </style>

@@ -306,6 +306,7 @@ export default class Timeline extends Vue {
     }
 
     wheel(ev: WheelEvent) {
+        ev.preventDefault();
         const amount = normalizeMouseWheel(ev);
         const unit = this.pixelToUnit(ev.offsetX); // the unit which is currently hovered
         this.editor.unitWidth *= 1 - amount / 1500;
