@@ -15,9 +15,9 @@ import { ItemArea } from "../types";
 import { LibraryItemType } from "@/library";
 
 import { VueConstructor } from "vue";
-import AudioPreview from "./itempreviews/AudioPreview.vue";
-import AutomationPreview from "./itempreviews/AutomationPreview.vue";
-import PatternPreview from "./itempreviews/PatternPreview.vue";
+import AudioPreview from "@/audio/AudioPreview.vue";
+import AutomationPreview from "@/automation/AutomationPreview.vue";
+import PatternPreview from "@/pattern/PatternPreview.vue";
 
 const ITEM_COMPONENT_MAPPING: Record<LibraryItemType, VueConstructor | null> = {
     [LibraryItemType.AUDIO]: AudioPreview,

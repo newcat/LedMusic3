@@ -5,6 +5,17 @@ import { BaklavaEvent } from "@baklavajs/events";
 import { readFile } from "fs";
 import { promisify } from "util";
 
+export interface IWaveformPart {
+    start: number;
+    end: number;
+    url: string;
+}
+
+export interface IWaveform {
+    count: number;
+    parts: IWaveformPart[];
+}
+
 export class AudioLibraryItem extends LibraryItem {
     public static sampleRate = 192000;
 
@@ -12,6 +23,7 @@ export class AudioLibraryItem extends LibraryItem {
     public name = "Empty";
     public path = "";
     public audioBuffer: AudioBuffer | null = null;
+    public waveform: IWaveform | null = null;
 
     public events = {
         loaded: new BaklavaEvent<void>(),
@@ -37,9 +49,7 @@ export class AudioLibraryItem extends LibraryItem {
             this.audioBuffer = await offlineAudioContext.decodeAudioData(rawData.buffer);
 
             console.log("Creating waveform");
-            const samples = this.audioBuffer.getChannelData(0);
-            // Important! Using transferable here crashes Electron 8.4+
-            await WaveformWorker.generateWaveform(this.id, samples, AudioLibraryItem.sampleRate, 256);
+            this.waveform = await this.generateWaveform();
         } catch (err) {
             console.warn(err);
             this.error = true;
@@ -47,10 +57,6 @@ export class AudioLibraryItem extends LibraryItem {
 
         this.loading = false;
         this.events.loaded.emit();
-    }
-
-    public async destroy() {
-        await WaveformWorker.deleteWaveform(this.id);
     }
 
     public serialize() {
@@ -66,5 +72,27 @@ export class AudioLibraryItem extends LibraryItem {
         this.id = id;
         this.name = name;
         this.path = path;
+    }
+
+    private async generateWaveform(): Promise<IWaveform> {
+        const samples = this.audioBuffer!.getChannelData(0);
+        // Important! Using transferable for the samples crashes Electron 8.4+
+        const rawWaveform = await WaveformWorker.generateWaveform(samples, AudioLibraryItem.sampleRate, 1024);
+
+        const parts: IWaveformPart[] = [];
+        for (const part of rawWaveform.parts) {
+            const cv = document.createElement("canvas");
+            cv.width = part.image.width;
+            cv.height = part.image.height;
+            const ctx = cv.getContext("2d")!;
+            ctx.drawImage(part.image, 0, 0);
+            const url = cv.toDataURL();
+            parts.push({ start: part.start, end: part.end, url });
+        }
+
+        return {
+            count: rawWaveform.count,
+            parts,
+        };
     }
 }

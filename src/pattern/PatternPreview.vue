@@ -10,10 +10,10 @@ svg.pattern-preview(:viewBox="viewBox", preserveAspectRatio="none")
 </template>
 
 <script lang="ts">
-import type { PatternLibraryItem } from "@/pattern";
+import type { PatternLibraryItem } from "./pattern.libraryItem";
 
 import { Component, Vue, Prop } from "vue-property-decorator";
-import { Item } from "../../model";
+import { Item } from "@/timeline";
 
 @Component
 export default class PatternPreview extends Vue {

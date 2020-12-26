@@ -1,21 +1,19 @@
 import colors from "@/colors";
 import * as Comlink from "comlink";
 
-interface IWaveformPart {
+export interface IWaveformPart {
     start: number;
     end: number;
     image: ImageBitmap;
 }
 
-interface IWaveform {
-    sampleCount: number;
+export interface IWaveform {
+    count: number;
     parts: IWaveformPart[];
 }
 
 export class WaveformWorker {
-    private waveforms = new Map<string, IWaveform>();
-
-    public generateWaveform(id: string, samples: Float32Array, sampleRate: number, resolution: number) {
+    public generateWaveform(samples: Float32Array, sampleRate: number, resolution: number): IWaveform {
         const peaks = this.calculatePeaks(samples, sampleRate, resolution);
         const parts: IWaveformPart[] = [];
         for (let i = 0; i < peaks.length; i += 1024) {
@@ -23,33 +21,15 @@ export class WaveformWorker {
             const image = this.createPartWaveformTexture(peaks, i, end);
             parts.push({ start: i, end, image });
         }
-        this.waveforms.set(id, {
-            sampleCount: peaks.length,
+        const r = {
+            count: peaks.length,
             parts,
-        });
-    }
-
-    public drawWaveform(id: string, width: number, height: number, start: number, end: number, unitWidth: number): ImageBitmap {
-        const waveform = this.waveforms.get(id);
-        if (!waveform) {
-            throw new Error(`Waveform ${id} not found`);
-        }
-        const canvas = new OffscreenCanvas(width, height);
-        const renderingContext = canvas.getContext("2d")!;
-        const totalSamples = waveform.sampleCount;
-        const totalUnits = end - start;
-        for (const part of waveform.parts) {
-            const x = (part.start / totalSamples) * totalUnits * unitWidth;
-            const partWidth = ((part.end - part.start) / totalSamples) * totalUnits * unitWidth;
-            renderingContext.drawImage(part.image, x, 0, partWidth, height);
-        }
-        const imageBitmap = canvas.transferToImageBitmap();
-        Comlink.transfer(imageBitmap, [imageBitmap]);
-        return imageBitmap;
-    }
-
-    public deleteWaveform(id: string) {
-        this.waveforms.delete(id);
+        };
+        Comlink.transfer(
+            r,
+            r.parts.map((p) => p.image)
+        );
+        return r;
     }
 
     private calculatePeaks(samples: Float32Array, sampleRate: number, resolution: number) {

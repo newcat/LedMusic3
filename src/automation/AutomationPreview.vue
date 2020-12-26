@@ -25,10 +25,10 @@ svg.automation-clip
 </template>
 
 <script lang="ts">
-import type { AutomationLibraryItem } from "@/automation";
+import type { AutomationLibraryItem } from "./automation.libraryItem";
 
 import { Component, Vue, Prop } from "vue-property-decorator";
-import { Item } from "../../model";
+import { Item } from "@/timeline";
 
 @Component
 export default class Automation extends Vue {
