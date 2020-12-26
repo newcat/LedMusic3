@@ -95,6 +95,10 @@ export class State implements IState {
             library: this.library.save(),
             bpm: this.bpm,
             fps: this.fps,
+            volume: this.volume,
+            position: this.position,
+            resolution: this.resolution,
+            snapUnits: this.snapUnits,
         });
     }
 
@@ -105,6 +109,10 @@ export class State implements IState {
         this.timeline.load(data.timeline, this.library);
         this.bpm = data.bpm ?? defaults.bpm;
         this.fps = data.fps ?? defaults.fps;
+        this.volume = data.volume ?? defaults.volume;
+        this.position = data.position ?? 0;
+        this.resolution = data.resolution ?? defaults.resolution;
+        this.snapUnits = data.snapUnits ?? defaults.snapUnits;
     }
 
     public setPositionByUser(newPosition: number) {

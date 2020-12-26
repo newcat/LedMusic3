@@ -10,7 +10,7 @@
 
     .__content(:style="contentStyles")
 
-        position-marker(:unitWidth="unitWidth", :headerWidth="headerWidth")
+        position-marker(:editor="editor")
 
         .__header-row(@click="onHeaderClick")
             .__container
@@ -21,7 +21,6 @@
             :key="t.id",
             :editor="editor",
             :track="t",
-            :unitWidth="unitWidth",
             @mouseenter="onTrackMouseenter(t)",
             @mouseleave="onTrackMouseleave()",
             @mousemove="onTrackMouseMove",
@@ -53,12 +52,9 @@ import "../styles/all.scss";
     components: { MarkerLabel, PositionMarker, TrackView },
 })
 export default class Timeline extends Vue {
-    unitWidth = 1.5;
-    headerWidth = 200;
-    lastItemEnd = 0;
-
     unwatchFn!: () => void;
 
+    lastItemEnd = 0;
     ctrlPressed = false;
     isDragging = false;
     dragArea: ItemArea | "" = "";
@@ -73,9 +69,9 @@ export default class Timeline extends Vue {
     }
 
     get contentStyles() {
-        const baseBgSize = this.markerSpacing.space * this.unitWidth;
+        const baseBgSize = this.markerSpacing.space * this.editor.unitWidth;
         return {
-            width: `${(this.lastItemEnd + globalState.snapUnits) * this.unitWidth + this.headerWidth}px`,
+            width: `${(this.lastItemEnd + globalState.snapUnits) * this.editor.unitWidth + this.editor.headerWidth}px`,
             backgroundSize: `${4 * baseBgSize}px ${4 * baseBgSize}px, ${baseBgSize}px ${baseBgSize}px`,
         };
     }
@@ -89,9 +85,9 @@ export default class Timeline extends Vue {
     }
 
     get markerSpacing(): { space: number; majorMultiplier: number } {
-        if (this.unitWidth < 0.25) {
+        if (this.editor.unitWidth < 0.25) {
             return { space: TICKS_PER_BEAT * 16, majorMultiplier: 1 };
-        } else if (this.unitWidth > 2) {
+        } else if (this.editor.unitWidth > 2) {
             return { space: TICKS_PER_BEAT, majorMultiplier: 4 };
         } else {
             return { space: TICKS_PER_BEAT * 4, majorMultiplier: 4 };
@@ -99,7 +95,7 @@ export default class Timeline extends Vue {
     }
 
     get markers(): IMarker[] {
-        if (this.unitWidth <= 0) {
+        if (this.editor.unitWidth <= 0) {
             return [];
         }
         const markers: IMarker[] = [];
@@ -179,7 +175,7 @@ export default class Timeline extends Vue {
 
     onTrackMouseMove(ev: MouseEvent) {
         const x = ev.clientX;
-        const diffUnits = Math.floor((x - this.dragStartPosition.x) / this.unitWidth);
+        const diffUnits = Math.floor((x - this.dragStartPosition.x) / this.editor.unitWidth);
         if (this.isDragging && this.dragItem) {
             if (this.dragArea === "leftHandle" || this.dragArea === "rightHandle") {
                 this.dragStartStates.forEach((state) => {
@@ -312,17 +308,17 @@ export default class Timeline extends Vue {
     wheel(ev: WheelEvent) {
         const amount = normalizeMouseWheel(ev);
         const unit = this.pixelToUnit(ev.offsetX); // the unit which is currently hovered
-        this.unitWidth *= 1 - amount / 1500;
+        this.editor.unitWidth *= 1 - amount / 1500;
         // scroll so that the unit stays at the same place visually
         this.$el.scrollBy(this.unitToPixel(unit) - ev.offsetX, 0);
     }
 
     unitToPixel(unit: number): number {
-        return unit * this.unitWidth;
+        return unit * this.editor.unitWidth;
     }
 
     pixelToUnit(pixel: number): number {
-        return Math.floor(pixel / this.unitWidth);
+        return Math.floor(pixel / this.editor.unitWidth);
     }
 
     isSelfOrIsChildOf(el: HTMLElement, selector: string) {

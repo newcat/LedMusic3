@@ -11,6 +11,8 @@ import { observe } from "@nx-js/observer-util";
 export interface IEditorState {
     tracks: ITrackState[];
     items: IItemState[];
+    unitWidth: number;
+    headerWidth: number;
 }
 
 export class TimelineEditor {
@@ -27,6 +29,9 @@ export class TimelineEditor {
 
     private _tracks: Track[] = [];
     private _items: Item[] = [];
+
+    public unitWidth = 1.5;
+    public headerWidth = 200;
 
     public labelFunction: (unit: number) => string = (u) => u.toString();
 
@@ -54,12 +59,16 @@ export class TimelineEditor {
         }
         // state.tracks.forEach((ts) => this.addTrack(Track.load(ts)));
         state.items.forEach((is) => this.addItem(Item.load(is, library)));
+        this.unitWidth = state.unitWidth ?? 1.5;
+        this.headerWidth = state.headerWidth ?? 200;
     }
 
     public save(): IEditorState {
         return {
             tracks: this.tracks.map((t) => t.save()),
             items: this.items.map((i) => i.save()),
+            unitWidth: this.unitWidth,
+            headerWidth: this.headerWidth,
         };
     }
 

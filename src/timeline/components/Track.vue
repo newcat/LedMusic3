@@ -46,11 +46,12 @@ export default class TrackView extends Vue {
     @Prop()
     track!: Track;
 
-    @Prop()
-    unitWidth!: number;
-
     get items(): Item[] {
         return this.editor ? this.editor.items.filter((i) => i.trackId === this.track.id) : [];
+    }
+
+    get unitWidth() {
+        return this.editor.unitWidth;
     }
 
     moveUp() {

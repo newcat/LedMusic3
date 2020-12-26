@@ -5,7 +5,10 @@
 
 <script lang="ts">
 import { Component, Vue, Prop, Watch } from "vue-property-decorator";
+import * as Comlink from "comlink";
+import { v4 as uuidv4 } from "uuid";
 import { AudioLibraryItem } from "@/audio";
+import WaveformWorker from "@/audio/workerInstance";
 import { Item } from "../../model";
 
 @Component
@@ -16,26 +19,22 @@ export default class Audio extends Vue {
     @Prop({ type: Number, required: true })
     unitWidth!: number;
 
-    renderingContext: CanvasRenderingContext2D | null = null;
+    isDrawing = false;
+    drawAfterFinish = false;
     resizeObserver: ResizeObserver | null = null;
 
     get libraryItem() {
         return this.item.libraryItem as AudioLibraryItem;
     }
 
-    mounted() {
+    async mounted() {
         this.resizeObserver = new ResizeObserver(() => {
-            if (this.$refs.canvas) {
-                const canvasEl = this.$refs.canvas as HTMLCanvasElement;
-                canvasEl.width = this.$el.clientWidth;
-                canvasEl.height = this.$el.clientHeight;
-                this.drawWaveform();
-            }
+            const canvasEl = this.$refs.canvas as HTMLCanvasElement;
+            canvasEl.width = this.$el.clientWidth;
+            canvasEl.height = this.$el.clientHeight;
+            this.drawWaveform();
         });
         this.resizeObserver.observe(this.$el);
-        if (this.$refs.canvas) {
-            this.renderingContext = (this.$refs.canvas as HTMLCanvasElement).getContext("2d");
-        }
     }
 
     beforeDestroy() {
@@ -43,21 +42,35 @@ export default class Audio extends Vue {
     }
 
     @Watch("libraryItem.loading")
-    @Watch("libraryItem.waveform")
     @Watch("unitWidth")
-    drawWaveform() {
-        if (this.renderingContext) {
-            if (this.libraryItem.waveform.length === 0 || this.libraryItem.loading) {
-                return;
-            }
-            const height = this.renderingContext.canvas.height;
-            const totalSamples = this.libraryItem.waveform[0].total;
-            const totalUnits = this.item.end - this.item.start;
-            for (const part of this.libraryItem.waveform) {
-                const x = (part.start / totalSamples) * totalUnits * this.unitWidth;
-                const width = ((part.end - part.start) / totalSamples) * totalUnits * this.unitWidth;
-                this.renderingContext.drawImage(part.image, x, 0, width, height);
-            }
+    async drawWaveform() {
+        if (this.isDrawing) {
+            this.drawAfterFinish = true;
+            return;
+        }
+        if (this.libraryItem.loading) {
+            return;
+        }
+        this.isDrawing = true;
+        const canvasEl = this.$refs.canvas as HTMLCanvasElement;
+        const bmp = await WaveformWorker.drawWaveform(
+            this.libraryItem.id,
+            canvasEl.width,
+            canvasEl.height,
+            this.item.start,
+            this.item.end,
+            this.unitWidth
+        );
+        console.log(bmp.width, bmp.height);
+        const ctx = canvasEl.getContext("2d")!;
+        ctx.drawImage(bmp, 0, 0);
+        // This does not work for some reason although I expect it to be more performant
+        // const ctx = canvasEl.getContext("bitmaprenderer")!;
+        // ctx.transferFromImageBitmap(bmp);
+        this.isDrawing = false;
+        if (this.drawAfterFinish) {
+            this.drawAfterFinish = false;
+            this.drawWaveform();
         }
     }
 }

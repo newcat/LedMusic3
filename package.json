@@ -23,6 +23,7 @@
         "baklavajs": "^1.8.1",
         "bson": "^4.1.0",
         "chroma-js": "^2.0.6",
+        "comlink": "^4.3.0",
         "open-simplex-noise": "^2.4.0-pre4",
         "serialport": "^9.0.2",
         "uuid": "^8.3.1",
