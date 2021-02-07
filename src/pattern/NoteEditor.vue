@@ -5,6 +5,7 @@
         :style="contentStyles",
         @mousedown="mousedown",
         @mouseup="mouseup",
+        @wheel="wheel",
         @keydown="keydown",
         @keyup="keyup")
 
@@ -33,6 +34,7 @@ import type { PatternLibraryItem } from "./pattern.libraryItem";
 import { INote } from "./types";
 import CNote from "./Note.vue";
 import { globalState } from "@/globalState";
+import { normalizeMouseWheel } from "@/utils";
 
 @Component({
     components: { CNote },
@@ -100,6 +102,15 @@ export default class NoteEditor extends Vue {
     mouseup() {
         this.draggedNote = null;
         this.resizedNote = null;
+    }
+
+    wheel(ev: WheelEvent) {
+        ev.preventDefault();
+        const amount = normalizeMouseWheel(ev);
+        const tick = ev.offsetX / this.tickWidth; // the tick which is currently hovered
+        this.tickWidth *= 1 - amount / 1500;
+        // scroll so that the tick stays at the same place visually
+        this.$el.scrollBy(tick * this.tickWidth - ev.offsetX, 0);
     }
 
     keydown(ev: KeyboardEvent) {
