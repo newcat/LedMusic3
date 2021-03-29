@@ -8,6 +8,7 @@ v-card.d-flex.flex-column(flat)
     note-editor(v-else-if="isPattern", :notePattern="selectedItem", :key="selectedItemId")
     automation-editor(v-else-if="isAutomation", :automationClip="selectedItem", :key="selectedItemId")
     output-editor(v-else-if="isOutput", :output="selectedItem", :key="selectedItemId")
+    stage-editor(v-else-if="isStage", :output="selectedItem", :key="selectedItemId")
 </template>
 
 <script lang="ts">
@@ -17,9 +18,10 @@ import { LibraryItemType } from "@/library";
 import { NoteEditor } from "@/pattern";
 import { AutomationEditor } from "@/automation";
 import { OutputEditor } from "@/output";
+import { StageEditor } from "@/stage";
 
 @Component({
-    components: { NoteEditor, AutomationEditor, OutputEditor },
+    components: { NoteEditor, AutomationEditor, OutputEditor, StageEditor },
 })
 export default class Graph extends Vue {
     @Prop({ type: String, default: "" })
@@ -43,6 +45,10 @@ export default class Graph extends Vue {
 
     get isOutput() {
         return this.selectedItem?.type === LibraryItemType.OUTPUT;
+    }
+
+    get isStage() {
+        return this.selectedItem?.type === LibraryItemType.STAGE;
     }
 }
 </script>

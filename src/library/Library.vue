@@ -18,6 +18,8 @@ v-card(flat)
                     v-list-item-title Note Pattern
                 v-list-item(@click="addOutput")
                     v-list-item-title Output
+                v-list-item(@click="addStage")
+                    v-list-item-title Stage
 
     v-treeview(
         :active="!!activeItem ? [activeItem.id] : []",
@@ -59,6 +61,7 @@ import { globalState } from "@/globalState";
 import { LibraryItemType, LibraryItem } from "./libraryItem";
 import ItemSettings from "./LibraryItemSettings.vue";
 import { OutputLibraryItem } from "@/output/output.libraryItem";
+import { StageLibraryItem } from "@/stage/stage.libraryItem";
 
 interface ITreeNode {
     id: string;
@@ -109,7 +112,13 @@ export default class Library extends Vue {
             children: [],
             type: LibraryItemType.OUTPUT,
         };
-        const rootItems = [audioFiles, graphs, automationClips, notePatterns, outputs];
+        const stages: ITreeNode = {
+            id: "_folder_stages",
+            name: "Stages",
+            children: [],
+            type: LibraryItemType.STAGE
+        }
+        const rootItems = [audioFiles, graphs, automationClips, notePatterns, outputs, stages];
         this.globalState.library.items.forEach((item) => {
             const itemData = {
                 id: item.id,
@@ -169,6 +178,8 @@ export default class Library extends Vue {
                 return "queue_music";
             case LibraryItemType.OUTPUT:
                 return "mediation";
+            case LibraryItemType.STAGE:
+                return "airplay";
             default:
                 return "note";
         }
@@ -188,6 +199,10 @@ export default class Library extends Vue {
 
     public addOutput() {
         this.globalState.library.addItem(new OutputLibraryItem());
+    }
+
+    public addStage() {
+        this.globalState.library.addItem(new StageLibraryItem());
     }
 
     public deleteItem(id: string) {

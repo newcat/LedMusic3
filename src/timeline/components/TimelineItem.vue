@@ -25,6 +25,7 @@ const ITEM_COMPONENT_MAPPING: Record<LibraryItemType, VueConstructor | null> = {
     [LibraryItemType.AUTOMATION]: AutomationPreview,
     [LibraryItemType.PATTERN]: PatternPreview,
     [LibraryItemType.OUTPUT]: null,
+    [LibraryItemType.STAGE]: null,
 };
 
 @Component

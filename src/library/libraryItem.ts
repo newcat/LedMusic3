@@ -6,6 +6,7 @@ export enum LibraryItemType {
     AUTOMATION = 3,
     PATTERN = 4,
     OUTPUT = 5,
+    STAGE = 6,
 }
 
 export abstract class LibraryItem {
