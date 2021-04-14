@@ -1,19 +1,24 @@
 <template lang="pug">
 .prop(:class="classes", :style="style")
-    .handle.t.l
-    .handle.t.c
-    .handle.t.r
-    .handle.m.l
-    .handle.m.r
-    .handle.b.l
-    .handle.b.c
-    .handle.b.r
+    template(v-for="v in verticalHandles")
+        template(v-for="h in horizontalHandles")
+            .handle(:class="[v, h]", @pointerdown="onPointerDown($event, v, h)")
     component(:is="propComponent")
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
 import { Prop as PropModel, propList } from "../props";
+
+type VerticalHandle = "t" | "m" | "b";
+type HorizontalHandle = "l" | "c" | "r";
+
+interface DragData {
+    v: VerticalHandle;
+    h: HorizontalHandle;
+    startX: number;
+    startY: number;
+}
 
 @Component
 export default class PropWrapper extends Vue {
@@ -22,6 +27,14 @@ export default class PropWrapper extends Vue {
 
     @Prop()
     prop!: PropModel;
+
+    verticalHandles: VerticalHandle[] = ["t", "m", "b"];
+    horizontalHandles: HorizontalHandle[] = ["l", "c", "r"];
+
+    dragData: DragData | null = null;
+
+    boundPointerMove = this.onPointerMove.bind(this);
+    boundPointerUp = this.onPointerUp.bind(this);
 
     get classes() {
         console.log(this.selected);
@@ -40,6 +53,56 @@ export default class PropWrapper extends Vue {
 
     get propComponent() {
         return propList.find((p) => p.type === this.prop.type)?.component;
+    }
+
+    onPointerDown(ev: PointerEvent, v: VerticalHandle, h: HorizontalHandle) {
+        this.dragData = {
+            v,
+            h,
+            startX: ev.screenX,
+            startY: ev.screenY,
+        };
+        document.addEventListener("pointermove", this.boundPointerMove);
+        document.addEventListener("pointerup", this.boundPointerUp);
+    }
+
+    onPointerUp() {
+        this.dragData = null;
+        document.removeEventListener("pointermove", this.boundPointerMove);
+        document.removeEventListener("pointerup", this.boundPointerUp);
+    }
+
+    onPointerMove(ev: PointerEvent) {
+        if (!this.dragData) {
+            return;
+        }
+
+        const dy = ev.screenY - this.dragData.startY;
+        if (this.dragData.v === "t") {
+            this.prop.y += dy;
+            this.prop.height -= dy;
+            this.dragData.startY = ev.screenY;
+        } else if (this.dragData.v === "b") {
+            this.prop.height += dy;
+            this.dragData.startY = ev.screenY;
+        }
+
+        const dx = ev.screenX - this.dragData.startX;
+        if (this.dragData.h === "l") {
+            this.prop.x += dx;
+            this.prop.width -= dx;
+            this.dragData.startX = ev.screenX;
+        } else if (this.dragData.h === "r") {
+            this.prop.width += dx;
+            this.dragData.startX = ev.screenX;
+        }
+
+        if (this.dragData.v === "m" && this.dragData.h === "c") {
+            this.prop.x += dx;
+            this.prop.y += dy;
+            this.dragData.startX = ev.screenX;
+            this.dragData.startY = ev.screenY;
+        }
     }
 }
 </script>
