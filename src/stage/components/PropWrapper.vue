@@ -3,7 +3,8 @@
     template(v-for="v in verticalHandles")
         template(v-for="h in horizontalHandles")
             .handle(:class="[v, h]", @pointerdown="onPointerDown($event, v, h)")
-    component(:is="propComponent")
+    .handle.rotation(@pointerdown="onPointerDownRotation")
+    component(:is="propComponent", @pointerdown.native="onPointerDown($event, 'm', 'c')")
 </template>
 
 <script lang="ts">
@@ -14,8 +15,9 @@ type VerticalHandle = "t" | "m" | "b";
 type HorizontalHandle = "l" | "c" | "r";
 
 interface DragData {
-    v: VerticalHandle;
-    h: HorizontalHandle;
+    v?: VerticalHandle;
+    h?: HorizontalHandle;
+    rotation: boolean;
     startX: number;
     startY: number;
 }
@@ -45,7 +47,7 @@ export default class PropWrapper extends Vue {
 
     get style() {
         return {
-            transform: `translate(${this.prop.x}px, ${this.prop.y}px) rotate(${this.prop.rotation})`,
+            transform: `translate(${this.prop.x}px, ${this.prop.y}px) rotate(${this.prop.rotation}deg)`,
             width: `${this.prop.width}px`,
             height: `${this.prop.height}px`,
         };
@@ -59,6 +61,17 @@ export default class PropWrapper extends Vue {
         this.dragData = {
             v,
             h,
+            rotation: false,
+            startX: ev.screenX,
+            startY: ev.screenY,
+        };
+        document.addEventListener("pointermove", this.boundPointerMove);
+        document.addEventListener("pointerup", this.boundPointerUp);
+    }
+
+    onPointerDownRotation(ev: PointerEvent) {
+        this.dragData = {
+            rotation: true,
             startX: ev.screenX,
             startY: ev.screenY,
         };
@@ -103,6 +116,12 @@ export default class PropWrapper extends Vue {
             this.dragData.startX = ev.screenX;
             this.dragData.startY = ev.screenY;
         }
+
+        if (this.dragData.rotation) {
+            this.prop.rotation += dx;
+            this.dragData.startX = ev.screenX;
+            this.dragData.startY = ev.screenY;
+        }
     }
 }
 </script>
@@ -134,7 +153,11 @@ export default class PropWrapper extends Vue {
         opacity: 0;
         background-color: $color-primary;
 
-        transition: opacity 0.3s linear;
+        transition: opacity 0.3s linear, background-color 0.1s linear;
+
+        &:hover {
+            background-color: lighten($color-primary, 10%);
+        }
 
         &.t {
             top: 0;
@@ -158,6 +181,11 @@ export default class PropWrapper extends Vue {
 
         &.r {
             left: 100%;
+        }
+
+        &.rotation {
+            top: -30px;
+            left: 50%;
         }
     }
 

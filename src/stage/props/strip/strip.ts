@@ -5,6 +5,6 @@ export class StripProp extends Prop {
     public ledCount = 30;
     public x = 200;
     public y = 200;
-    public width = 40;
-    public height = 200;
+    public width = 200;
+    public height = 40;
 }

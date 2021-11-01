@@ -10,9 +10,9 @@ export interface PropInfo {
 export abstract class Prop {
     public abstract type: string;
 
-    public x: number = 0;
-    public y: number = 0;
-    public width: number = 0;
-    public height: number = 0;
-    public rotation: number = 0;
+    public x = 0;
+    public y = 0;
+    public width = 0;
+    public height = 0;
+    public rotation = 0;
 }
